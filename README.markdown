@@ -63,7 +63,7 @@ Add the folder "FHSTwitterEngine" to your project and import "FHSTwitterEngine.h
 -> Do an API call:
 
     dispatch_async(GCDBackgroundThread, ^{
-    	int returnCode = **[self.engine doYourBloodyAPICall]**;
+    	int returnCode = [self.engine doYourBloodyAPICall];
     	/* Handle returnCode */
     	dispatch_sync(GCDMainThread, ^{
         	/* Update UI */
