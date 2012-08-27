@@ -50,6 +50,13 @@
 
 #import <Foundation/Foundation.h>
 
+// Return Code Keys
+#define FHSTwitterEngineReturnCodeOK 0
+#define FHSTwitterEngineReturnCodeAPIError 1
+#define FHSTwitterEngineReturnCodeInsufficientInput 2
+#define FHSTwitterEngineReturnCodeImageTooLarge 3
+#define FHSTwitterEngineReturnCodeUserUnauthorized 4
+
 // These are for the dispatch_async() calls that you use to get around the synchronous-ness
 #define GCDBackgroundThread dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
 #define GCDMainThread dispatch_get_main_queue()
@@ -60,19 +67,25 @@
 // REST API
 //
 
+//
 // Custom REST API methods
 // friends/ids & users/lookup OR followers/ids & users/lookup
 // (The second being called once for every 99 id's) - can be expensive CACHE CACHE CACHE
+//
 
 - (NSArray *)getFollowers;
 - (NSArray *)getFriends;
+
+//
+// Normal REST API methods
+//
 
 // statuses/update
 - (int)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
 - (int)postTweet:(NSString *)tweetString;
 
 // statuses/home_timeline
-- (id)getHomeTimelineSinceID:(NSString *)sinceID startingAtPage:(int)pageNum count:(int)count;
+- (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
 
 // help/test
 - (BOOL)testService;
@@ -122,9 +135,62 @@
 // favorites/create, favorites/destroy
 - (int)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag;
 
+// favorites
+- (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count;
+
 // account/verify_credentials
 - (id)verifyCredentials;
 
+// search
+- (id)searchTwitterWithQuery:(NSString *)queryString;
+
+// friendships/exists
+- (id)user:(NSString *)user followsUser:(NSString *)userTwo areUsernames:(BOOL)areUsernames;
+
+// friendships/create
+- (int)followUser:(NSString *)user isUsername:(BOOL)isUsername;
+
+// friendships/destroy
+- (int)unfollowUser:(NSString *)user isUsername:(BOOL)isUsername;
+
+// friendships/lookup
+- (id)lookupFriends:(NSArray *)users areIDs:(BOOL)areIDs;
+
+// friendships/incoming
+- (id)getPendingIncomingFollowers;
+
+// friendships/outgoing
+- (id)getPendingOutgoingFollowers;
+
+// friendships/update
+- (int)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID;
+
+// friendships/no_retweet_ids
+- (id)getNoRetweetIDs;
+
+// legal/tos
+- (id)getTermsOfService;
+
+// legal/privacy
+- (id)getPrivacyPolicy;
+
+// direct_messages
+- (id)getDirectMessages:(int)count;
+
+// direct_messages/destroy
+- (int)deleteDirectMessage:(NSString *)messageID;
+
+// direct_messages/sent
+- (id)getSentDirectMessages:(int)count;
+
+// direct_messages/new
+- (int)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID;
+
+// direct_messages/show
+- (id)showDirectMessage:(NSString *)messageID;
+
+// report_spam
+- (int)reportUserAsSpam:(NSString *)user isID:(BOOL)isID;
 
 
 //
@@ -156,6 +222,7 @@
 // Keys:
 // message - (its the error message)
 // title - (its the error code and title)
+// Feed this to a UIAlertView or something of the like
 - (NSDictionary *)lookupErrorCode:(int)errorCode;
 
 // init method
@@ -163,5 +230,8 @@
 
 // Logged in user's username
 @property (nonatomic, strong) NSString *loggedInUsername;
+
+// Logged in user's Twitter ID
+@property (nonatomic, strong) NSString *loggedInID;
 
 @end

@@ -96,9 +96,9 @@
 			children = (
 				9B2A1B9815E805D1007E66E0 /* AppDelegate.h */,
 				9B2A1B9915E805D1007E66E0 /* AppDelegate.m */,
-				9B2A1B9C15E805D1007E66E0 /* ViewController.xib */,
 				9B2A1BC215E805D1007E66E0 /* ViewController.h */,
 				9B2A1BC315E805D1007E66E0 /* ViewController.m */,
+				9B2A1B9C15E805D1007E66E0 /* ViewController.xib */,
 				9B2A1C0715E807D9007E66E0 /* FHSTwitterEngine */,
 				9B2A1BD815E80601007E66E0 /* Supporting Files */,
 			);

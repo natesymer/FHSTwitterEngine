@@ -21,7 +21,7 @@
     [self.engine clearAccessToken];
     NSString *username = self.engine.loggedInUsername;
     if (username.length > 0) {
-        loggedInUserLabel.text = [NSString stringWithFormat:@"Logged in as %@",username];
+        loggedInUserLabel.text = [NSString stringWithFormat:@"Logged in as %@.",username];
     } else {
         loggedInUserLabel.text = @"You are not logged in.";
     }
@@ -51,9 +51,8 @@
 
 - (IBAction)listFriends:(id)sender {
     dispatch_async(GCDBackgroundThread, ^{
-        
         NSLog(@"Friends: %@",[self.engine getFriends]);
-        
+        NSLog(@"Privacy Policy: %@",[self.engine getPrivacyPolicy]);
     });
 }
 

@@ -11,7 +11,8 @@ FHSTwitterEngine can:
 
 - Login through XAuth.
 - Login through OAuth. Implementation based on [SA_OAuthTwitterEngineController](https://github.com/bengottlieb/Twitter-OAuth-iPhone)
-- Make a request to most API endpoints (I implemented them ad nauseam)
+- Make a request to every available API endpoints. Yes, even the legal ones.
+
 
 Why FHSTwitterEngine is better than MGTwitterEngine:
 
@@ -22,11 +23,10 @@ Why FHSTwitterEngine is better than MGTwitterEngine:
 - **Less crufty**
 
 
-List of implemented API endpoints: All of them. Yes, even the legal/xyz ones.
 
 **Setup**
 
-Add the folder "FHSTwitterEngine" to your project and import "FHSTwitterEngine.h"
+Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.h"
 
 **Usage:**
 
@@ -54,30 +54,42 @@ Add the folder "FHSTwitterEngine" to your project and import "FHSTwitterEngine.h
 
 -> End a session:
 
-    [self.engine clearAccessToken]; /* notice that it's not account/end_session */
+    [self.engine clearAccessToken];
 
 -> Check if a session is valid:
 
     [self.engine isAuthorized];
     
--> Do an API call:
+-> Do an API call (POST)\*:
 
     dispatch_async(GCDBackgroundThread, ^{
-    	int returnCode = [self.engine doYourBloodyAPICall];
+    	int returnCode = [self.engine doYourBloodyPOSTAPICall];
     	/* Handle returnCode */
     	dispatch_sync(GCDMainThread, ^{
         	/* Update UI */
         });
     });
 
+-> Do an API call (GET)\*\*:
 
+    dispatch_async(GCDBackgroundThread, ^{
+    	id returnValue = [self.engine doYourBloodyAPICall];
+    	/* Handle returnValue */
+    	dispatch_sync(GCDMainThread, ^{
+        	/* Update UI */
+        });
+    });
+
+
+- POST methods will return int.<br />
+- GET methods will return id. This can be either an NSDictionary, NSArray, NSString or nil.
 
 <br />
 **About Return Codes**<br />
 (These apply to any method that returns an int)<br />
 
-0 - Success<br />
-1 - API Error (Params are invalid - missing params here are my fault)<br />
+0 - Success <br />
+1 - API Error (Params are invalid - It's my fault if whole (name and value) params are missing) <br />
 2 - Insufficient input (missing a parameter, your fault)<br />
 3 - Image too large (bigger than 700KB. Again, your fault)<br />
 4 - User unauthorized <br />
