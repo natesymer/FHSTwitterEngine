@@ -195,6 +195,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
     CFStringRef string = CFUUIDCreateString(NULL, theUUID);
     NSMakeCollectable(theUUID);
     nonce = (NSString *)string;
+    CFRelease(theUUID); // Modified (wasn't there before, fixed memory leak
 }
 
 - (NSString *)_signatureBaseString 

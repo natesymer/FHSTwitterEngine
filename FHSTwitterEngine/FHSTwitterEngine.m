@@ -44,7 +44,8 @@
 
 @interface FHSTwitterEngine ()
 
-// id list generator - returns an array of id list strings
+// id list generator - returns an array of id/username list strings
+// used for users/lookup
 - (NSArray *)generateRequestURLSForIDs:(NSArray *)idsArray;
 
 // sendRequest methods, use these for every request
@@ -62,14 +63,16 @@
 @end
 
 @interface NSData (Base64)
-+ (NSData *)dataWithBase64EncodedString:(NSString *) string;
-- (id)initWithBase64EncodedString:(NSString *) string;
-- (NSString *)base64EncodingWithLineLength:(unsigned int) lineLength;
++ (NSData *)dataWithBase64EncodedString:(NSString *)string;
+- (id)initWithBase64EncodedString:(NSString *)string;
+- (NSString *)base64EncodingWithLineLength:(unsigned int)lineLength;
 
 @end
 
 @interface NSString (FHSTwitterEngine)
 
+// Trims tweets and direct messages to 140 characters
+// after trimming out extra spaces and newlines
 - (NSString *)trimForTwitter;
 
 @end
@@ -95,44 +98,204 @@
 /*
  TODO:
  - Implement the listed enpoints
- - Fix error message reporting (i.e. returned error strings)
+ - Return error strings for GET requests
+ - Add more params to all of the methods
 */
 
 /* 
  // API Endpoints to Implement
 
  - GET lists
+ - GET lists/statuses
+ - POST lists/members/create_all
+ - POST lists/members/destroy_all
+ - GET lists/memberships
  - GET lists/members
- - POST lists/members/create
- - POST lists/members/destroy
- 
- - GET trends/daily
- - GET trends/weekly
- 
- - GET blocks/blocking
- - GET blocks/exists
+ - POST lists/update
 
- - GET help/configuration
- - GET help/languages
- 
  - POST statuses/update_with_media
- - GET statuses/mentions
- - POST statuses/retweet
- - GET statuses/show
  - POST statuses/destroy
- - GET statuses/user_timeline
+ - POST statuses/retweet
+ - GET statuses/mentions
+ - GET statuses/show
  - GET statuses/retweeted_by_me
  - GET statuses/retweeted_to_me
  - GET statuses/retweets_of_me
  - GET statuses/retweeted_to_user
  - GET statuses/retweeted_by_user
- - POST statuses/update_with_media
  - GET statuses/oembed
- 
- - GET users/suggestions
  */
 
-// 24 more to implement
+// 18 more to implement
+
+- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count {
+    return [self getTimelineForUser:user isID:isID count:count sinceID:nil maxID:nil];
+}
+
+- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
+    
+    if (user.length == 0) {
+        return nil;
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1/statuses/user_timeline.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    NSMutableArray *params = [[NSMutableArray alloc]init];
+    
+    OARequestParameter *countP = [[OARequestParameter alloc]initWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
+    OARequestParameter *sinceIDP = [[OARequestParameter alloc]initWithName:@"since_id" value:sinceID];
+    OARequestParameter *maxIDP = [[OARequestParameter alloc]initWithName:@"max_id" value:maxID];
+    OARequestParameter *userP = [[OARequestParameter alloc]initWithName:@"screen_name" value:user];
+    OARequestParameter *excludeRepliesP = [[OARequestParameter alloc]initWithName:@"exclude_replies" value:@"false"];
+    OARequestParameter *includeRTsP = [[OARequestParameter alloc]initWithName:@"include_rts" value:@"true"];
+    
+    if (isID) {
+        userP.name = @"user_id";
+    }
+    
+    [params addObject:countP];
+    [params addObject:userP];
+    [params addObject:excludeRepliesP];
+    [params addObject:includeRTsP];
+    
+    if (sinceID.length > 0) {
+        [params addObject:sinceIDP];
+    }
+    
+    if (maxID.length > 0) {
+        [params addObject:maxIDP];
+    }
+    
+    return [self sendGETRequest:request withParameters:params];
+}
+
+- (id)getWeeklyTrends {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1/trends/weekly.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    return [self sendGETRequest:request withParameters:nil];
+}
+
+- (id)getDailyTrends {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1/trends/daily.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    return [self sendGETRequest:request withParameters:nil];
+}
+
+- (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size {
+    
+    if (username.length == 0) {
+        return nil;
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1/users/profile_image"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    OARequestParameter *usernameP = [[OARequestParameter alloc]initWithName:@"screen_name" value:username];
+    
+    NSArray *sizes = [NSArray arrayWithObjects:@"mini", @"normal", @"bigger", @"original", nil];
+
+    OARequestParameter *sizeP = [[OARequestParameter alloc]initWithName:@"size" value:[sizes objectAtIndex:size]];
+    
+    NSArray *params = [NSArray arrayWithObjects:usernameP, sizeP, nil];
+    
+    if (![self isAuthorized]) {
+        return nil;
+    }
+    
+    [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
+    [request setTimeoutInterval:25];
+    
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    
+    [request setHTTPMethod:@"GET"];
+    [request setParameters:params];
+    [request prepare];
+    
+    NSError *error = nil;
+    NSHTTPURLResponse *response = nil;
+    
+    NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    
+    if (response == nil || responseData == nil || error != nil) {
+        return nil;
+    }
+    
+    if (([response statusCode] >= 304)) {
+        return nil;
+    }
+    
+    UIImage *image = [UIImage imageWithData:responseData];
+    
+    return image;
+}
+
+- (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1/blocks/exists.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    
+    OARequestParameter *userP = [[OARequestParameter alloc]initWithName:@"screen_name" value:user];
+    
+    if (isID) {
+        userP.name = @"user_id";
+    }
+    
+    OARequestParameter *skipstatusP = [[OARequestParameter alloc]initWithName:@"skip_status" value:@"true"];
+    
+    id obj = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:skipstatusP, userP, nil]];
+    
+    if (!obj) {
+        return FHSTwitterEngineBOOLKeyERROR;
+    }
+    
+    if ([obj isKindOfClass:[NSDictionary class]]) {
+        BOOL blockDoesntExist = [[obj objectForKey:@"error"]isEqualToString:@"You are not blocking this user."];
+        if (blockDoesntExist) {
+            return FHSTwitterEngineBOOLKeyNO;
+        } else {
+            return FHSTwitterEngineBOOLKeyYES;
+        }
+    }
+    
+    return FHSTwitterEngineBOOLKeyERROR;
+}
+
+- (id)listBlockedUsers {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1/blocks/blocking.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    OARequestParameter *skipstatusP = [[OARequestParameter alloc]initWithName:@"skip_status" value:@"true"];
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:skipstatusP, nil]];
+}
+
+- (id)listBlockedIDs {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1/blocks/blocking/ids.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    OARequestParameter *stringifyIDsP = [[OARequestParameter alloc]initWithName:@"stringify_ids" value:@"true"];
+    
+    id object = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:stringifyIDsP, nil]];
+    
+    if ([object isKindOfClass:[NSDictionary class]]) {
+        NSDictionary *dict = (NSDictionary *)object;
+        if ([dict.allKeys containsObject:@"ids"]) {
+            object = [dict objectForKey:@"ids"];
+        }
+    }
+    return object;
+}
+
+- (id)getLanguages {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1/help/languages.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    return [self sendGETRequest:request withParameters:nil];
+}
+
+- (id)getConfiguration {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1/help/configuration.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    return [self sendGETRequest:request withParameters:nil];
+}
 
 - (int)reportUserAsSpam:(NSString *)user isID:(BOOL)isID {
     
@@ -219,7 +382,7 @@
 - (id)getDirectMessages:(int)count {
     
     if (count == 0) {
-        return FHSTwitterEngineReturnCodeInsufficientInput;
+        return nil;
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1/direct_messages.json"];
@@ -926,41 +1089,66 @@
 }
 
 - (NSArray *)generateRequestURLSForIDs:(NSArray *)idsArray {
-    int count = idsArray.count;
-    NSMutableArray *requestStrings = [[NSMutableArray alloc]init];
     
-    int position = 1;
-    NSString *list = @"";
+    int count = idsArray.count;
+    
+    NSMutableArray *reqStrs = [[NSMutableArray alloc]init];
     
     int remainder = fmod(count, 99);
     
-    for (int ii = 0; ii < count; ii++) {
-        int theNumber = 99;
+    int numberOfStrings = (count-remainder)/99;
+    
+    for (int i = 0; i < numberOfStrings; i++) {
+        NSString *reqString = @"";
         
-        int countMinusRemainder = count-remainder;
-        
-        if (ii >= countMinusRemainder) {
-            theNumber = remainder;
+        for (int ii = 0; ii < 99; ii++) {
+            
+            // i*99 -> the number of 99's completed
+            // ii -> the number indicating the progress into the current 99
+            int lol = (i*99)+ii;
+            
+            // handle getting the correct string
+            NSString *currentID = [[idsArray objectAtIndex:lol]stringByAppendingString:@","];
+            
+            // append the string
+            reqString = [reqString stringByAppendingString:currentID];
         }
         
-        if ((count-position) == theNumber) {
-            NSString *usernameAtPosition = [idsArray objectAtIndex:ii];
-            list = [list stringByAppendingFormat:@",%@",usernameAtPosition];
-            [requestStrings addObject:list];
-            list = @"";
-            position = 1;
-        } else {
-            NSString *usernameAtPosition = [idsArray objectAtIndex:ii];
-            list = [list stringByAppendingFormat:@",%@",usernameAtPosition];
-            position = position+1;
+        BOOL isLastCharAComma = ([[reqString substringFromIndex:reqString.length-1]isEqualToString:@","]);
+        
+        if (isLastCharAComma) {
+            reqString = [reqString substringToIndex:reqString.length-1];
         }
+        
+        [reqStrs addObject:reqString];
     }
     
-    if ((list.length > 0) && (list.length < 100)) {
-        [requestStrings addObject:list];
+    if (numberOfStrings*99 < count) {
+        NSString *reqString = @"";
+        
+        for (int iii = 0; iii < remainder; iii++) {
+            
+            // handle getting the correct string
+            NSString *currentID = [[idsArray objectAtIndex:iii]stringByAppendingString:@","];
+            
+            // append the string
+            reqString = [reqString stringByAppendingString:currentID];
+        }
+        
+        BOOL isLastCharAComma = ([[reqString substringFromIndex:reqString.length-1]isEqualToString:@","]);
+        
+        if (isLastCharAComma) {
+            reqString = [reqString substringToIndex:reqString.length-1];
+        }
+        
+        [reqStrs addObject:reqString];
     }
     
-    return requestStrings;
+    for (id obj in reqStrs) {
+        NSLog(@"Index: %d, Count: %d",[reqStrs indexOfObject:obj],[(NSString *)obj componentsSeparatedByString:@","].count);
+    }
+    
+    return reqStrs;
 }
 
 - (NSArray *)getFollowers {

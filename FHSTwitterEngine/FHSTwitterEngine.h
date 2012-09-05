@@ -50,6 +50,12 @@
 
 #import <Foundation/Foundation.h>
 
+// BOOL keys
+// Used to return boolean values while accounting for errors
+#define FHSTwitterEngineBOOLKeyYES @"YES"
+#define FHSTwitterEngineBOOLKeyNO @"NO"
+#define FHSTwitterEngineBOOLKeyERROR @"ERROR"
+
 // Return Code Keys
 #define FHSTwitterEngineReturnCodeOK 0
 #define FHSTwitterEngineReturnCodeAPIError 1
@@ -60,6 +66,13 @@
 // These are for the dispatch_async() calls that you use to get around the synchronous-ness
 #define GCDBackgroundThread dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
 #define GCDMainThread dispatch_get_main_queue()
+
+typedef enum {
+    FHSTwitterEngineImageSizeMini, // 24px by 24px
+    FHSTwitterEngineImageSizeNormal, // 48x48
+    FHSTwitterEngineImageSizeBigger, // 73x73
+    FHSTwitterEngineImageSizeOriginal // original size of image
+} FHSTwitterEngineImageSize;
 
 @interface FHSTwitterEngine : NSObject <UIWebViewDelegate>
 
@@ -191,6 +204,36 @@
 
 // report_spam
 - (int)reportUserAsSpam:(NSString *)user isID:(BOOL)isID;
+
+// help/configuration
+- (id)getConfiguration;
+
+// help/languages
+- (id)getLanguages;
+
+// blocks/blocking/ids
+- (id)listBlockedIDs;
+
+// blocks/blocking
+- (id)listBlockedUsers;
+
+// blocks/exists
+// Returns NSString, use the FHSTwitterEngineBOOLKey's 
+- (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID;
+
+// users/profile_image
+// Returns UIImage
+- (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
+
+// trends/daily
+- (id)getDailyTrends;
+
+// trends/weekly
+- (id)getWeeklyTrends;
+
+// statuses/user_timeline
+- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count;
+- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 
 //
