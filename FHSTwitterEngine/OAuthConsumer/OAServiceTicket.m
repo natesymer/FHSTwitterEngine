@@ -32,8 +32,7 @@
 
 - (id)initWithRequest:(OAMutableURLRequest *)aRequest response:(NSURLResponse *)aResponse didSucceed:(BOOL)success 
 {
-    if (self = [super init])
-	{
+    if (self = [super init]) {
 		self.request = aRequest;
 		self.response = aResponse;
 		self.didSucceed = success;

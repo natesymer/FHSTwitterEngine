@@ -29,9 +29,18 @@
 
 @implementation NSURL (OABaseAdditions)
 
-- (NSString *)URLStringWithoutQuery 
-{
-    NSArray *parts = [[self absoluteString] componentsSeparatedByString:@"?"];
+- (NSString *)URLStringWithoutQuery {
+    NSString *absoluteString = [self absoluteString];
+    
+    if (!absoluteString) {
+        absoluteString = @"";
+    }
+    
+    if (absoluteString.length == 0) {
+        return nil;
+    }
+    
+    NSArray *parts = [absoluteString componentsSeparatedByString:@"?"];
     return [parts objectAtIndex:0];
 }
 

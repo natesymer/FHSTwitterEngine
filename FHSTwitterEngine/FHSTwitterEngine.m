@@ -22,6 +22,7 @@
 #import "OAConsumer.h"
 #import "OAMutableURLRequest.h"
 #import "OARequestParameter.h"
+#import "OAAsynchronousDataFetcher.h"
 #import "OAToken.h"
 
 @interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate> {
@@ -94,6 +95,7 @@
 @implementation FHSTwitterEngine
 
 @synthesize consumer, accessToken, loggedInUsername, loggedInID;
+
 
 /*
  TODO:
@@ -1108,7 +1110,7 @@
             int lol = (i*99)+ii;
             
             // handle getting the correct string
-            NSString *currentID = [[idsArray objectAtIndex:lol]stringByAppendingString:@","];
+            NSString *currentID = [[[idsArray objectAtIndex:lol]stringValue]stringByAppendingString:@","];
             
             // append the string
             reqString = [reqString stringByAppendingString:currentID];
@@ -1129,7 +1131,7 @@
         for (int iii = 0; iii < remainder; iii++) {
             
             // handle getting the correct string
-            NSString *currentID = [[idsArray objectAtIndex:iii]stringByAppendingString:@","];
+            NSString *currentID = [[[idsArray objectAtIndex:iii]stringValue]stringByAppendingString:@","];
             
             // append the string
             reqString = [reqString stringByAppendingString:currentID];

@@ -10,7 +10,7 @@ Created by Nathaniel Symer, aka [fhsjaagshs](mailto:fhsjaagshs@fhsjaagshs.com)
 FHSTwitterEngine can:
 
 - Login through XAuth.
-- Login through OAuth. Implementation based on [SA_OAuthTwitterEngineController](https://github.com/bengottlieb/Twitter-OAuth-iPhone)
+- Login through OAuth. Login UI based on [SA_OAuthTwitterEngineController](https://github.com/bengottlieb/Twitter-OAuth-iPhone)
 - Make a request to every available API endpoints. Yes, even the legal ones.
 
 
@@ -20,6 +20,7 @@ Why FHSTwitterEngine is better than MGTwitterEngine:
 - Does not send you to Dependency Hell over a JSON parser
 - Synchronous allowing for easier implementation (See usage)
 - More implemented API endpoints
+- Uses a better version of OAuthConsumer (mine)
 - **Less crufty**
 
 
@@ -98,6 +99,16 @@ Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.
 (You can look them up using the lookupErrorCode: method)
 
 *Return codes 2 & 3 are your fault*
+
+<br />
+
+**For the future**
+
+I envision more endpoints, API v1.1 compatibility, and async (with blocks) methods. Blocks kick delegates' bums anyday.
+
+**IMPORTANT**
+
+FHSTwitterEngine contains a heavily modified version of OAuthConsumer. I removed OADataFetcher and added block support to OAAsynchronousDataFetcher. I also fixed many memory leaks.
 
 <br />
 

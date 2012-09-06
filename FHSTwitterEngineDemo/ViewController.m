@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "FHSTwitterEngine.h"
+#import "OAAsynchronousDataFetcher.h"
 
 @implementation ViewController
 
@@ -54,6 +55,9 @@
         NSLog(@"Friends: %@",[self.engine getFriends]);
         NSLog(@"Privacy Policy: %@",[self.engine getPrivacyPolicy]);
     });
+    
+    OAMutableURLRequest *req = [[OAMutableURLRequest alloc]initWithURL:nil consumer:nil token:nil realm:nil signatureProvider:nil];
+    [req parameters];
 }
 
 - (IBAction)postTweet:(id)sender {
@@ -81,7 +85,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
+    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"Xg3ACDprWAH8loEPjMzRg" andSecret:@"9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0"];
     [passwordField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
     [usernameField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
     [tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];

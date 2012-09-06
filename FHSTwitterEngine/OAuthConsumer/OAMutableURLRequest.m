@@ -51,21 +51,24 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 		consumer = [aConsumer retain];
 		
 		// empty token for Unauthorized Request Token transaction
-		if (aToken == nil)
-			token = [[OAToken alloc] init];
-		else
+		if (aToken == nil) {
+			token = [[OAToken alloc]init];
+		} else {
 			token = [aToken retain];
+        }
 		
-		if (aRealm == nil)
+		if (aRealm == nil) {
 			realm = [[NSString alloc] initWithString:@""];
-		else 
+		} else {
 			realm = [aRealm retain];
+        }
 		
 		// default to HMAC-SHA1
-		if (aProvider == nil)
+		if (aProvider == nil) {
 			signatureProvider = [[OAHMAC_SHA1SignatureProvider alloc] init];
-		else 
+		} else {
 			signatureProvider = [aProvider retain];
+        }
 		
 		[self _generateTimestamp];
 		[self _generateNonce];
@@ -90,21 +93,24 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 		consumer = [aConsumer retain];
 		
 		// empty token for Unauthorized Request Token transaction
-		if (aToken == nil)
+		if (aToken == nil) {
 			token = [[OAToken alloc] init];
-		else
+		} else {
 			token = [aToken retain];
+        }
 		
-		if (aRealm == nil)
-			realm = [[NSString alloc] initWithString:@""];
-		else 
+		if (aRealm == nil) {
+			realm = [[NSString alloc]initWithString:@""];
+		} else {
 			realm = [aRealm retain];
+        }
 		
 		// default to HMAC-SHA1
-		if (aProvider == nil)
+		if (aProvider == nil) {
 			signatureProvider = [[OAHMAC_SHA1SignatureProvider alloc] init];
-		else 
+		} else {
 			signatureProvider = [aProvider retain];
+        }
 		
 		timestamp = [aTimestamp retain];
 		nonce = [aNonce retain];
@@ -161,7 +167,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 	NSMutableString *extraParameters = [NSMutableString string];
 	
 	// Adding the optional parameters in sorted order isn't required by the OAuth spec, but it makes it possible to hard-code expected values in the unit tests.
-	for(NSString *parameterName in [[extraOAuthParameters allKeys] sortedArrayUsingSelector:@selector(compare:)])
+	for (NSString *parameterName in [[extraOAuthParameters allKeys] sortedArrayUsingSelector:@selector(compare:)])
 	{
 		[extraParameters appendFormat:@", %@=\"%@\"",
 		 [parameterName URLEncodedString],
@@ -184,9 +190,13 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 #pragma mark -
 #pragma mark Private
 
-- (void)_generateTimestamp 
+- (void)_generateTimestamp
 {
-    timestamp = [[NSString stringWithFormat:@"%ld", time(NULL)] retain];
+    if (timestamp) {
+        [timestamp release];
+    }
+    
+    timestamp = [[NSString alloc]initWithFormat:@"%ld",time(NULL)];
 }
 
 - (void)_generateNonce 
@@ -194,6 +204,11 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
     CFUUIDRef theUUID = CFUUIDCreate(NULL);
     CFStringRef string = CFUUIDCreateString(NULL, theUUID);
     NSMakeCollectable(theUUID);
+    
+    if (nonce) {
+        [nonce release];
+    }
+    
     nonce = (NSString *)string;
     CFRelease(theUUID); // Modified (wasn't there before, fixed memory leak
 }
@@ -215,9 +230,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 		if (token.verifier != nil && ![token.verifier isEqualToString:@""]) {
 			[parameterPairs addObject:[[OARequestParameter requestParameterWithName:@"oauth_verifier" value:token.verifier] URLEncodedNameValuePair]];
 		}
-    }
-	else 
-	{
+    } else {
 		[parameterPairs addObject:[[OARequestParameter requestParameterWithName:@"oauth_callback" value:@"oob"] URLEncodedNameValuePair]];
 	}
 

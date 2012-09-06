@@ -19,7 +19,6 @@
 		9B2A1C2D15E807D9007E66E0 /* Base64Transcoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1315E807D9007E66E0 /* Base64Transcoder.c */; };
 		9B2A1C2E15E807D9007E66E0 /* OAAsynchronousDataFetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1615E807D9007E66E0 /* OAAsynchronousDataFetcher.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C2F15E807D9007E66E0 /* OAConsumer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1815E807D9007E66E0 /* OAConsumer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		9B2A1C3015E807D9007E66E0 /* OADataFetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1A15E807D9007E66E0 /* OADataFetcher.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C3115E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1C15E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C3215E807D9007E66E0 /* OAMutableURLRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1E15E807D9007E66E0 /* OAMutableURLRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C3315E807D9007E66E0 /* OAPlaintextSignatureProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C2015E807D9007E66E0 /* OAPlaintextSignatureProvider.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -55,8 +54,6 @@
 		9B2A1C1615E807D9007E66E0 /* OAAsynchronousDataFetcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAAsynchronousDataFetcher.m; sourceTree = "<group>"; };
 		9B2A1C1715E807D9007E66E0 /* OAConsumer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAConsumer.h; sourceTree = "<group>"; };
 		9B2A1C1815E807D9007E66E0 /* OAConsumer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAConsumer.m; sourceTree = "<group>"; };
-		9B2A1C1915E807D9007E66E0 /* OADataFetcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OADataFetcher.h; sourceTree = "<group>"; };
-		9B2A1C1A15E807D9007E66E0 /* OADataFetcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OADataFetcher.m; sourceTree = "<group>"; };
 		9B2A1C1B15E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAHMAC_SHA1SignatureProvider.h; sourceTree = "<group>"; };
 		9B2A1C1C15E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAHMAC_SHA1SignatureProvider.m; sourceTree = "<group>"; };
 		9B2A1C1D15E807D9007E66E0 /* OAMutableURLRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAMutableURLRequest.h; sourceTree = "<group>"; };
@@ -135,8 +132,6 @@
 				9B2A1C1615E807D9007E66E0 /* OAAsynchronousDataFetcher.m */,
 				9B2A1C1715E807D9007E66E0 /* OAConsumer.h */,
 				9B2A1C1815E807D9007E66E0 /* OAConsumer.m */,
-				9B2A1C1915E807D9007E66E0 /* OADataFetcher.h */,
-				9B2A1C1A15E807D9007E66E0 /* OADataFetcher.m */,
 				9B2A1C1B15E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.h */,
 				9B2A1C1C15E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m */,
 				9B2A1C1D15E807D9007E66E0 /* OAMutableURLRequest.h */,
@@ -147,9 +142,9 @@
 				9B2A1C2215E807D9007E66E0 /* OARequestParameter.m */,
 				9B2A1C2315E807D9007E66E0 /* OAServiceTicket.h */,
 				9B2A1C2415E807D9007E66E0 /* OAServiceTicket.m */,
-				9B2A1C2515E807D9007E66E0 /* OASignatureProviding.h */,
 				9B2A1C2615E807D9007E66E0 /* OAToken.h */,
 				9B2A1C2715E807D9007E66E0 /* OAToken.m */,
+				9B2A1C2515E807D9007E66E0 /* OASignatureProviding.h */,
 				9B2A1C2815E807D9007E66E0 /* OAuthConsumer.h */,
 			);
 			path = OAuthConsumer;
@@ -171,8 +166,8 @@
 		9B2A1C1215E807D9007E66E0 /* Crytpo */ = {
 			isa = PBXGroup;
 			children = (
-				9B2A1C1315E807D9007E66E0 /* Base64Transcoder.c */,
 				9B2A1C1415E807D9007E66E0 /* Base64Transcoder.h */,
+				9B2A1C1315E807D9007E66E0 /* Base64Transcoder.c */,
 			);
 			path = Crytpo;
 			sourceTree = "<group>";
@@ -277,7 +272,6 @@
 				9B2A1C2D15E807D9007E66E0 /* Base64Transcoder.c in Sources */,
 				9B2A1C2E15E807D9007E66E0 /* OAAsynchronousDataFetcher.m in Sources */,
 				9B2A1C2F15E807D9007E66E0 /* OAConsumer.m in Sources */,
-				9B2A1C3015E807D9007E66E0 /* OADataFetcher.m in Sources */,
 				9B2A1C3115E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m in Sources */,
 				9B2A1C3215E807D9007E66E0 /* OAMutableURLRequest.m in Sources */,
 				9B2A1C3315E807D9007E66E0 /* OAPlaintextSignatureProvider.m in Sources */,
