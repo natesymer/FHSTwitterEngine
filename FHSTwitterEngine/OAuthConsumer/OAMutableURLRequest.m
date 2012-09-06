@@ -120,6 +120,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 - (void)dealloc {
     
 	[extraOAuthParameters release];
+    extraOAuthParameters = nil;
     
     [consumer release];
     consumer = nil;
@@ -154,9 +155,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
     // sign
 	// Secrets must be urlencoded before concatenated with '&'
 	// TODO: if later RSA-SHA1 support is added then a little code redesign is needed
-    signature = [signatureProvider signClearText:[self _signatureBaseString] withSecret:[NSString stringWithFormat:@"%@&%@", [consumer.secret URLEncodedString], [token.secret URLEncodedString]]];
-    
-    [signature retain];
+    signature = [[signatureProvider signClearText:[self _signatureBaseString] withSecret:[NSString stringWithFormat:@"%@&%@", [consumer.secret URLEncodedString], [token.secret URLEncodedString]]]retain];
     
     // set OAuth headers
 	NSString *oauthToken;
@@ -173,9 +172,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 	
 	// Adding the optional parameters in sorted order isn't required by the OAuth spec, but it makes it possible to hard-code expected values in the unit tests.
 	for (NSString *parameterName in [[extraOAuthParameters allKeys] sortedArrayUsingSelector:@selector(compare:)]) {
-		[extraParameters appendFormat:@", %@=\"%@\"",
-		 [parameterName URLEncodedString],
-		 [[extraOAuthParameters objectForKey:parameterName] URLEncodedString]];
+		[extraParameters appendFormat:@", %@=\"%@\"",[parameterName URLEncodedString],[[extraOAuthParameters objectForKey:parameterName] URLEncodedString]];
 	}	
     
     NSString *oauthHeader = [NSString stringWithFormat:@"OAuth realm=\"%@\", oauth_consumer_key=\"%@\", %@oauth_signature_method=\"%@\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"%@", [realm URLEncodedString], [consumer.key URLEncodedString], oauthToken, [[signatureProvider name] URLEncodedString], [signature URLEncodedString], timestamp, nonce, extraParameters];
@@ -201,7 +198,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 - (NSString *)_signatureBaseString {
     // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
     // build a sorted array of both request parameters and OAuth header parameters
-    NSMutableArray *parameterPairs = [NSMutableArray  arrayWithCapacity:(6 + [[self parameters] count])]; // 6 being the number of OAuth params in the Signature Base String
+    NSMutableArray *parameterPairs = [NSMutableArray  arrayWithCapacity:(6 + [self parameters].count)]; // 6 being the number of OAuth params in the Signature Base String
     
 	[parameterPairs addObject:[[OARequestParameter requestParameterWithName:@"oauth_consumer_key" value:consumer.key] URLEncodedNameValuePair]];
 	[parameterPairs addObject:[[OARequestParameter requestParameterWithName:@"oauth_signature_method" value:[signatureProvider name]] URLEncodedNameValuePair]];
@@ -226,11 +223,11 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
     NSString *normalizedRequestParameters = [sortedPairs componentsJoinedByString:@"&"];
     
     // OAuth Spec, Section 9.1.2 "Concatenate Request Elements"
-    NSString *ret = [NSString stringWithFormat:@"%@&%@&%@", self.HTTPMethod, [[self.URL URLStringWithoutQuery] URLEncodedString], [normalizedRequestParameters URLEncodedString]];
+    NSString *ret = [NSString stringWithFormat:@"%@&%@&%@", self.HTTPMethod, [[self.URL URLStringWithoutQuery]URLEncodedString], [normalizedRequestParameters URLEncodedString]];
 	return ret;
 }
 
-#pragma mark properties
+#pragma mark Setters and Getters
 
 - (NSString *)nonce
 {

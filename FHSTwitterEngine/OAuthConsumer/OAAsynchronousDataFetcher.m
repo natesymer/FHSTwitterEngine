@@ -3,7 +3,6 @@
 //  OAuthConsumer
 //
 //  Created by Zsombor Szabó on 12/3/08.
-//  Modified by Nathaniel Symer on 9/5/12.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +28,12 @@
 
 @implementation OAAsynchronousDataFetcher
 
-@synthesize requestFailedBlock, requestSucceededBlock;
+@synthesize requestFailedBlock, requestSucceededBlock, response, request, responseData, connection;
 
-+ (id)asynchronousFetcherWithRequest:(OAMutableURLRequest *)aRequest delegate:(id)aDelegate didFinishSelector:(SEL)finishSelector didFailSelector:(SEL)failSelector {
+#pragma mark -
+#pragma mark Object creation methods
+
++ (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest delegate:(id)aDelegate didFinishSelector:(SEL)finishSelector didFailSelector:(SEL)failSelector {
 	return [[[OAAsynchronousDataFetcher alloc] initWithRequest:aRequest delegate:aDelegate didFinishSelector:finishSelector didFailSelector:failSelector] autorelease];
 }
 
@@ -47,7 +49,7 @@
 	return self;
 }
 
-+ (id)asynchronousFetcherWithRequest:(OAMutableURLRequest *)aRequest didFinishBlock:(void (^)(id ticket, id data))finishBlock didFailBlock:(void (^)(id ticket, id error))failBlock {
++ (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest didFinishBlock:(void (^)(id ticket, id data))finishBlock didFailBlock:(void (^)(id ticket, id error))failBlock {
     return [[[OAAsynchronousDataFetcher alloc]initWithRequest:aRequest didFinishBlock:finishBlock didFailBlock:failBlock]autorelease];
 }
 
@@ -70,26 +72,56 @@
     return self;
 }
 
-- (void)setRequest:(OAMutableURLRequest *)aRequest {
-    if (request) {
-        [request release];
-    }
-    request = [aRequest retain];
+- (void)dealloc {
+    [self setRequest:nil];
+    [self setConnection:nil];
+    [self setResponse:nil];
+    [self setDidFailBlock:nil];
+    [self setDidFinishBlock:nil];
+    [self setDelegate:nil];
+	[self setResponseData:nil];
+	[super dealloc];
+}
+
+
+#pragma mark -
+#pragma mark Miscellaneous Setters/getters
+
+- (void)setDidFinishSelector:(SEL)aSelector {
+    didFinishSelector = aSelector;
+}
+
+- (void)setDidFailSelector:(SEL)aSelector {
+    didFailSelector = aSelector;
+}
+
+- (void)setDidFailBlock:(void (^)(id ticket, id error))failBlock {
+    Block_release(self.requestFailedBlock);
+    self.requestFailedBlock = failBlock;
+}
+
+- (void)setDidFinishBlock:(void (^)(id ticket, id data))finishBlock {
+    Block_release(self.requestSucceededBlock);
+    self.requestSucceededBlock = finishBlock;
+}
+
+- (id)delegate {
+    return delegate;
 }
 
 - (void)setDelegate:(id)aDelegate {
     delegate = aDelegate;
 }
 
+
+#pragma mark -
+#pragma mark Connection management methods
+
 - (void)start {
     
     [request prepare];
 	
-	if (connection) {
-		[connection release];
-    }
-	
-	connection = [[NSURLConnection alloc]initWithRequest:request delegate:self];
+    [self setConnection:[NSURLConnection connectionWithRequest:request delegate:self]];
     
 	if (connection) {
 		[responseData setLength:0];
@@ -106,34 +138,16 @@
 }
 
 - (void)cancel {
-	if (connection) {
-		[connection cancel];
-		[connection release];
-		connection = nil;
-	}
+    [connection cancel];
+    [self setConnection:nil];
     [responseData setLength:0];
-}
-
-- (void)dealloc {
-	if (request) [request release];
-	if (connection) [connection release];
-	if (response) [response release];
-	if (responseData) [responseData release];
-    if (requestSucceededBlock) Block_release(requestSucceededBlock);
-    if (requestFailedBlock) Block_release(requestFailedBlock);
-    delegate = nil;
-	[super dealloc];
 }
 
 #pragma mark -
 #pragma mark NSURLConnection Delegate methods
 
 - (void)connection:(NSURLConnection *)aConnection didReceiveResponse:(NSURLResponse *)aResponse {
-	if (response) {
-		[response release];
-    }
-	response = [aResponse retain];
-    
+    [self setResponse:aResponse];
 	[responseData setLength:0];
 }
 
