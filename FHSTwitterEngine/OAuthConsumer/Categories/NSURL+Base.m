@@ -30,7 +30,7 @@
 @implementation NSURL (OABaseAdditions)
 
 - (NSString *)URLStringWithoutQuery {
-    NSString *absoluteString = [self absoluteString];
+    NSString *absoluteString = self.absoluteString;
     
     if (!absoluteString) {
         absoluteString = @"";

@@ -55,9 +55,6 @@
         NSLog(@"Friends: %@",[self.engine getFriends]);
         NSLog(@"Privacy Policy: %@",[self.engine getPrivacyPolicy]);
     });
-    
-    OAMutableURLRequest *req = [[OAMutableURLRequest alloc]initWithURL:nil consumer:nil token:nil realm:nil signatureProvider:nil];
-    [req parameters];
 }
 
 - (IBAction)postTweet:(id)sender {

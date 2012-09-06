@@ -65,4 +65,9 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 
 - (void)setOAuthParameterName:(NSString*)parameterName withValue:(NSString*)parameterValue;
 
+- (NSString *)nonce;
+- (void)setNonce:(NSString *)aKey;
+- (NSString *)signature;
+- (void)setSignature:(NSString *)aSecret;
+
 @end

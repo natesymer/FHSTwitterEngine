@@ -81,8 +81,8 @@
 - (id)initWithUserDefaultsUsingServiceProviderName:(NSString *)provider prefix:(NSString *)prefix {
     
 	if (self = [super init]) {
-		NSString *theKey = [[NSUserDefaults standardUserDefaults] stringForKey:[NSString stringWithFormat:@"OAUTH_%@_%@_KEY", prefix, provider]];
-		NSString *theSecret = [[NSUserDefaults standardUserDefaults] stringForKey:[NSString stringWithFormat:@"OAUTH_%@_%@_SECRET", prefix, provider]];
+		NSString *theKey = [[NSUserDefaults standardUserDefaults]stringForKey:[NSString stringWithFormat:@"OAUTH_%@_%@_KEY", prefix, provider]];
+		NSString *theSecret = [[NSUserDefaults standardUserDefaults]stringForKey:[NSString stringWithFormat:@"OAUTH_%@_%@_SECRET", prefix, provider]];
         
         BOOL keyIsEmpty = ((theKey == nil) || (theKey.length == 0));
         BOOL secretIsEmpty = ((theSecret == nil) || (theSecret.length == 0));
@@ -98,7 +98,6 @@
 }
 
 - (void)dealloc {
-    
 	[verifier release];
 	[key release];
 	[secret release];
