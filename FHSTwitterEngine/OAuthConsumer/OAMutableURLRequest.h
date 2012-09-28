@@ -44,8 +44,9 @@
     NSString *timestamp;
 	NSMutableDictionary *extraOAuthParameters;
 }
-@property (readonly) NSString *signature;
-@property (readonly) NSString *nonce;
+@property (nonatomic, assign) NSString *signature;
+@property (nonatomic, assign) NSString *nonce;
+@property (nonatomic, assign) NSString *timestamp;
 
 - (id)initWithURL:(NSURL *)aUrl
 		 consumer:(OAConsumer *)aConsumer
@@ -64,10 +65,5 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 - (void)prepare;
 
 - (void)setOAuthParameterName:(NSString*)parameterName withValue:(NSString*)parameterValue;
-
-- (NSString *)nonce;
-- (void)setNonce:(NSString *)aKey;
-- (NSString *)signature;
-- (void)setSignature:(NSString *)aSecret;
 
 @end

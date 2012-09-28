@@ -34,7 +34,7 @@
 @end
 
 @implementation OAMutableURLRequest
-@synthesize signature, nonce;
+@synthesize signature, nonce, timestamp;
 
 #pragma mark init
 
@@ -191,7 +191,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
     CFUUIDRef theUUID = CFUUIDCreate(NULL);
     CFStringRef string = CFUUIDCreateString(NULL, theUUID);
     CFRelease(theUUID);
-    [self setNonce:(NSString *)string];
+    [self setNonce:[NSString stringWithString:(NSString *)string]];
     CFRelease(string);
 }
 
@@ -225,44 +225,6 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
     // OAuth Spec, Section 9.1.2 "Concatenate Request Elements"
     NSString *ret = [NSString stringWithFormat:@"%@&%@&%@", self.HTTPMethod, [[self.URL URLStringWithoutQuery]URLEncodedString], [normalizedRequestParameters URLEncodedString]];
 	return ret;
-}
-
-#pragma mark Setters and Getters
-
-- (NSString *)nonce
-{
-    return nonce;
-}
-
-- (void)setNonce:(NSString *)aNonce
-{
-    [aNonce retain];
-    [nonce release];
-    nonce = aNonce;
-}
-
-- (NSString *)signature
-{
-    return signature;
-}
-
-- (void)setSignature:(NSString *)aSignature
-{
-    [aSignature retain];
-    [signature release];
-    signature = aSignature;
-}
-
-- (NSString *)timestamp;
-{
-    return timestamp;
-}
-
-- (void)setTimestamp:(NSString *)aString;
-{
-    [aString retain];
-    [timestamp release];
-    timestamp = aString;
 }
 
 @end

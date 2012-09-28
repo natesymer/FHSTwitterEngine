@@ -29,7 +29,7 @@
 
 @implementation OAToken
 
-@synthesize key, secret, verifier;
+@synthesize key, secret, verifier, pin;
 
 #pragma mark init
 
@@ -39,6 +39,7 @@
 		self.key = @"";
 		self.secret = @"";
 		self.verifier = @"";
+        self.pin = @"";
 	}
     
     return self;
@@ -98,6 +99,7 @@
 }
 
 - (void)dealloc {
+    [pin release];
 	[verifier release];
 	[key release];
 	[secret release];

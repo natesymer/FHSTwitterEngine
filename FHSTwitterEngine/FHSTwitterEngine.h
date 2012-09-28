@@ -51,11 +51,12 @@
 
 //
 // NOTE TO CONTRIBUTORS
-// There is an excellent JSON parser INCLUDED in the iOS SDK called NSJSONSerialization. Please use it for the sake of my (our) users.
+// Use the included TouchJSON. It's only slightly modified (to use the isEqual methods in some cases)
 //
 
 
 #import <Foundation/Foundation.h>
+#import "OAuthConsumer.h"
 
 // BOOL keys
 // Used to return boolean values while accounting for errors
@@ -63,23 +64,43 @@
 #define FHSTwitterEngineBOOLKeyNO @"NO"
 #define FHSTwitterEngineBOOLKeyERROR @"ERROR"
 
-// Return Code Keys
-#define FHSTwitterEngineReturnCodeOK 0
-#define FHSTwitterEngineReturnCodeAPIError 1
-#define FHSTwitterEngineReturnCodeInsufficientInput 2
-#define FHSTwitterEngineReturnCodeImageTooLarge 3
-#define FHSTwitterEngineReturnCodeUserUnauthorized 4
-
 // These are for the dispatch_async() calls that you use to get around the synchronous-ness
 #define GCDBackgroundThread dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
 #define GCDMainThread dispatch_get_main_queue()
 
+typedef enum {
+    FHSTwitterEngineAlignModeLeft,
+    FHSTwitterEngineAlignModeRight,
+    FHSTwitterEngineAlignModeCenter,
+    FHSTwitterEngineAlignModeNone
+} FHSTwitterEngineAlignMode;
+
+// Return Code Keys
+typedef enum {
+    FHSTwitterEngineReturnCodeOK,
+    FHSTwitterEngineReturnCodeAPIError,
+    FHSTwitterEngineReturnCodeInsufficientInput,
+    FHSTwitterEngineReturnCodeImageTooLarge,
+    FHSTwitterEngineReturnCodeUserUnauthorized
+} FHSTwitterEngineReturnCode;
+
+// Image sizes
 typedef enum {
     FHSTwitterEngineImageSizeMini, // 24px by 24px
     FHSTwitterEngineImageSizeNormal, // 48x48
     FHSTwitterEngineImageSizeBigger, // 73x73
     FHSTwitterEngineImageSizeOriginal // original size of image
 } FHSTwitterEngineImageSize;
+
+@protocol FHSTwitterEngineAccessTokenDelegate <NSObject>
+
+- (void)storeAccessToken:(NSString *)accessToken;
+- (NSString *)loadAccessToken;
+
+@end
+
+@class OAToken;
+@class OAConsumer;
 
 @interface FHSTwitterEngine : NSObject <UIWebViewDelegate>
 
@@ -89,12 +110,11 @@ typedef enum {
 
 //
 // Custom REST API methods
-// friends/ids & users/lookup OR followers/ids & users/lookup
-// (The second being called once for every 99 id's) - can be expensive CACHE CACHE CACHE
+// (The second method is called once for every 99 id's) - can be expensive CACHE CACHE CACHE
 //
 
-- (NSArray *)getFollowers;
-- (NSArray *)getFriends;
+- (NSArray *)getFollowers; // followers/ids & users/lookup
+- (NSArray *)getFriends; // friends/ids & users/lookup
 
 //
 // Normal REST API methods
@@ -242,6 +262,21 @@ typedef enum {
 - (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count;
 - (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
+// statuses/retweet
+- (int)retweet:(NSString *)identifier;
+
+// statuses/oembed
+- (id)oembedTweet:(NSString *)identifier maxWidth:(float)maxWidth alignmentMode:(FHSTwitterEngineAlignMode)alignmentMode;
+
+// statuses/show
+- (int)getDetailsForTweet:(NSString *)identifier;
+
+// statuses/destory
+- (int)destoryTweet:(NSString *)identifier;
+
+// statuses/update_with_media
+- (int)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
+- (int)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
 
 //
 // Login and Auth
@@ -283,5 +318,12 @@ typedef enum {
 
 // Logged in user's Twitter ID
 @property (nonatomic, strong) NSString *loggedInID;
+
+@property (nonatomic, strong) id<FHSTwitterEngineAccessTokenDelegate> delegate;
+
+// normally hidden
+@property (strong, nonatomic) OAToken *accessToken;
+
+@property (strong, nonatomic) OAConsumer *consumer;
 
 @end

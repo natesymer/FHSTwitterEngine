@@ -82,7 +82,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+<<<<<<< HEAD
     self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"<consumer key>" andSecret:@"<consumer secret>"];
+=======
+    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
+>>>>>>> Lots of new stuff
     [passwordField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
     [usernameField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
     [tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];

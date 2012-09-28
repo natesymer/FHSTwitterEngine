@@ -37,48 +37,60 @@ Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.
     
 -> Login via OAuth:
     
-    [self.engine showOAuthLoginControllerFromViewController:self];
+    [engine showOAuthLoginControllerFromViewController:self];
     
 -> Login via XAuth:
     
     dispatch_async(GCDBackgroundThread, ^{
-        int resturnCode = [self.engine getXAuthAccessTokenForUsername:usernameField.text password:passwordField.text];
+    	/* start autorelease pool */
+    	
+        int resturnCode = [engine getXAuthAccessTokenForUsername:usernameField.text password:passwordField.text];
         /* Handle returnCode */
         dispatch_sync(GCDMainThread, ^{
         	/* Update UI */
         });
+        
+        /* end autorelease pool */
     });
     
 -> Reload a saved access_token:
 
-    [self.engine loadAccessToken];
+    [engine loadAccessToken];
 
 -> End a session:
 
-    [self.engine clearAccessToken];
+    [engine clearAccessToken];
 
 -> Check if a session is valid:
 
-    [self.engine isAuthorized];
+    [engine isAuthorized];
     
 -> Do an API call (POST)\*:
 
     dispatch_async(GCDBackgroundThread, ^{
+    	/* start autorelease pool*/
+    	
     	int returnCode = [self.engine doYourBloodyPOSTAPICall];
     	/* Handle returnCode */
     	dispatch_sync(GCDMainThread, ^{
         	/* Update UI */
         });
+        
+        /* end autorelease pool */
     });
 
 -> Do an API call (GET)\*\*:
 
     dispatch_async(GCDBackgroundThread, ^{
+    	/* start autorelease pool */
+    	
     	id returnValue = [self.engine doYourBloodyAPICall];
     	/* Handle returnValue */
     	dispatch_sync(GCDMainThread, ^{
         	/* Update UI */
         });
+        
+        /* end autorelease pool */
     });
 
 
@@ -104,13 +116,18 @@ Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.
 
 **For the future**
 
-I envision more endpoints, API v1.1 compatibility, and async (with blocks) methods. Blocks kick delegates' bums anyday.
+I envision more endpoints, API v1.1 compatibility, and async (with blocks) methods. Blocks beat delegates anyday.
 
 **IMPORTANT**
 
 FHSTwitterEngine contains a heavily modified version of OAuthConsumer. I removed OADataFetcher and added block support to OAAsynchronousDataFetcher. I also fixed many memory leaks.
 
 <br />
+
+**Fixes for some common problems** (and best practices)
+
+- If you have the Dropbox SDK (DropboxSDK.framework) in your project, then you should delete the crypto folder in OAuthConsumer (it's included in the Dropbox SDK)
+- If you have any errors concerning multiple declarations for any class, check to make sure that any class is not importing another class which is importing the first class
 
 **Note to contributors**
 

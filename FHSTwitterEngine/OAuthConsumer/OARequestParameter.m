@@ -32,7 +32,7 @@
 
 + (id)requestParameterWithName:(NSString *)aName value:(NSString *)aValue 
 {
-	return [[[OARequestParameter alloc] initWithName:aName value:aValue] autorelease];
+	return [[[OARequestParameter alloc]initWithName:aName value:aValue] autorelease];
 }
 
 - (id)initWithName:(NSString *)aName value:(NSString *)aValue 

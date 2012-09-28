@@ -29,4 +29,5 @@
 
 
 @interface OAHMAC_SHA1SignatureProvider : NSObject <OASignatureProviding>
+
 @end

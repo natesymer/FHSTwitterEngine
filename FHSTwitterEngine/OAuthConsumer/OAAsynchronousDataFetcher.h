@@ -25,39 +25,25 @@
 #import <Foundation/Foundation.h>
 
 #import "OAMutableURLRequest.h"
+#import "OAServiceTicket.h"
 
 @interface OAAsynchronousDataFetcher : NSObject {
     OAMutableURLRequest *request;
     NSURLResponse *response;
     NSURLConnection *connection;
     NSMutableData *responseData;
-    id delegate;
-    SEL didFinishSelector;
-    SEL didFailSelector;	
+	void (^requestFinishedBlock)(OAServiceTicket *, NSData *, NSError *);
 }
-
-@property (copy) void (^requestSucceededBlock)(id, id);
-@property (copy) void (^requestFailedBlock)(id, id);
 
 @property (nonatomic, assign) NSURLResponse *response;
 @property (nonatomic, assign) OAMutableURLRequest *request;
 @property (nonatomic, assign) NSMutableData *responseData;
 @property (nonatomic, assign) NSURLConnection *connection;
 
-+ (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest delegate:(id)aDelegate didFinishSelector:(SEL)finishSelector didFailSelector:(SEL)failSelector;
-- (id)initWithRequest:(OAMutableURLRequest *)aRequest delegate:(id)aDelegate didFinishSelector:(SEL)finishSelector didFailSelector:(SEL)failSelector;
++ (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest;
+- (id)initWithRequest:(OAMutableURLRequest *)aRequest;
 
-+ (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest didFinishBlock:(void (^)(id ticket, id data))finishBlock didFailBlock:(void (^)(id ticket, id error))failBlock;
-- (id)initWithRequest:(OAMutableURLRequest *)aRequest didFinishBlock:(void (^)(id ticket, id data))finishBlock didFailBlock:(void (^)(id ticket, id error))failBlock;
-
-- (void)setDidFinishSelector:(SEL)aSelector;
-- (void)setDidFailSelector:(SEL)aSelector;
-- (void)setDidFailBlock:(void (^)(id ticket, id error))failBlock;
-- (void)setDidFinishBlock:(void (^)(id ticket, id data))finishBlock;
-- (id)delegate;
-- (void)setDelegate:(id)aDelegate;
-
-- (void)start;
+- (void)startWithBlock:(void (^)(OAServiceTicket *, NSData *, NSError *))block;
 - (void)cancel;
 
 @end

@@ -28,38 +28,20 @@
 
 @implementation OAAsynchronousDataFetcher
 
-@synthesize requestFailedBlock, requestSucceededBlock, response, request, responseData, connection;
+@synthesize response, request, responseData, connection;
 
 #pragma mark -
 #pragma mark Object creation methods
 
-+ (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest delegate:(id)aDelegate didFinishSelector:(SEL)finishSelector didFailSelector:(SEL)failSelector {
-	return [[[OAAsynchronousDataFetcher alloc] initWithRequest:aRequest delegate:aDelegate didFinishSelector:finishSelector didFailSelector:failSelector] autorelease];
++ (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest {
+    return [[[OAAsynchronousDataFetcher alloc]initWithRequest:aRequest]autorelease];
 }
 
-- (id)initWithRequest:(OAMutableURLRequest *)aRequest delegate:(id)aDelegate didFinishSelector:(SEL)finishSelector didFailSelector:(SEL)failSelector {
+- (id)initWithRequest:(OAMutableURLRequest *)aRequest {
     self = [super init];
 	if (self) {
-		request = [aRequest retain];
-		delegate = aDelegate;
-		didFinishSelector = finishSelector;
-		didFailSelector = failSelector;
-        responseData = [[NSMutableData alloc]init];
-	}
-	return self;
-}
-
-+ (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest didFinishBlock:(void (^)(id ticket, id data))finishBlock didFailBlock:(void (^)(id ticket, id error))failBlock {
-    return [[[OAAsynchronousDataFetcher alloc]initWithRequest:aRequest didFinishBlock:finishBlock didFailBlock:failBlock]autorelease];
-}
-
-- (id)initWithRequest:(OAMutableURLRequest *)aRequest didFinishBlock:(void (^)(id ticket, id data))finishBlock didFailBlock:(void (^)(id ticket, id error))failBlock {
-    self = [super init];
-	if (self) {
-		request = [aRequest retain];
-        self.requestSucceededBlock = finishBlock;
-        self.requestFailedBlock = failBlock;
-        responseData = [[NSMutableData alloc]init];
+		self.request = [aRequest retain];
+        self.responseData = [[NSMutableData alloc]init];
 	}
 	return self;
 }
@@ -67,7 +49,7 @@
 - (id)init {
     self = [super init];
     if (self) {
-        responseData = [[NSMutableData alloc]init];
+        self.responseData = [[NSMutableData alloc]init];
     }
     return self;
 }
@@ -76,71 +58,44 @@
     [self setRequest:nil];
     [self setConnection:nil];
     [self setResponse:nil];
-    [self setDidFailBlock:nil];
-    [self setDidFinishBlock:nil];
-    [self setDelegate:nil];
+    [self.responseData setLength:0];
 	[self setResponseData:nil];
 	[super dealloc];
 }
 
-
-#pragma mark -
-#pragma mark Miscellaneous Setters/getters
-
-- (void)setDidFinishSelector:(SEL)aSelector {
-    didFinishSelector = aSelector;
+- (void)callBlockWithTicket:(OAServiceTicket *)ticket data:(NSData *)data error:(NSError *)error {
+    requestFinishedBlock(ticket, data, error);
+    [self setRequest:nil];
+    [self setConnection:nil];
+    [self setResponse:nil];
+    [self.responseData setLength:0];
+    Block_release(requestFinishedBlock);
 }
-
-- (void)setDidFailSelector:(SEL)aSelector {
-    didFailSelector = aSelector;
-}
-
-- (void)setDidFailBlock:(void (^)(id ticket, id error))failBlock {
-    Block_release(self.requestFailedBlock);
-    self.requestFailedBlock = failBlock;
-}
-
-- (void)setDidFinishBlock:(void (^)(id ticket, id data))finishBlock {
-    Block_release(self.requestSucceededBlock);
-    self.requestSucceededBlock = finishBlock;
-}
-
-- (id)delegate {
-    return delegate;
-}
-
-- (void)setDelegate:(id)aDelegate {
-    delegate = aDelegate;
-}
-
 
 #pragma mark -
 #pragma mark Connection management methods
 
-- (void)start {
+- (void)startWithBlock:(void (^)(OAServiceTicket *, NSData *, NSError *))block {
     
-    [request prepare];
+    requestFinishedBlock = Block_copy(block);
+    
+    [self.request prepare];
 	
-    [self setConnection:[NSURLConnection connectionWithRequest:request delegate:self]];
+    [self setConnection:[NSURLConnection connectionWithRequest:self.request delegate:self]];
     
-	if (connection) {
-		[responseData setLength:0];
+	if (self.connection) {
+		[self.responseData setLength:0];
 	} else {
         OAServiceTicket *ticket = [[OAServiceTicket alloc]initWithRequest:request response:nil didSucceed:NO];
-        if (delegate) {
-            [delegate performSelector:didFailSelector withObject:ticket withObject:nil];
-        } else {
-            self.requestFailedBlock(ticket, nil);
-        }
-        
-		[ticket release];
+        [self callBlockWithTicket:ticket data:nil error:[NSError errorWithDomain:@"Connection could not be created." code:1 userInfo:nil]];
+        [ticket release];
 	}
 }
 
 - (void)cancel {
-    [connection cancel];
+    [self.connection cancel];
     [self setConnection:nil];
-    [responseData setLength:0];
+    [self.responseData setLength:0];
 }
 
 #pragma mark -
@@ -148,37 +103,23 @@
 
 - (void)connection:(NSURLConnection *)aConnection didReceiveResponse:(NSURLResponse *)aResponse {
     [self setResponse:aResponse];
-	[responseData setLength:0];
+	[self.responseData setLength:0];
 }
 
 - (void)connection:(NSURLConnection *)aConnection didReceiveData:(NSData *)data {
-	[responseData appendData:data];
+	[self.responseData appendData:data];
 }
 
 - (void)connection:(NSURLConnection *)aConnection didFailWithError:(NSError *)error {
 	OAServiceTicket *ticket = [[OAServiceTicket alloc]initWithRequest:request response:response didSucceed:NO];
-    
-    if (delegate) {
-        [delegate performSelector:didFailSelector withObject:ticket withObject:error];
-    } else {
-        self.requestFailedBlock(ticket, error);
-    }
-	
+    [self callBlockWithTicket:ticket data:nil error:error];
 	[ticket release];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)aConnection {
 	OAServiceTicket *ticket = [[OAServiceTicket alloc]initWithRequest:request response:response didSucceed:[(NSHTTPURLResponse *)response statusCode] < 400];
-    
-    if (delegate) {
-        [delegate performSelector:didFinishSelector withObject:ticket withObject:responseData];
-    } else {
-        self.requestSucceededBlock(ticket, responseData);
-    }
-	
+    [self callBlockWithTicket:ticket data:responseData error:nil];
 	[ticket release];
-    
-    [responseData setLength:0];
 }
 
 @end

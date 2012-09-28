@@ -35,5 +35,5 @@
 #import "OAPlaintextSignatureProvider.h"
 #import "OARequestParameter.h"
 #import "OAServiceTicket.h"
-#import "OADataFetcher.h"
 #import "OAAsynchronousDataFetcher.h"
+#import "NSMutableURLRequest+NSMutableURLRequest_sendSync.h"
