@@ -30,6 +30,8 @@ Why FHSTwitterEngine is better than MGTwitterEngine:
 
 Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.h"
 
+You will have to set OAuthConsumer and TouchJSON to use `-fno-objc-arc`.
+
 **Usage:**
 
 -> Create FHSTwitterEngine object:
@@ -68,7 +70,7 @@ Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.
 
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		int returnCode = [self.engine doYourBloodyPOSTAPICall];
+    		int returnCode = [engine twitterAPIMethod]; // POST
     		// Handle returnCode
     		dispatch_sync(GCDMainThread, ^{
         		// Update UI
@@ -80,7 +82,7 @@ Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.
 
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		id returnValue = [self.engine doYourBloodyAPICall];
+    		id returnValue = [engine twitterAPIMethod]; // GET
     		// Handle returnValue
     		dispatch_sync(GCDMainThread, ^{
         		// Update UI
@@ -117,7 +119,7 @@ They are macros for dispatch_async()/dispatch_sync().
 There are three keys:
 
 - FHSTwitterEngineBOOLKeyYES<br />
-- FHSTwitterEngineBOOLKeyNO<br />B
+- FHSTwitterEngineBOOLKeyNO<br />
 - FHSTwitterEngineBOOLKeyERROR<br />
 
 Check to see if the returned object is both an NSString and equal to one of these values.
@@ -126,7 +128,7 @@ Check to see if the returned object is both an NSString and equal to one of thes
 
 **For the future**
 
-Nothing for now... feel free to [email](mailto:fhsjaagshs@fhsjaagshs.com) me for suggestions
+Nothing for now... feel free to [email](mailto:fhsjaagshs@fhsjaagshs.com) me for suggestions.
 
 **IMPORTANT**
 

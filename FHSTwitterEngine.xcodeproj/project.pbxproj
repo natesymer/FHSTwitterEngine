@@ -23,11 +23,11 @@
 		9B2A1C3415E807D9007E66E0 /* OARequestParameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C2215E807D9007E66E0 /* OARequestParameter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C3515E807D9007E66E0 /* OAServiceTicket.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C2415E807D9007E66E0 /* OAServiceTicket.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C3615E807D9007E66E0 /* OAToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C2715E807D9007E66E0 /* OAToken.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		9B2A59E41628F053003B4E2E /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B2A59E31628F053003B4E2E /* Default-568h@2x.png */; };
 		9B31B96015E56E34003FC89D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B95F15E56E34003FC89D /* UIKit.framework */; };
 		9B31B96215E56E34003FC89D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96115E56E34003FC89D /* Foundation.framework */; };
 		9B31B96415E56E34003FC89D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96315E56E34003FC89D /* CoreGraphics.framework */; };
 		9B44287416152DDD000C9EE1 /* TouchJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B44287316152DDC000C9EE1 /* TouchJSON.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		9B5E0FD91628E88C00D0F81E /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B5E0FD81628E88C00D0F81E /* Default-568h@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -63,13 +63,13 @@
 		9B2A1C2615E807D9007E66E0 /* OAToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAToken.h; sourceTree = "<group>"; };
 		9B2A1C2715E807D9007E66E0 /* OAToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAToken.m; sourceTree = "<group>"; };
 		9B2A1C2815E807D9007E66E0 /* OAuthConsumer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthConsumer.h; sourceTree = "<group>"; };
+		9B2A59E31628F053003B4E2E /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		9B31B95B15E56E34003FC89D /* FHSTwitterEngine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FHSTwitterEngine.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B31B95F15E56E34003FC89D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		9B31B96115E56E34003FC89D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		9B31B96315E56E34003FC89D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		9B44287216152DDC000C9EE1 /* TouchJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TouchJSON.h; path = FHSTwitterEngine/TouchJSON.h; sourceTree = SOURCE_ROOT; };
 		9B44287316152DDC000C9EE1 /* TouchJSON.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TouchJSON.m; path = FHSTwitterEngine/TouchJSON.m; sourceTree = SOURCE_ROOT; };
-		9B5E0FD81628E88C00D0F81E /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Default-568h@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,7 +103,7 @@
 		9B2A1BD815E80601007E66E0 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				9B5E0FD81628E88C00D0F81E /* Default-568h@2x.png */,
+				9B2A59E31628F053003B4E2E /* Default-568h@2x.png */,
 				9B2A1B9A15E805D1007E66E0 /* InfoPlist.strings */,
 				9B2A1B9E15E805D1007E66E0 /* FHSTwitterEngine-Info.plist */,
 				9B2A1B9F15E805D1007E66E0 /* FHSTwitterEngine-Prefix.pch */,
@@ -257,7 +257,7 @@
 			files = (
 				9B2A1BC515E805D1007E66E0 /* InfoPlist.strings in Resources */,
 				9B2A1BC615E805D1007E66E0 /* ViewController.xib in Resources */,
-				9B5E0FD91628E88C00D0F81E /* Default-568h@2x.png in Resources */,
+				9B2A59E41628F053003B4E2E /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
