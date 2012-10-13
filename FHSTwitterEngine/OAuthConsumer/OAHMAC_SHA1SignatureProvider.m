@@ -41,7 +41,7 @@
     unsigned char result[20];
 	CCHmac(kCCHmacAlgSHA1, [secretData bytes], [secretData length], [clearTextData bytes], [clearTextData length], result);
     
-    //Base64 Encoding
+    // Base64 Encoding
     
     char base64Result[32];
     size_t theResultLength = 32;

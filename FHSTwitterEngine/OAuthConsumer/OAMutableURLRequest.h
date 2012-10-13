@@ -28,8 +28,6 @@
 #import "OAConsumer.h"
 #import "OAToken.h"
 #import "OAHMAC_SHA1SignatureProvider.h"
-#import "OASignatureProviding.h"
-#import "NSMutableURLRequest+Parameters.h"
 #import "NSURL+Base.h"
 
 
@@ -48,22 +46,17 @@
 @property (nonatomic, assign) NSString *nonce;
 @property (nonatomic, assign) NSString *timestamp;
 
-- (id)initWithURL:(NSURL *)aUrl
-		 consumer:(OAConsumer *)aConsumer
-			token:(OAToken *)aToken
-            realm:(NSString *)aRealm
-signatureProvider:(id<OASignatureProviding, NSObject>)aProvider;
+- (id)initWithURL:(NSURL *)aUrl consumer:(OAConsumer *)aConsumer token:(OAToken *)aToken realm:(NSString *)aRealm signatureProvider:(id<OASignatureProviding, NSObject>)aProvider;
 
-- (id)initWithURL:(NSURL *)aUrl
-		 consumer:(OAConsumer *)aConsumer
-			token:(OAToken *)aToken
-            realm:(NSString *)aRealm
-signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
-            nonce:(NSString *)aNonce
-        timestamp:(NSString *)aTimestamp;
+- (id)initWithURL:(NSURL *)aUrl consumer:(OAConsumer *)aConsumer token:(OAToken *)aToken realm:(NSString *)aRealm signatureProvider:(id<OASignatureProviding, NSObject>)aProvider nonce:(NSString *)aNonce timestamp:(NSString *)aTimestamp;
 
 - (void)prepare;
 
 - (void)setOAuthParameterName:(NSString*)parameterName withValue:(NSString*)parameterValue;
+
+- (NSArray *)parameters;
+- (void)setParameters:(NSArray *)parameters;
+
+- (NSData *)sendSynchronousConnection;
 
 @end

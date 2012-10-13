@@ -2,7 +2,7 @@
 //  OAAsynchronousDataFetcher.h
 //  OAuthConsumer
 //
-//  Created by Zsombor Szabó on 12/3/08.
+//  Created by Nathaniel Symer on 9/28/12.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal

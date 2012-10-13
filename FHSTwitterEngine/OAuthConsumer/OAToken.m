@@ -26,7 +26,6 @@
 
 #import "OAToken.h"
 
-
 @implementation OAToken
 
 @synthesize key, secret, verifier, pin;

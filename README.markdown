@@ -18,9 +18,10 @@ Why FHSTwitterEngine is better than MGTwitterEngine:
 
 - Lack of annoying delegates
 - Does not send you to Dependency Hell over a JSON parser
+- Less setup
 - Synchronous allowing for easier implementation (See usage)
 - More implemented API endpoints
-- Uses a better version of OAuthConsumer (mine)
+- Uses a fixed version of OAuthConsumer (mine)
 - **Less crufty**
 
 
@@ -42,15 +43,13 @@ Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.
 -> Login via XAuth:
     
     dispatch_async(GCDBackgroundThread, ^{
-    	/* start autorelease pool */
-    	
-        int resturnCode = [engine getXAuthAccessTokenForUsername:usernameField.text password:passwordField.text];
-        /* Handle returnCode */
-        dispatch_sync(GCDMainThread, ^{
-        	/* Update UI */
-        });
-        
-        /* end autorelease pool */
+    	@autoreleasepool {
+    		int resturnCode = [engine getXAuthAccessTokenForUsername:usernameField.text password:passwordField.text];
+        	// Handle returnCode 
+        	dispatch_sync(GCDMainThread, ^{
+        		// Update UI
+       		});
+    	}
     });
     
 -> Reload a saved access_token:
@@ -68,34 +67,34 @@ Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.
 -> Do an API call (POST)\*:
 
     dispatch_async(GCDBackgroundThread, ^{
-    	/* start autorelease pool*/
-    	
-    	int returnCode = [self.engine doYourBloodyPOSTAPICall];
-    	/* Handle returnCode */
-    	dispatch_sync(GCDMainThread, ^{
-        	/* Update UI */
-        });
-        
-        /* end autorelease pool */
+    	@autoreleasepool {
+    		int returnCode = [self.engine doYourBloodyPOSTAPICall];
+    		// Handle returnCode
+    		dispatch_sync(GCDMainThread, ^{
+        		// Update UI
+       		});
+    	}
     });
 
 -> Do an API call (GET)\*\*:
 
     dispatch_async(GCDBackgroundThread, ^{
-    	/* start autorelease pool */
-    	
-    	id returnValue = [self.engine doYourBloodyAPICall];
-    	/* Handle returnValue */
-    	dispatch_sync(GCDMainThread, ^{
-        	/* Update UI */
-        });
-        
-        /* end autorelease pool */
+    	@autoreleasepool {
+    		id returnValue = [self.engine doYourBloodyAPICall];
+    		// Handle returnValue
+    		dispatch_sync(GCDMainThread, ^{
+        		// Update UI
+       		});
+    	}
     });
 
 
-- POST methods will return int.<br />
-- GET methods will return id. This can be either an NSDictionary, NSArray, NSString or nil.
+- POST methods return int. These are called *return codes*. See below for more.
+- GET methods return id. This can be either an NSDictionary, NSArray, NSString, UIImage or nil. See below for errors
+
+So what are those `GCDBackgroundThread` and `GCDMainThread`?<br />
+They are macros for dispatch_async()/dispatch_sync(). 
+
 
 <br />
 **About Return Codes**<br />
@@ -106,33 +105,44 @@ Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.
 2 - Insufficient input (missing a parameter, your fault)<br />
 3 - Image too large (bigger than 700KB. Again, your fault)<br />
 4 - User unauthorized <br />
-304 to 504 - HTTP/Twitter response code. Look these up [here](https://dev.twitter.com/docs/error-codes-responses). (My favorite is Error 420 - Enhance Your Calm)
+304 to 504 - HTTP/Twitter response code. Check them out [here](https://dev.twitter.com/docs/error-codes-responses). (My favorite is Error 420 - Enhance Your Calm)
 
 (You can look them up using the lookupErrorCode: method)
 
 *Return codes 2 & 3 are your fault*
 
-<br />
+
+**About GET request return codes**
+
+There are three keys:
+
+- FHSTwitterEngineBOOLKeyYES<br />
+- FHSTwitterEngineBOOLKeyNO<br />B
+- FHSTwitterEngineBOOLKeyERROR<br />
+
+Check to see if the returned object is both an NSString and equal to one of these values.
+
+
 
 **For the future**
 
-I envision more endpoints, API v1.1 compatibility, and async (with blocks) methods. Blocks beat delegates anyday.
+Nothing for now... feel free to [email](mailto:fhsjaagshs@fhsjaagshs.com) me for suggestions
 
 **IMPORTANT**
 
-FHSTwitterEngine contains a heavily modified version of OAuthConsumer. I removed OADataFetcher and added block support to OAAsynchronousDataFetcher. I also fixed many memory leaks.
+Some of the libraries included are (heavily) modified:
 
-<br />
+- OAuthConsumer - Removed OADataFetcher and added block support to OAAsynchronousDataFetcher. Fixed memory leaks.
+- TouchJSON - Fixed some BOOL comparison of NSData.
+
+You should use the included versions instead of other version of the libraries because the included versions are *considerably* better.
+
+
 
 **Fixes for some common problems** (and best practices)
 
 - If you have the Dropbox SDK (DropboxSDK.framework) in your project, then you should delete the crypto folder in OAuthConsumer (it's included in the Dropbox SDK)
 - If you have any errors concerning multiple declarations for any class, check to make sure that any class is not importing another class which is importing the first class
 
-**Note to contributors**
-
-If you could help me implement the rest of the endpoints, I would really appreciate it. 
-
-There is an excellent JSON parser *INCLUDED* in the iOS SDK called NSJSONSerialization. Please use it for the sake of my (our) users.
 
 
