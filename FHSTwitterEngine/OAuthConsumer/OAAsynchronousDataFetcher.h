@@ -29,21 +29,14 @@
 
 @interface OAAsynchronousDataFetcher : NSObject {
     OAMutableURLRequest *request;
-    NSURLResponse *response;
-    NSURLConnection *connection;
-    NSMutableData *responseData;
-	void (^requestFinishedBlock)(OAServiceTicket *, NSData *, NSError *);
 }
 
-@property (nonatomic, assign) NSURLResponse *response;
 @property (nonatomic, assign) OAMutableURLRequest *request;
-@property (nonatomic, assign) NSMutableData *responseData;
-@property (nonatomic, assign) NSURLConnection *connection;
 
 + (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest;
 - (id)initWithRequest:(OAMutableURLRequest *)aRequest;
 
 - (void)startWithBlock:(void (^)(OAServiceTicket *, NSData *, NSError *))block;
-- (void)cancel;
+//- (void)cancel;
 
 @end

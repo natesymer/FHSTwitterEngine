@@ -101,23 +101,23 @@ const u_int8_t kBits_11000000 = 0xC0;
 const u_int8_t kBits_11110000 = 0xF0;
 const u_int8_t kBits_11111100 = 0xFC;
 
-size_t EstimateBas64EncodedDataSize(size_t inDataSize)
+size_t EstimateBas64EncodedDataSizeFHS(size_t inDataSize)
 {
 size_t theEncodedDataSize = (int)ceil(inDataSize / 3.0) * 4;
 theEncodedDataSize = theEncodedDataSize / 72 * 74 + theEncodedDataSize % 72;
 return(theEncodedDataSize);
 }
 
-size_t EstimateBas64DecodedDataSize(size_t inDataSize)
+size_t EstimateBas64DecodedDataSizeFHS(size_t inDataSize)
 {
 size_t theDecodedDataSize = (int)ceil(inDataSize / 4.0) * 3;
 //theDecodedDataSize = theDecodedDataSize / 72 * 74 + theDecodedDataSize % 72;
 return(theDecodedDataSize);
 }
 
-bool Base64EncodeData(const void *inInputData, size_t inInputDataSize, char *outOutputData, size_t *ioOutputDataSize)
+bool Base64EncodeDataFHS(const void *inInputData, size_t inInputDataSize, char *outOutputData, size_t *ioOutputDataSize)
 {
-size_t theEncodedDataSize = EstimateBas64EncodedDataSize(inInputDataSize);
+size_t theEncodedDataSize = EstimateBas64EncodedDataSizeFHS(inInputDataSize);
 if (*ioOutputDataSize < theEncodedDataSize)
 	return(false);
 *ioOutputDataSize = theEncodedDataSize;
@@ -167,7 +167,7 @@ bool Base64DecodeData(const void *inInputData, size_t inInputDataSize, void *ioO
 {
 memset(ioOutputData, '.', *ioOutputDataSize);
 
-size_t theDecodedDataSize = EstimateBas64DecodedDataSize(inInputDataSize);
+size_t theDecodedDataSize = EstimateBas64DecodedDataSizeFHS(inInputDataSize);
 if (*ioOutputDataSize < theDecodedDataSize)
 	return(false);
 *ioOutputDataSize = 0;

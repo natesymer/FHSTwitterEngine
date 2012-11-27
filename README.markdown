@@ -4,7 +4,7 @@ FHSTwitterEngine
 
 ***The synchronous Twitter engine that doesn't suck!!***
 
-Created by Nathaniel Symer, aka [fhsjaagshs](mailto:fhsjaagshs@fhsjaagshs.com)
+Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [fhsjaagshs](http://twitter.com/fhsjaagshs)
 
 
 FHSTwitterEngine can:
@@ -30,7 +30,9 @@ Why FHSTwitterEngine is better than MGTwitterEngine:
 
 Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.h"
 
-You will have to set OAuthConsumer and TouchJSON to use `-fno-objc-arc`.
+You will have to set OAuthConsumer and TouchJSON to use `-fno-objc-arc` if you are using ARC.
+
+You also need to link against SystemConfiguration.framework
 
 **Usage:**
 
@@ -49,7 +51,9 @@ You will have to set OAuthConsumer and TouchJSON to use `-fno-objc-arc`.
     		int resturnCode = [engine getXAuthAccessTokenForUsername:usernameField.text password:passwordField.text];
         	// Handle returnCode 
         	dispatch_sync(GCDMainThread, ^{
-        		// Update UI
+    			@autoreleasepool {
+        			// Update UI
+        		}
        		});
     	}
     });
@@ -73,7 +77,9 @@ You will have to set OAuthConsumer and TouchJSON to use `-fno-objc-arc`.
     		int returnCode = [engine twitterAPIMethod]; // POST
     		// Handle returnCode
     		dispatch_sync(GCDMainThread, ^{
-        		// Update UI
+    			@autoreleasepool {
+        			// Update UI
+        		}
        		});
     	}
     });
@@ -85,14 +91,16 @@ You will have to set OAuthConsumer and TouchJSON to use `-fno-objc-arc`.
     		id returnValue = [engine twitterAPIMethod]; // GET
     		// Handle returnValue
     		dispatch_sync(GCDMainThread, ^{
-        		// Update UI
+    			@autoreleasepool {
+        			// Update UI
+        		}
        		});
     	}
     });
 
 
-- POST methods return int. These are called *return codes*. See below for more.
-- GET methods return id. This can be either an NSDictionary, NSArray, NSString, UIImage or nil. See below for errors
+\* POST methods return int. These are called *return codes*. See below for more.<br />
+\*\* GET methods return id. This can be either an NSDictionary, NSArray, NSString, UIImage or nil. See below for errors
 
 So what are those `GCDBackgroundThread` and `GCDMainThread`?<br />
 They are macros for dispatch_async()/dispatch_sync(). 
@@ -128,14 +136,14 @@ Check to see if the returned object is both an NSString and equal to one of thes
 
 **For the future**
 
-Nothing for now... feel free to [email](mailto:fhsjaagshs@fhsjaagshs.com) me for suggestions.
+Nothing for now... feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 
 **IMPORTANT**
 
 Some of the libraries included are (heavily) modified:
 
-- OAuthConsumer - Removed OADataFetcher and added block support to OAAsynchronousDataFetcher. Fixed memory leaks.
-- TouchJSON - Fixed some BOOL comparison of NSData.
+- OAuthConsumer - Removed OADataFetcher and rewrote OAAsynchronousDataFetcher to use blocks. Condensed classes and fixed memory leaks.
+- TouchJSON - Fixed some boolean comparison of NSData and condense to one header/implementation pair.
 
 You should use the included versions instead of other version of the libraries because the included versions are *considerably* better.
 
@@ -143,8 +151,7 @@ You should use the included versions instead of other version of the libraries b
 
 **Fixes for some common problems** (and best practices)
 
-- If you have the Dropbox SDK (DropboxSDK.framework) in your project, then you should delete the crypto folder in OAuthConsumer (it's included in the Dropbox SDK)
-- If you have any errors concerning multiple declarations for any class, check to make sure that any class is not importing another class which is importing the first class
+- If you have any errors concerning multiple declarations for any class, check to make sure that any class is not importing another class which is importing the first class (AKA `#import` loop)
 
 
 

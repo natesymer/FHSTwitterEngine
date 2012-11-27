@@ -3,6 +3,7 @@
 //  FHSTwitterEngine
 //
 //  Created by Nathaniel Symer on 8/22/12.
+//  Copyright (C) 2012 Nathaniel Symer.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +23,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-// For y'all who don't wanna read the above, you can do whatever you want with this code
-
 #import "FHSTwitterEngine.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -34,6 +33,12 @@
 #import "OAAsynchronousDataFetcher.h"
 #import "OAToken.h"
 #import "TouchJSON.h"
+
+#import <sys/socket.h>
+#import <netinet/in.h>
+#import <ifaddrs.h>
+
+#import <SystemConfiguration/SystemConfiguration.h>
 
 @interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate> {
     UINavigationBar *navBar;
@@ -71,9 +76,11 @@
 @end
 
 @interface NSData (Base64)
+
 + (NSData *)dataWithBase64EncodedString:(NSString *)string;
 - (id)initWithBase64EncodedString:(NSString *)string;
 - (NSString *)base64EncodingWithLineLength:(unsigned int)lineLength;
+
 @end
 
 @interface NSString (FHSTwitterEngine)
@@ -106,76 +113,51 @@
 /*
  TODO:
  - Implement the listed enpoints
- - Return error strings for GET requests
-*/
-
-/* 
- // API Endpoints to Implement
-
- - GET lists/memberships
- - GET lists/subscribers
- - POST lists/subscribers/create
- - GET lists/subscribers/show
- - POST lists/subscribers/destroy
- - POST lists/members/create_all
- - GET lists/members/show
- - GET lists/members
- - POST lists/members/create
- - POST lists/destroy
- - POST lists/update
- - POST lists/create
- - GET lists/show
- - GET lists/subscriptions
- - POST lists/members/destroy_all
+ - Return NSErrors for GET requests
+ - Add more params to all of the methods
  */
 
-// 15 more to implement
+/*
+ // API Endpoints to Implement
+ 
+ // 7 more to implement
+ - GET lists
+ - GET lists/statuses
+ - POST lists/members/create_all
+ - POST lists/members/destroy_all
+ - GET lists/memberships
+ - GET lists/members
+ - POST lists/update
+*/
 
-- (int)removeUser:(NSString *)user isID:(BOOL)isID fromListWithID:(NSString *)listID {
+
+- (id)getRetweetsForTweet:(NSString *)identifier count:(int)count {
+    NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/statuses/retweets/%@.json",identifier]];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    OARequestParameter *identifierP = [[OARequestParameter alloc]initWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:identifierP, nil]];
+}
+
+- (id)getRetweetedTimelineWithCount:(int)count {
+    return [self getRetweetedTimelineWithCount:count sinceID:nil maxID:nil];
+}
+
+- (id)getRetweetedTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
     
-    if (user.length == 0) {
-        return FHSTwitterEngineReturnCodeAPIError;
-    }
-    
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/members/destroy.json"];
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/retweets_of_me.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     NSMutableArray *params = [[NSMutableArray alloc]init];
-
-    OARequestParameter *userP = [[OARequestParameter alloc]initWithName:@"screen_name" value:user];
-    OARequestParameter *listIDP = [[OARequestParameter alloc]initWithName:@"list_id" value:listID];
-    
-    if (isID) {
-        userP.name = @"user_id";
-    }
-    
-    [params addObject:userP];
-    [params addObject:listIDP];
-    
-    return [self sendPOSTRequest:request withParameters:params];
-}
-
-- (id)getTimelineForUsersInListWithID:(NSString *)listID count:(int)count {
-    return [self getTimelineForUsersInListWithID:listID count:count sinceID:nil maxID:nil];
-}
-
-- (id)getTimelineForUsersInListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/statuses.json"];
-    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
-    OARequestParameter *list_idP = [[OARequestParameter alloc]initWithName:@"list_id" value:listID];
     
     OARequestParameter *countP = [[OARequestParameter alloc]initWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
+    
     OARequestParameter *excludeRepliesP = [[OARequestParameter alloc]initWithName:@"exclude_replies" value:@"false"];
     OARequestParameter *includeRTsP = [[OARequestParameter alloc]initWithName:@"include_rts" value:@"true"];
-    
-    
-    NSMutableArray *params = [[NSMutableArray alloc]init];
     
     [params addObject:countP];
     [params addObject:excludeRepliesP];
     [params addObject:includeRTsP];
-    [params addObject:list_idP];
-
+    
     if (sinceID.length > 0 || sinceID != nil) {
         OARequestParameter *sinceIDP = [[OARequestParameter alloc]initWithName:@"since_id" value:sinceID];
         [params addObject:sinceIDP];
@@ -187,46 +169,27 @@
     }
     
     return [self sendGETRequest:request withParameters:params];
-
 }
 
-- (id)getSubscribedToListsForUser:(NSString *)user isID:(BOOL)isID {
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/list.json"];
-    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
-    OARequestParameter *userP = [[OARequestParameter alloc]initWithName:isID?@"user_id":@"screen_name" value:user];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:userP,nil]];
+- (id)getMentionsTimelineWithCount:(int)count {
+    return [self getMentionsTimelineWithCount:count sinceID:nil maxID:nil];
 }
 
-- (id)getMentionedTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count {
-    return [self getMentionedTimelineForUser:user isID:isID count:count sinceID:nil maxID:nil];
-}
+- (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
 
-- (id)getMentionedTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
-    
-    if (user.length == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
-    }
-    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/mentions_timeline.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     NSMutableArray *params = [[NSMutableArray alloc]init];
     
     OARequestParameter *countP = [[OARequestParameter alloc]initWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
-    OARequestParameter *userP = [[OARequestParameter alloc]initWithName:@"screen_name" value:user];
+
     OARequestParameter *excludeRepliesP = [[OARequestParameter alloc]initWithName:@"exclude_replies" value:@"false"];
     OARequestParameter *includeRTsP = [[OARequestParameter alloc]initWithName:@"include_rts" value:@"true"];
-    OARequestParameter *contributor_detailsP = [[OARequestParameter alloc]initWithName:@"contributor_details" value:@"true"];
-    
-    if (isID) {
-        userP.name = @"user_id";
-    }
-    
+
     [params addObject:countP];
-    [params addObject:userP];
     [params addObject:excludeRepliesP];
     [params addObject:includeRTsP];
-    [params addObject:contributor_detailsP];
     
     if (sinceID.length > 0 || sinceID != nil) {
         OARequestParameter *sinceIDP = [[OARequestParameter alloc]initWithName:@"since_id" value:sinceID];
@@ -240,7 +203,6 @@
     
     return [self sendGETRequest:request withParameters:params];
 }
-
 
 - (int)postTweet:(NSString *)tweetString withImageData:(NSData *)theData {
     return [self postTweet:tweetString withImageData:theData inReplyTo:@""];
@@ -266,17 +228,18 @@
 }
 
 - (int)destoryTweet:(NSString *)identifier {
-    NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/statuses/destroy/%@.json",identifier]];
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/destroy.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
-    return [self sendPOSTRequest:request withParameters:nil];
+    OARequestParameter *identifierP = [[OARequestParameter alloc]initWithName:@"id" value:identifier];
+    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:identifierP, nil]];
 }
 
-- (int)getDetailsForTweet:(NSString *)identifier {
+- (id)getDetailsForTweet:(NSString *)identifier {
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/show.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     OARequestParameter *identifierP = [[OARequestParameter alloc]initWithName:@"id" value:identifier];
     OARequestParameter *includeMyRetweet = [[OARequestParameter alloc]initWithName:@"include_my_retweet" value:@"true"];
-    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:identifierP, includeMyRetweet, nil]];
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:includeMyRetweet, identifierP, nil]];
 }
 
 - (id)oembedTweet:(NSString *)identifier maxWidth:(float)maxWidth alignmentMode:(FHSTwitterEngineAlignMode)alignmentMode {
@@ -302,13 +265,8 @@
 }
 
 - (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count {
-    return [self getTimelineForUser:user isID:isID count:count sinceID:nil maxID:nil];
-}
-
-- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
-    
     if (user.length == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/user_timeline.json"];
@@ -318,6 +276,34 @@
     
     OARequestParameter *countP = [[OARequestParameter alloc]initWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
     
+    OARequestParameter *userP = [[OARequestParameter alloc]initWithName:@"screen_name" value:user];
+    OARequestParameter *excludeRepliesP = [[OARequestParameter alloc]initWithName:@"exclude_replies" value:@"false"];
+    OARequestParameter *includeRTsP = [[OARequestParameter alloc]initWithName:@"include_rts" value:@"true"];
+    
+    if (isID) {
+        userP.name = @"user_id";
+    }
+    
+    [params addObject:countP];
+    [params addObject:userP];
+    [params addObject:excludeRepliesP];
+    [params addObject:includeRTsP];
+    
+    return [self sendGETRequest:request withParameters:params];
+}
+
+- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
+    
+    if (user.length == 0) {
+        return nil;
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/user_timeline.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    NSMutableArray *params = [[NSMutableArray alloc]init];
+    
+    OARequestParameter *countP = [[OARequestParameter alloc]initWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
     
     OARequestParameter *userP = [[OARequestParameter alloc]initWithName:@"screen_name" value:user];
     OARequestParameter *excludeRepliesP = [[OARequestParameter alloc]initWithName:@"exclude_replies" value:@"false"];
@@ -360,50 +346,59 @@
 - (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size {
     
     if (username.length == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/users/profile_image"];
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/users/show.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     OARequestParameter *usernameP = [[OARequestParameter alloc]initWithName:@"screen_name" value:username];
     
-    NSArray *sizes = [NSArray arrayWithObjects:@"mini", @"normal", @"bigger", @"original", nil];
-
-    OARequestParameter *sizeP = [[OARequestParameter alloc]initWithName:@"size" value:[sizes objectAtIndex:size]];
+    NSArray *params = [NSArray arrayWithObjects:usernameP, nil];
     
-    NSArray *params = [NSArray arrayWithObjects:usernameP, sizeP, nil];
+    id userShowReturn = [self sendGETRequest:request withParameters:params];
     
-    if (![self isAuthorized]) {
-        return FHSTwitterEngineBOOLKeyERROR;
+    if ([userShowReturn isKindOfClass:[NSDictionary class]]) {
+        if ([userShowReturn objectForKey:@"error"]) {
+            return nil;
+        } else {
+            
+            NSString *finalURL = nil;
+            NSString *rawProfileURL = [userShowReturn objectForKey:@"profile_image_url"];
+            
+            if (size == 0) { // mini
+                NSString *ext = [rawProfileURL pathExtension];
+                finalURL = [[[[rawProfileURL stringByDeletingPathExtension]stringByReplacingOccurrencesOfString:@"_normal" withString:@""] stringByAppendingString:@"_mini."]stringByAppendingString:ext];
+            } else if (size == 1) { // normal
+                finalURL = rawProfileURL;
+            } else if (size == 2) { // bigger
+                NSString *ext = [rawProfileURL pathExtension];
+                finalURL = [[[[rawProfileURL stringByDeletingPathExtension]stringByReplacingOccurrencesOfString:@"_normal" withString:@""] stringByAppendingString:@"_bigger."]stringByAppendingString:ext];
+            } else if (size == 3) { // original
+                finalURL = [[rawProfileURL stringByDeletingPathExtension]stringByReplacingOccurrencesOfString:@"_normal" withString:@""];
+            }
+            NSLog(@"finalURL: %@",finalURL);
+            
+            NSURLRequest *imageRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:finalURL]];
+            
+            NSHTTPURLResponse *response = nil;
+            NSError *error = nil;
+            
+            NSData *imageData = [NSURLConnection sendSynchronousRequest:imageRequest returningResponse:&response error:&error];
+            
+            if (response == nil || error != nil) {
+                return nil;
+            }
+            
+            if (([response statusCode] >= 304)) {
+                return nil;
+            }
+            
+            return [UIImage imageWithData:imageData];
+            
+        }
     }
     
-    [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
-    [request setTimeoutInterval:25];
-    
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-    
-    [request setHTTPMethod:@"GET"];
-    [request setParameters:params];
-    [request prepare];
-    
-    NSError *error = nil;
-    NSHTTPURLResponse *response = nil;
-    
-    NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-    
-    if (response == nil || responseData == nil || error != nil) {
-        return FHSTwitterEngineBOOLKeyERROR;
-    }
-    
-    if (([response statusCode] >= 304)) {
-        return FHSTwitterEngineBOOLKeyERROR;
-    }
-    
-    UIImage *image = [UIImage imageWithData:responseData];
-    
-    return image;
+    return nil;
 }
 
 - (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID {
@@ -494,7 +489,7 @@
 - (id)showDirectMessage:(NSString *)messageID {
     
     if (messageID.length == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/direct_messages/show/%@.json",messageID]];
@@ -533,7 +528,7 @@
 - (id)getSentDirectMessages:(int)count {
     
     if (count == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/direct_messages/sent.json"];
@@ -557,7 +552,7 @@
 - (id)getDirectMessages:(int)count {
     
     if (count == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/direct_messages.json"];
@@ -571,7 +566,7 @@
 - (id)getPrivacyPolicy {
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/legal/privacy.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
-
+    
     id object = [self sendGETRequest:request withParameters:nil];
     
     if ([object isKindOfClass:[NSDictionary class]]) {
@@ -639,7 +634,7 @@
     } else {
         deviceP.value = @"false";
     }
-
+    
     return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:userP, retweetsP, deviceP, nil]];
 }
 
@@ -749,11 +744,11 @@
 - (id)user:(NSString *)user followsUser:(NSString *)userTwo areUsernames:(BOOL)areUsernames {
     
     if (user.length == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     if (userTwo.length == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/friendships/exists.json"]; // fix this
@@ -778,7 +773,7 @@
     int length = queryString.length;
     
     if ((length == 0) || (length > 1000)) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://search.twitter.com/search.json"];
@@ -798,13 +793,13 @@
 }
 
 - (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count {
-
+    
     if (count == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     if (user.length == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/favorites.json"];
@@ -827,22 +822,23 @@
         return FHSTwitterEngineReturnCodeInsufficientInput;
     }
     
-    NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/favorites/%@/%@.json",flag?@"create":@"destroy",tweetID]];
+    NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/favorites/%@.json",flag?@"create":@"destroy"]];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    OARequestParameter *idP = [[OARequestParameter alloc]initWithName:@"id" value:tweetID];
     
-    return [self sendPOSTRequest:request withParameters:nil];
+    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:idP, nil]];
 }
 
 - (id)getRateLimitStatus {
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/account/rate_limit_status.json"];
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/application/rate_limit_status.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     return [self sendGETRequest:request withParameters:nil];
 }
 
 - (int)updateProfileColorsWithDictionary:(NSDictionary *)dictionary {
-
+    
     // profile_background_color - hex color
     // profile_link_color - hex color
     // profile_sidebar_border_color - hex color
@@ -872,7 +868,7 @@
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/account/update_profile_colors.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
-
+    
     NSMutableArray *params = [[NSMutableArray alloc]init];
     
     OARequestParameter *profile_background_colorP = [[OARequestParameter alloc]initWithName:@"profile_background_color" value:profile_background_color];
@@ -903,27 +899,27 @@
     
     OARequestParameter *skipStatus = [[OARequestParameter alloc]initWithName:@"skip_status" value:@"true"];
     [params addObject:skipStatus];
-
+    
     return [self sendPOSTRequest:request withParameters:params];
 }
 
-- (int)setUseProfileImage:(BOOL)shouldUseProfileImage {
+- (int)setUseProfileBackgroundImage:(BOOL)shouldUseProfileBackgroundImage {
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/account/update_profile_background_image.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     NSMutableArray *params = [[NSMutableArray alloc]init];
     
     OARequestParameter *skipStatus = [[OARequestParameter alloc]initWithName:@"skip_status" value:@"true"];
-    OARequestParameter *useImage = [[OARequestParameter alloc]initWithName:@"profile_use_background_image" value:shouldUseProfileImage?@"true":@"false"];
+    OARequestParameter *useImage = [[OARequestParameter alloc]initWithName:@"profile_use_background_image" value:shouldUseProfileBackgroundImage?@"true":@"false"];
     
     [params addObject:skipStatus];
     [params addObject:useImage];
-
+    
     return [self sendPOSTRequest:request withParameters:params];
 }
 
 - (int)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)flag {
-
+    
     if (file.length == 0) {
         return FHSTwitterEngineReturnCodeInsufficientInput;
     }
@@ -974,7 +970,7 @@
 }
 
 - (NSDictionary *)getTotals {
-
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/account/totals.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -982,7 +978,7 @@
 }
 
 - (NSDictionary *)getUserSettings {
-
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/account/settings.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -1041,11 +1037,12 @@
 }
 
 - (int)updateSettingsWithDictionary:(NSDictionary *)settings {
-
+    
     if (!settings) {
         return FHSTwitterEngineReturnCodeInsufficientInput;
     }
     
+    // Dictionary with keys:
     // All strings... You could have guessed that.
     // sleep_time_enabled - true/false
     // start_sleep_time - UTC time
@@ -1152,11 +1149,11 @@
 - (id)getUserInformationForUsers:(NSArray *)users areUsers:(BOOL)flag {
     
     if (users.count == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     if (users.count > 99) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil; // change to error message later
     }
     
     NSString *userString = nil;
@@ -1241,7 +1238,7 @@
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count {
     
     if (count == 0) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/home_timeline.json"];
@@ -1264,10 +1261,6 @@
 }
 
 - (NSArray *)generateRequestURLSForIDs:(NSArray *)idsArray {
-    
-    if (idsArray.count) {
-        return nil;
-    }
     
     int count = idsArray.count;
     
@@ -1388,7 +1381,7 @@
 }
 
 - (NSArray *)getFriends {
-
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/friends/ids.json"];
     
     OARequestParameter *param = [[OARequestParameter alloc]initWithName:@"screen_name" value:self.loggedInUsername];
@@ -1397,7 +1390,7 @@
     
     
     id returnedValue = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:param, nil]];
-
+    
     NSMutableArray *identifiersFromRequest = nil;
     
     if ([returnedValue isKindOfClass:[NSDictionary class]]) {
@@ -1406,7 +1399,7 @@
             identifiersFromRequest = [NSMutableArray arrayWithArray:(NSArray *)idsRAW];
         }
     }
-
+    
     if (identifiersFromRequest.count == 0) {
         return nil;
     }
@@ -1453,7 +1446,7 @@
     // somehow, inReplyToString becomes an __NSCFNumber
     
     if (tweetString.length == 0) {
-        return FHSTwitterEngineReturnCodeInsufficientInput;
+        return 2;
     }
     
     tweetString = [tweetString trimForTwitter];
@@ -1472,7 +1465,7 @@
     if (inReplyToString.length > 0) {
         [params addObject:inReplyToID];
     }
-
+    
     // PARAMETERS WERE MALFORMED due to setting the params before the HTTP method... lulz
     
     return [self sendPOSTRequest:request withParameters:params];
@@ -1490,13 +1483,13 @@
 - (int)getXAuthAccessTokenForUsername:(NSString *)username password:(NSString *)password {
     
     if (password.length == 0) {
-        return FHSTwitterEngineReturnCodeInsufficientInput;
+        return 2;
     }
     
     if (username.length == 0) {
-        return FHSTwitterEngineReturnCodeInsufficientInput;
+        return 2;
     }
-
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
     
 	OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:nil realm:nil signatureProvider:nil];
@@ -1504,8 +1497,6 @@
 	[request setHTTPMethod:@"POST"];
 	
 	[request setParameters:[NSArray arrayWithObjects:[OARequestParameter requestParameterWithName:@"x_auth_mode" value:@"client_auth"], [OARequestParameter requestParameterWithName:@"x_auth_username" value:username],[OARequestParameter requestParameterWithName:@"x_auth_password" value:password], nil]];
-    
-    [request prepare];
     
     NSError *error = nil;
     NSURLResponse *response = nil;
@@ -1534,9 +1525,9 @@
 //
 
 - (int)sendPOSTRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params {
-
+    
     if (![self isAuthorized]) {
-        return FHSTwitterEngineReturnCodeUserUnauthorized;
+        return 4;
     }
     
     [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
@@ -1545,9 +1536,9 @@
     [request setHTTPMethod:@"POST"];
     [request setParameters:params];
     [request prepare];
-
+    
     NSError *error = nil;
-    NSURLResponse *response = [[NSURLResponse alloc]init];
+    NSHTTPURLResponse *response = nil;
     
     NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
     
@@ -1562,24 +1553,25 @@
         return (int)error.code;
     }
     
-    if (([(NSHTTPURLResponse *)response statusCode] >= 304)) {
+    if (([response statusCode] >= 304)) {
         return (int)[(NSHTTPURLResponse *)response statusCode];
     }
     
     if ([parsedJSONResponse isKindOfClass:[NSDictionary class]]) {
         NSString *errorMessage = [parsedJSONResponse objectForKey:@"error"];
         if (errorMessage.length > 0) {
-            return FHSTwitterEngineReturnCodeAPIError;
+            return 1;
         }
     }
     
-    return FHSTwitterEngineReturnCodeOK;
+    return 0;
 }
 
 - (id)sendGETRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params {
     
     if (![self isAuthorized]) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        // TODO: Return NSError that shows that the user is not authenticated
+        return nil;
     }
     
     [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
@@ -1593,22 +1585,41 @@
     NSHTTPURLResponse *response = nil;
     
     NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-
+    
     CJSONDeserializer *theDeserializer = [CJSONDeserializer deserializer];
     theDeserializer.nullObject = @"";
     theDeserializer.scanner.options = kJSONScannerOptions_MutableContainers;
     id parsedJSONResponse = [theDeserializer deserialize:responseData error:nil];
     
-   //id parsedJSONResponse = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil];
+    // TODO: Return NSError rather than NSDictionary
     
     if (response == nil || responseData == nil || error != nil) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        NSMutableDictionary *errorDict = [[NSMutableDictionary alloc]init];
+        [errorDict setObject:[error localizedDescription] forKey:@"error"];
+        return errorDict;
     }
     
     if (([response statusCode] >= 304)) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        
+        NSLog(@"Parsed Response: %@", parsedJSONResponse);
+        
+        // TODO: Get error code from parsed JSON
+        
+        NSMutableDictionary *errorDict = [[NSMutableDictionary alloc]init];
+        NSString *errorString = [[self lookupErrorCode:[response statusCode]]objectForKey:@"message"];
+        [errorDict setObject:errorString forKey:@"error"];
+        [errorDict setObject:[NSNumber numberWithInt:[response statusCode]] forKey:@"error_code"];
+        
+        NSError *theError = [NSError errorWithDomain:errorString code:[response statusCode] userInfo:nil];
+        NSLog(@"Self-generated Error: %@",theError);
+        
+        if (errorString.length == 0 || !errorString) {
+            return nil;
+        }
+        
+        return errorDict;
     }
-
+    
     return parsedJSONResponse;
 }
 
@@ -1620,7 +1631,7 @@
 
 - (NSString *)getRequestTokenString {
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"];
-
+    
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:url consumer:self.consumer token:nil realm:nil signatureProvider:nil];
     [request setHTTPMethod:@"POST"];
     [request prepare];
@@ -1631,11 +1642,11 @@
     NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
     
     if (response == nil || responseData == nil || error != nil) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     if (!([(NSHTTPURLResponse *)response statusCode] < 400)) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return nil;
     }
     
     NSString *responseBody = [[NSString alloc]initWithData:responseData encoding:NSUTF8StringEncoding];
@@ -1645,7 +1656,7 @@
 
 - (int)finishAuthWithPin:(NSString *)pin andRequestToken:(OAToken *)reqToken {
     if (pin.length != 7) {
-        return FHSTwitterEngineReturnCodeAPIError;
+        return 1;
     }
     
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
@@ -1670,7 +1681,7 @@
     }
     
     [self storeAccessToken:responseBody];
-
+    
     return 0;
 }
 
@@ -1703,7 +1714,7 @@
 
 - (NSString *)extractUsernameFromHTTPBody:(NSString *)body {
 	if (!body) {
-       return nil; 
+        return nil;
     }
 	
 	NSArray *tuples = [body componentsSeparatedByString:@"&"];
@@ -1773,23 +1784,23 @@
     NSString *message = nil;
     
     if (errorCode == 200) {
-        title = @"There is nothing wrong!";
+        title = @"Error 200\nThere is nothing wrong!";
         message = @"Quit being such an uptight person. See error 420 (Enhance your calm) for help with this issue.";
     }
     
     if (errorCode == -1009) {
-        title = @"You're Offline!";
+        title = @"Error -1009\nYou're Offline!";
         message = @"You are disconnected from the internet. Reconnect and try again.";
     }
     
     if (errorCode == -1200) {
-        title = @"Secure Connection Failed";
+        title = @"Error -1200\nSecure Connection Failed";
         message = @"This error is not your fault and is a temporary issue.";
     }
     
     if (errorCode == -1012) {
-        title = @"Internal OAuth Error";
-        message = @"Try logging out and back in.";
+        title = @"Error -1012\nInternal OAuth Error";
+        message = @"I paraphrase IT Crowd (British TV Show): Try logging out and back in again.";
     }
     
     if (errorCode == 304) {
@@ -1799,7 +1810,7 @@
     
     if (errorCode == 400) {
         title = @"Error 400\nBad Request";
-        message = @"Are you being rate limited? If not its all my fault.";
+        message = @"Twitter is either rate limiting you, or this app just messed up.";
     }
     
     if (errorCode == 401) {
@@ -1820,6 +1831,11 @@
     if (errorCode == 420) {
         title = @"Error 420\nEnhance Your Calm";
         message = @"You're being rate limited bro...";
+    }
+    
+    if (errorCode == 429) {
+        title = @"Error 429\nToo Many Requests";
+        message = @"You are being rate limited for the current endpoint. See error 420 for help.";
     }
     
     if ((errorCode == 500) || (errorCode == 131)) {
@@ -1863,7 +1879,7 @@
     
     if (errorCode == 3) {
         title = @"Image too large";
-        message = @"Your image is just too much for Twitter. Please be nice and give it 700KB images maximum.";
+        message = @"Your image is just too much for Twitter. Please be nice and only upload images sized at less thank 700KB.";
     }
     
     if (errorCode == 4) {
@@ -1912,19 +1928,54 @@
     return vc;
 }
 
++ (BOOL)isConnectedToInternet {
+    struct sockaddr_in zeroAddress;
+    bzero(&zeroAddress, sizeof(zeroAddress));
+    zeroAddress.sin_len = sizeof(zeroAddress);
+    zeroAddress.sin_family = AF_INET;
+    
+    SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithAddress(kCFAllocatorDefault, (const struct sockaddr *)&zeroAddress);
+    if(reachability != nil) {
+        SCNetworkReachabilityFlags flags;
+        if (SCNetworkReachabilityGetFlags(reachability, &flags)) {
+            
+            if ((flags & kSCNetworkReachabilityFlagsReachable) == 0) {
+                return NO;
+            }
+            
+            if ((flags & kSCNetworkReachabilityFlagsConnectionRequired) == 0) {
+                return YES;
+            }
+            
+            
+            if ((((flags & kSCNetworkReachabilityFlagsConnectionOnDemand) != 0) || (flags & kSCNetworkReachabilityFlagsConnectionOnTraffic) != 0)) {
+                if ((flags & kSCNetworkReachabilityFlagsInterventionRequired) == 0) {
+                    return YES;
+                }
+            }
+            
+            if ((flags & kSCNetworkReachabilityFlagsIsWWAN) == kSCNetworkReachabilityFlagsIsWWAN) {
+                return YES;
+            }
+        }
+    }
+    
+    return NO;
+}
+
 @end
 
 
 
-@interface NSString (TwitterOAuth)
+@interface NSString (isNumeric)
 
-- (BOOL)oauthtwitter_isNumeric;
+- (BOOL)isNumeric;
 
 @end
 
-@implementation NSString (TwitterOAuth)
+@implementation NSString (isNumeric)
 
-- (BOOL)oauthtwitter_isNumeric {
+- (BOOL)isNumeric {
 	const char *raw = (const char *)[self UTF8String];
 	
 	for (int i = 0; i < strlen(raw); i++) {
@@ -2002,17 +2053,21 @@
 	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
 	[navBar pushNavigationItem:navItem animated:NO];
     
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    
     dispatch_async(GCDBackgroundThread, ^{
         @autoreleasepool {
             NSString *reqTokenString = [self.engine getRequestTokenString];
             self.requestToken = [[OAToken alloc]initWithHTTPResponseBody:reqTokenString];
-
+            
             NSString *address = [NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",self.requestToken.key];
             NSURL *url = [NSURL URLWithString:address];
             NSURLRequest *request = [NSURLRequest requestWithURL:url];
-        
+            
             dispatch_sync(GCDMainThread, ^{
-                [self.theWebView loadRequest:request];
+                @autoreleasepool {
+                    [self.theWebView loadRequest:request];
+                }
             });
         }
     });
@@ -2037,7 +2092,7 @@
 	
 	NSString *copied = pb.string;
 	
-	if (copied.length != 7 || !copied.oauthtwitter_isNumeric) {
+	if (copied.length != 7 || !copied.isNumeric) {
         return;
     }
 	
@@ -2046,7 +2101,6 @@
 
 - (NSString *)locatePin {
     // JavaScript for the newer Twitter PIN image
-    // Run this first to cut down the amount of JS executed
 	NSString *js = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); " \
     "if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
 	NSString *pin = [[theWebView stringByEvaluatingJavaScriptFromString:js]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -2055,7 +2109,6 @@
 		return pin;
 	} else {
 		// Older version of Twitter PIN Image
-        // Used as a fallback
         js = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";
 		pin = [[theWebView stringByEvaluatingJavaScriptFromString:js]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 		
@@ -2112,17 +2165,17 @@
 }
 
 - (UIView *)pinCopyPromptBar {
-	if (pinCopyBar == nil){
+	if (pinCopyBar == nil) {
 		CGRect bounds = self.view.bounds;
 		
 		pinCopyBar = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 44, bounds.size.width, 44)];
 		pinCopyBar.barStyle = UIBarStyleBlackTranslucent;
 		pinCopyBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
         pinCopyBar.items = [NSArray arrayWithObjects:
-                                   [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
-                                   [[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil],
-                                   [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
-                                   nil];
+                            [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+                            [[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil],
+                            [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+                            nil];
         
 	}
 	return pinCopyBar;
@@ -2138,6 +2191,7 @@
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+    
     BOOL isNotCancelLink = !strstr([[NSString stringWithFormat:@"%@",request.URL]UTF8String], "denied=");
     
 	NSData *data = [request HTTPBody];

@@ -85,7 +85,8 @@
     dispatch_async(GCDBackgroundThread, ^{
         @autoreleasepool {
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            NSLog(@"%@",[self.engine getTimelineForUser:self.engine.loggedInUsername isID:NO count:5]);
+            UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"Timeline" message:[[self.engine getTimelineForUser:self.engine.loggedInUsername isID:NO count:5]description] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [av show];
             [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         }
     });

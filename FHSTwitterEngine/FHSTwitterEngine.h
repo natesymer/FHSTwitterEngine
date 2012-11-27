@@ -3,6 +3,7 @@
 //  FHSTwitterEngine
 //
 //  Created by Nathaniel Symer on 8/22/12.
+//  Copyright (C) 2012 Nathaniel Symer.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -22,20 +23,40 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-// For y'all who don't wanna read the above, you can do whatever you want with this code
-
 
 //
 // FHSTwitterEngine
 // The synchronous Twitter engine that doesn’t suck!!
 //
 
+
 // FHSTwitterEngine is Synchronous
 // That means you will have to thread. Boo Hoo.
 
-// See README.markdown for more
+// Setup
+// Just add the FHSTwitterEngine folder to you project.
+
+// USAGE
+// See README.markdown
+
+// Return Codes:
+// (These apply to any method that returns an int)
+// (You can look them up using the lookupErrorCode: method)
+// 0 - Success
+// 1 - API Error (Params are invalid - missing params here are my fault)
+// 2 - Insufficient input (missing a parameter, your fault)
+// 3 - Image too large (bigger than 700KB)
+// 4 - User unauthorized
+// 304 to 504 - HTTP/Twitter response code. Look these up here. (My favorite is Error 420 - Enhance Your Calm)
+
+//
+// NOTE TO CONTRIBUTORS
+// Use the included TouchJSON. It's only slightly modified (to use the isEqual methods in some cases)
+//
+
 
 #import <Foundation/Foundation.h>
+#import "OAuthConsumer.h"
 
 // BOOL keys
 // Used to return boolean values while accounting for errors
@@ -43,7 +64,7 @@
 #define FHSTwitterEngineBOOLKeyNO @"NO"
 #define FHSTwitterEngineBOOLKeyERROR @"ERROR"
 
-// These are for the dispatch_async()/dispatch_sync() calls that you use to get around the synchronous-ness
+// These are for the dispatch_async() calls that you use to get around the synchronous-ness
 #define GCDBackgroundThread dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
 #define GCDMainThread dispatch_get_main_queue()
 
@@ -84,19 +105,16 @@ typedef enum {
 @interface FHSTwitterEngine : NSObject <UIWebViewDelegate>
 
 //
-//
 // REST API
-//
 //
 
 //
 // Custom REST API methods
-// They call 2 to 10 requests per method. This can be expensive CACHE CACHE CACHE!!!!!
+// (The second method is called once for every 99 id's) - can be expensive CACHE CACHE CACHE
 //
 
 - (NSArray *)getFollowers; // followers/ids & users/lookup
 - (NSArray *)getFriends; // friends/ids & users/lookup
-
 
 //
 // Normal REST API methods
@@ -134,7 +152,7 @@ typedef enum {
 - (int)setProfileImageWithImageAtPath:(NSString *)file;
 
 // account/settings POST & GET
-// See FHSTwitterEngine.m for details
+// See FHSTwitterEngine.m For details
 - (int)updateSettingsWithDictionary:(NSDictionary *)settings;
 - (NSDictionary *)getUserSettings;
 
@@ -144,7 +162,7 @@ typedef enum {
 
 // account/update_profile_background_image
 - (int)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)flag;
-- (int)setUseProfileImage:(BOOL)shouldUseProfileImage;
+- (int)setUseProfileBackgroundImage:(BOOL)shouldUseProfileBackgroundImage;
 
 // account/update_profile_colors
 // See FHSTwitterEngine.m for details
@@ -227,11 +245,11 @@ typedef enum {
 - (id)listBlockedUsers;
 
 // blocks/exists
-// Returns NSString, use the FHSTwitterEngineBOOLKey's 
+// Returns NSString, use the FHSTwitterEngineBOOLKey's
 - (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID;
 
 // users/profile_image
-// Returns UIImage
+// Returns UIImage, either nil or the image
 - (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
 
 // trends/daily
@@ -251,7 +269,7 @@ typedef enum {
 - (id)oembedTweet:(NSString *)identifier maxWidth:(float)maxWidth alignmentMode:(FHSTwitterEngineAlignMode)alignmentMode;
 
 // statuses/show
-- (int)getDetailsForTweet:(NSString *)identifier;
+- (id)getDetailsForTweet:(NSString *)identifier;
 
 // statuses/destory
 - (int)destoryTweet:(NSString *)identifier;
@@ -261,24 +279,18 @@ typedef enum {
 - (int)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
 
 // statuses/mentions_timeline
-- (id)getMentionedTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count;
-- (id)getMentionedTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+- (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+- (id)getMentionsTimelineWithCount:(int)count;
 
-// lists/lists
-- (id)getSubscribedToListsForUser:(NSString *)user isID:(BOOL)isID;
+// statuses/retweets_of_me
+- (id)getRetweetedTimelineWithCount:(int)count;
+- (id)getRetweetedTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
-// lists/statuses
-- (id)getTimelineForUsersInListWithID:(NSString *)listID count:(int)count;
-- (id)getTimelineForUsersInListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+// statuses/retweets
+- (id)getRetweetsForTweet:(NSString *)identifier count:(int)count;
 
-// lists/members/destroy
-- (int)removeUser:(NSString *)user isID:(BOOL)isID fromListWithID:(NSString *)listID;
-
-
-//
 //
 // Login and Auth
-//
 //
 
 // XAuth login
@@ -295,12 +307,10 @@ typedef enum {
 
 
 //
-//
 // Misc Methods
 //
-//
 
-// Twitter date string to NSDate converter
+// Date parser
 - (NSDate *)getDateFromTwitterCreatedAt:(NSString *)twitterDate;
 
 // Error code lookup
@@ -314,17 +324,21 @@ typedef enum {
 // init method
 - (id)initWithConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
 
+// Determines your internet status
++ (BOOL)isConnectedToInternet;
+
 // Logged in user's username
 @property (nonatomic, strong) NSString *loggedInUsername;
 
 // Logged in user's Twitter ID
 @property (nonatomic, strong) NSString *loggedInID;
 
-// I know, A DELEGATE!!! Its for storing the access token in something other than NSUserDefaults
+// Will be called to store the accesstoken
 @property (nonatomic, strong) id<FHSTwitterEngineAccessTokenDelegate> delegate;
 
-// OAuthConsumer stuff
+// normally hidden
 @property (strong, nonatomic) OAToken *accessToken;
+
 @property (strong, nonatomic) OAConsumer *consumer;
 
 @end
