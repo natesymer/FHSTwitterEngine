@@ -112,24 +112,169 @@
 
 /*
  TODO:
- - Implement the listed enpoints
- - Return NSErrors for GET requests
- - Add more params to all of the methods
- */
-
-/*
- // API Endpoints to Implement
- 
- // 7 more to implement
- - GET lists
- - GET lists/statuses
- - POST lists/members/create_all
- - POST lists/members/destroy_all
- - GET lists/memberships
- - GET lists/members
- - POST lists/update
+ - Return NSErrors for GET requests if error is encountered
+ - Return NSErrors for POST requests if failed, else return nil
 */
 
+- (int)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/create.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    
+    OARequestParameter *nameP = [[OARequestParameter alloc]initWithName:@"name" value:name];
+    OARequestParameter *descriptionP = [[OARequestParameter alloc]initWithName:@"description" value:description];
+    OARequestParameter *isPrivateP = [[OARequestParameter alloc]initWithName:@"mode" value:nil];
+    
+    if (isPrivate) {
+        isPrivateP.value = @"private";
+    } else {
+        isPrivateP.value = @"public";
+    }
+    
+    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:isPrivateP, nameP, descriptionP, nil]];
+}
+
+- (id)getListWithID:(NSString *)listID {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/show.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    OARequestParameter *listIDP = [[OARequestParameter alloc]initWithName:@"list_id" value:listID];
+    
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:listIDP, nil]];
+}
+
+- (int)changeDescriptionOfListWithID:(NSString *)listID toDescription:(NSString *)newName {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/update.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    OARequestParameter *listIDP = [[OARequestParameter alloc]initWithName:@"list_id" value:listID];
+    
+    OARequestParameter *nameP = [[OARequestParameter alloc]initWithName:@"description" value:newName];
+    
+    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:listIDP, nameP, nil]];
+}
+
+- (int)changeNameOfListWithID:(NSString *)listID toName:(NSString *)newName {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/update.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    
+    OARequestParameter *listIDP = [[OARequestParameter alloc]initWithName:@"list_id" value:listID];
+    
+    OARequestParameter *nameP = [[OARequestParameter alloc]initWithName:@"name" value:newName];
+
+    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:listIDP, nameP, nil]];
+}
+
+- (int)setModeOfListWithID:(NSString *)listID toPrivate:(BOOL)isPrivate {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/update.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    
+    OARequestParameter *listIDP = [[OARequestParameter alloc]initWithName:@"list_id" value:listID];
+    
+    OARequestParameter *isPrivateP = [[OARequestParameter alloc]initWithName:@"mode" value:nil];
+    
+    if (isPrivate) {
+        isPrivateP.value = @"private";
+    } else {
+        isPrivateP.value = @"public";
+    }
+    
+    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:listIDP, isPrivateP, nil]];
+}
+
+- (id)getListsThatUserIsMemberOf:(NSString *)user {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/memberships.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    OARequestParameter *listIDP = [[OARequestParameter alloc]initWithName:@"screen_name" value:user];
+    
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:listIDP, nil]];
+}
+
+- (id)listUsersInListWithID:(NSString *)listID {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/members.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+
+    OARequestParameter *listIDP = [[OARequestParameter alloc]initWithName:@"list_id" value:listID];
+    
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:listIDP, nil]];
+}
+
+- (int)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users {
+    if (users.count >= 99) {
+        return FHSTwitterEngineReturnCodeInsufficientInput;
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/members/destroy_all.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    NSArray *usersListA = [self generateRequestURLSForIDs:users];
+    
+    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:[OARequestParameter requestParameterWithName:@"screen_name" value:[usersListA firstObjectCommonWithArray:usersListA]], nil]];
+}
+
+- (int)addUsersToListWithID:(NSString *)listID users:(NSArray *)users {
+    if (users.count >= 99) {
+        return FHSTwitterEngineReturnCodeInsufficientInput;
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/members/create_all.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+
+    NSArray *usersListA = [self generateRequestURLSForIDs:users];
+    
+    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:[OARequestParameter requestParameterWithName:@"screen_name" value:[usersListA firstObjectCommonWithArray:usersListA]], nil]];
+}
+
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count {
+    return [self getTimelineForListWithID:listID count:count sinceID:nil maxID:nil];
+}
+
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
+    
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/statuses.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    
+    NSMutableArray *params = [[NSMutableArray alloc]init];
+    
+    OARequestParameter *countP = [[OARequestParameter alloc]initWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
+    
+    OARequestParameter *excludeRepliesP = [[OARequestParameter alloc]initWithName:@"exclude_replies" value:@"false"];
+    OARequestParameter *includeRTsP = [[OARequestParameter alloc]initWithName:@"include_rts" value:@"true"];
+    
+    OARequestParameter *listIDP = [[OARequestParameter alloc]initWithName:@"list_id" value:listID];
+    
+    [params addObject:countP];
+    [params addObject:excludeRepliesP];
+    [params addObject:includeRTsP];
+    [params addObject:listIDP];
+    
+    if (sinceID.length > 0 || sinceID != nil) {
+        OARequestParameter *sinceIDP = [[OARequestParameter alloc]initWithName:@"since_id" value:sinceID];
+        [params addObject:sinceIDP];
+    }
+    
+    if (maxID.length > 0 || maxID != nil) {
+        OARequestParameter *maxIDP = [[OARequestParameter alloc]initWithName:@"max_id" value:maxID];
+        [params addObject:maxIDP];
+    }
+    
+    return [self sendGETRequest:request withParameters:params];
+}
+
+- (id)getListsForUser:(NSString *)user isID:(BOOL)isID {
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/list.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    OARequestParameter *userP = [[OARequestParameter alloc]initWithName:@"screen_name" value:user];
+
+    if (isID) {
+        userP.name = @"user_id";
+    }
+    
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:userP, nil]];
+}
 
 - (id)getRetweetsForTweet:(NSString *)identifier count:(int)count {
     NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/statuses/retweets/%@.json",identifier]];

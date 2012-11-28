@@ -289,6 +289,36 @@ typedef enum {
 // statuses/retweets
 - (id)getRetweetsForTweet:(NSString *)identifier count:(int)count;
 
+// lists/list
+- (id)getListsForUser:(NSString *)user isID:(BOOL)isID;
+
+// lists/statuses
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count;
+
+// lists/members/create_all
+- (int)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;
+
+// lists/members/destroy_all
+- (int)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
+
+// lists/members
+- (id)listUsersInListWithID:(NSString *)listID;
+
+// lists/memberships
+- (id)getListsThatUserIsMemberOf:(NSString *)user;
+
+// lists/update
+- (int)setModeOfListWithID:(NSString *)listID toPrivate:(BOOL)isPrivate;
+- (int)changeNameOfListWithID:(NSString *)listID toName:(NSString *)newName;
+- (int)changeDescriptionOfListWithID:(NSString *)listID toDescription:(NSString *)newName;
+
+// lists/show
+- (id)getListWithID:(NSString *)listID;
+
+// lists/create
+- (int)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
+
 //
 // Login and Auth
 //
