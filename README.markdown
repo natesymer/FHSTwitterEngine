@@ -46,8 +46,8 @@ Why FHSTwitterEngine is better than MGTwitterEngine:
     
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		int resturnCode = [engine getXAuthAccessTokenForUsername:@"<username>" password:@"<password>"];
-        	// Handle returnCode 
+    		NSError *error = [engine getXAuthAccessTokenForUsername:@"<username>" password:@"<password>"];
+        	// Handle error
         	dispatch_sync(GCDMainThread, ^{
     			@autoreleasepool {
         			// Update UI
