@@ -21,22 +21,27 @@
         dispatch_async(GCDBackgroundThread, ^{
             @autoreleasepool {
                 [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-                int returnCode = [self.engine getXAuthAccessTokenForUsername:username password:password];
+                NSError *returnCode = [self.engine getXAuthAccessTokenForUsername:username password:password];
                 [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+
+                NSString *title = nil;
+                NSString *message = nil;
                 
-                NSMutableDictionary *dict = [[NSMutableDictionary alloc]init];
-                
-                if (returnCode == 0) {
-                    [dict setObject:@"Success" forKey:@"title"];
-                    [dict setObject:@"You have successfully logged in via XAuth" forKey:@"message"];
-                }
-                
-                if (returnCode > 0) {
-                    dict = [[NSMutableDictionary alloc]initWithDictionary:[self.engine lookupErrorCode:returnCode]];
+                if ([returnCode isKindOfClass:[NSError class]]) {
+                    title = [NSString stringWithFormat:@"Error %d",returnCode.code];
+                    message = returnCode.domain;
+                } else {
+                    title = @"Success";
+                    message = @"You have successfully logged in via XAuth";
                 }
                 
                 dispatch_sync(GCDMainThread, ^{
-                    UIAlertView *av = [[UIAlertView alloc]initWithTitle:[dict objectForKey:@"title"] message:[dict objectForKey:@"message"] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                    UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                    [av show];
+                });
+                
+                dispatch_sync(GCDMainThread, ^{
+                    UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
                     [av show];
                     
                     if (returnCode == 0) {
@@ -103,23 +108,23 @@
             
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
             
-            int returnCode = [self.engine postTweet:tweet];
+            NSError *returnCode = [self.engine postTweet:tweet];
             
             [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
             
-            NSMutableDictionary *dict = [[NSMutableDictionary alloc]init];
+            NSString *title = nil;
+            NSString *message = nil;
             
-            if (returnCode == 0) {
-                [dict setObject:@"Tweet Posted" forKey:@"title"];
-                [dict setObject:tweet forKey:@"message"];
-            }
-            
-            if (returnCode > 0) {
-                dict = [[NSMutableDictionary alloc]initWithDictionary:[self.engine lookupErrorCode:returnCode]];
+            if ([returnCode isKindOfClass:[NSError class]]) {
+                title = [NSString stringWithFormat:@"Error %d",returnCode.code];
+                message = returnCode.domain;
+            } else {
+                title = @"Tweet Posted";
+                message = tweet;
             }
             
             dispatch_sync(GCDMainThread, ^{
-                UIAlertView *av = [[UIAlertView alloc]initWithTitle:[dict objectForKey:@"title"] message:[dict objectForKey:@"message"] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
                 [av show];
             });
         }
@@ -128,6 +133,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
     self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
     [tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
 }

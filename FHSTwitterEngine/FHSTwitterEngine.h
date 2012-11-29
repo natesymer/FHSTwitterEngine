@@ -121,8 +121,8 @@ typedef enum {
 //
 
 // statuses/update
-- (int)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
-- (int)postTweet:(NSString *)tweetString;
+- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
+- (NSError *)postTweet:(NSString *)tweetString;
 
 // statuses/home_timeline
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
@@ -131,49 +131,49 @@ typedef enum {
 - (BOOL)testService;
 
 // blocks/create
-- (int)block:(NSString *)username;
+- (NSError *)block:(NSString *)username;
 
 // blocks/destroy
-- (int)unblock:(NSString *)username;
+- (NSError *)unblock:(NSString *)username;
 
 // users/lookup
 - (id)getUserInformationForUsers:(NSArray *)users areUsers:(BOOL)flag;
 
 // notifications/follow & notifications/leave
-- (int)disableNotificationsForID:(NSString *)identifier;
-- (int)disableNotificationsForUsername:(NSString *)username;
-- (int)enableNotificationsForID:(NSString *)identifier;
-- (int)enableNotificationsForUsername:(NSString *)identifier;
+- (NSError *)disableNotificationsForID:(NSString *)identifier;
+- (NSError *)disableNotificationsForUsername:(NSString *)username;
+- (NSError *)enableNotificationsForID:(NSString *)identifier;
+- (NSError *)enableNotificationsForUsername:(NSString *)identifier;
 
 // account/totals
 - (NSDictionary *)getTotals;
 
 // account/update_profile_image
-- (int)setProfileImageWithImageAtPath:(NSString *)file;
+- (NSError *)setProfileImageWithImageAtPath:(NSString *)file;
 
 // account/settings POST & GET
 // See FHSTwitterEngine.m For details
-- (int)updateSettingsWithDictionary:(NSDictionary *)settings;
+- (NSError *)updateSettingsWithDictionary:(NSDictionary *)settings;
 - (NSDictionary *)getUserSettings;
 
 // account/update_profile
 // See FHSTwitterEngine.m for details
-- (int)updateUserProfileWithDictionary:(NSDictionary *)settings;
+- (NSError *)updateUserProfileWithDictionary:(NSDictionary *)settings;
 
 // account/update_profile_background_image
-- (int)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)flag;
-- (int)setUseProfileBackgroundImage:(BOOL)shouldUseProfileBackgroundImage;
+- (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)flag;
+- (NSError *)setUseProfileBackgroundImage:(BOOL)shouldUseProfileBackgroundImage;
 
 // account/update_profile_colors
 // See FHSTwitterEngine.m for details
 // If the dictionary is nil, FHSTwitterEngine resets the values
-- (int)updateProfileColorsWithDictionary:(NSDictionary *)dictionary;
+- (NSError *)updateProfileColorsWithDictionary:(NSDictionary *)dictionary;
 
 // account/rate_limit_status
 - (id)getRateLimitStatus;
 
 // favorites/create, favorites/destroy
-- (int)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag;
+- (NSError *)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag;
 
 // favorites
 - (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count;
@@ -188,10 +188,10 @@ typedef enum {
 - (id)user:(NSString *)user followsUser:(NSString *)userTwo areUsernames:(BOOL)areUsernames;
 
 // friendships/create
-- (int)followUser:(NSString *)user isUsername:(BOOL)isUsername;
+- (NSError *)followUser:(NSString *)user isUsername:(BOOL)isUsername;
 
 // friendships/destroy
-- (int)unfollowUser:(NSString *)user isUsername:(BOOL)isUsername;
+- (NSError *)unfollowUser:(NSString *)user isUsername:(BOOL)isUsername;
 
 // friendships/lookup
 - (id)lookupFriends:(NSArray *)users areIDs:(BOOL)areIDs;
@@ -203,7 +203,7 @@ typedef enum {
 - (id)getPendingOutgoingFollowers;
 
 // friendships/update
-- (int)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID;
+- (NSError *)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID;
 
 // friendships/no_retweet_ids
 - (id)getNoRetweetIDs;
@@ -218,19 +218,19 @@ typedef enum {
 - (id)getDirectMessages:(int)count;
 
 // direct_messages/destroy
-- (int)deleteDirectMessage:(NSString *)messageID;
+- (NSError *)deleteDirectMessage:(NSString *)messageID;
 
 // direct_messages/sent
 - (id)getSentDirectMessages:(int)count;
 
 // direct_messages/new
-- (int)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID;
+- (NSError *)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID;
 
 // direct_messages/show
 - (id)showDirectMessage:(NSString *)messageID;
 
 // report_spam
-- (int)reportUserAsSpam:(NSString *)user isID:(BOOL)isID;
+- (NSError *)reportUserAsSpam:(NSString *)user isID:(BOOL)isID;
 
 // help/configuration
 - (id)getConfiguration;
@@ -263,7 +263,7 @@ typedef enum {
 - (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 // statuses/retweet
-- (int)retweet:(NSString *)identifier;
+- (NSError *)retweet:(NSString *)identifier;
 
 // statuses/oembed
 - (id)oembedTweet:(NSString *)identifier maxWidth:(float)maxWidth alignmentMode:(FHSTwitterEngineAlignMode)alignmentMode;
@@ -272,11 +272,11 @@ typedef enum {
 - (id)getDetailsForTweet:(NSString *)identifier;
 
 // statuses/destory
-- (int)destoryTweet:(NSString *)identifier;
+- (NSError *)destoryTweet:(NSString *)identifier;
 
 // statuses/update_with_media
-- (int)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
-- (int)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
+- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
+- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
 
 // statuses/mentions_timeline
 - (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
@@ -297,10 +297,10 @@ typedef enum {
 - (id)getTimelineForListWithID:(NSString *)listID count:(int)count;
 
 // lists/members/create_all
-- (int)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;
+- (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;
 
 // lists/members/destroy_all
-- (int)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
+- (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
 
 // lists/members
 - (id)listUsersInListWithID:(NSString *)listID;
@@ -309,22 +309,22 @@ typedef enum {
 - (id)getListsThatUserIsMemberOf:(NSString *)user;
 
 // lists/update
-- (int)setModeOfListWithID:(NSString *)listID toPrivate:(BOOL)isPrivate;
-- (int)changeNameOfListWithID:(NSString *)listID toName:(NSString *)newName;
-- (int)changeDescriptionOfListWithID:(NSString *)listID toDescription:(NSString *)newName;
+- (NSError *)setModeOfListWithID:(NSString *)listID toPrivate:(BOOL)isPrivate;
+- (NSError *)changeNameOfListWithID:(NSString *)listID toName:(NSString *)newName;
+- (NSError *)changeDescriptionOfListWithID:(NSString *)listID toDescription:(NSString *)newName;
 
 // lists/show
 - (id)getListWithID:(NSString *)listID;
 
 // lists/create
-- (int)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
+- (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
 
 //
 // Login and Auth
 //
 
 // XAuth login
-- (int)getXAuthAccessTokenForUsername:(NSString *)username password:(NSString *)password;
+- (NSError *)getXAuthAccessTokenForUsername:(NSString *)username password:(NSString *)password;
 
 // OAuth login
 - (UIViewController *)OAuthLoginWindow; // You want to use it with something other than presentModalViewController:animated:

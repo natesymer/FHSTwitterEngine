@@ -1,7 +1,6 @@
 FHSTwitterEngine
 ================
 
-
 ***The synchronous Twitter engine that doesn't suck!!***
 
 Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [fhsjaagshs](http://twitter.com/fhsjaagshs)
@@ -9,8 +8,8 @@ Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [fhsjaagshs](http:/
 
 FHSTwitterEngine can:
 
-- Login through XAuth.
-- Login through OAuth. Login UI based on [SA_OAuthTwitterEngineController](https://github.com/bengottlieb/Twitter-OAuth-iPhone)
+- Login through xAuth.
+- Login through oAuth. Login UI based on [SA_OAuthTwitterEngineController](https://github.com/bengottlieb/Twitter-OAuth-iPhone)
 - Make a request to every available API endpoints. Yes, even the legal ones.
 
 
@@ -28,27 +27,26 @@ Why FHSTwitterEngine is better than MGTwitterEngine:
 
 **Setup**
 
-Add the folder "FHSTwitterEngine" to your project and #import "FHSTwitterEngine.h"
-
-You will have to set OAuthConsumer and TouchJSON to use `-fno-objc-arc` if you are using ARC.
-
-You also need to link against SystemConfiguration.framework
+1. Add the folder "FHSTwitterEngine" to your project and `#import "FHSTwitterEngine.h"` (in your `Prefix.pch`)
+2. Link against SystemConfiguration.framework
+3. In your Build Phases under Compile Sources, make sure that the OAuthConsumer and TouchJSON files have the compilier flag `-fno-objc-arc`
+4. Profit!!!!
 
 **Usage:**
 
--> Create FHSTwitterEngine object:
+--> Create FHSTwitterEngine object:
 
-    FHSTwitterEngine *engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"<consumer key>" andSecret:@"<consumer secret>"];
+    FHSTwitterEngine *engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
     
--> Login via OAuth:
+--> Login via OAuth:
     
     [engine showOAuthLoginControllerFromViewController:self];
     
--> Login via XAuth:
+--> Login via XAuth:
     
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		int resturnCode = [engine getXAuthAccessTokenForUsername:usernameField.text password:passwordField.text];
+    		int resturnCode = [engine getXAuthAccessTokenForUsername:@"<username>" password:@"<password>"];
         	// Handle returnCode 
         	dispatch_sync(GCDMainThread, ^{
     			@autoreleasepool {
@@ -58,24 +56,24 @@ You also need to link against SystemConfiguration.framework
     	}
     });
     
--> Reload a saved access_token:
+--> Reload a saved access_token:
 
     [engine loadAccessToken];
 
--> End a session:
+--> End a session:
 
     [engine clearAccessToken];
 
--> Check if a session is valid:
+--> Check if a session is valid:
 
     [engine isAuthorized];
     
--> Do an API call (POST)\*:
+--> Do an API call (POST):
 
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		int returnCode = [engine twitterAPIMethod]; // POST
-    		// Handle returnCode
+    		NSError *error = [engine twitterAPIMethod]; // POST
+    		// Handle error
     		dispatch_sync(GCDMainThread, ^{
     			@autoreleasepool {
         			// Update UI
@@ -84,12 +82,12 @@ You also need to link against SystemConfiguration.framework
     	}
     });
 
--> Do an API call (GET)\*\*:
+--> Do an API call (GET):
 
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		id returnValue = [engine twitterAPIMethod]; // GET
-    		// Handle returnValue
+    		id twitterData = [engine twitterAPIMethod]; // GET
+    		// Handle twitterData
     		dispatch_sync(GCDMainThread, ^{
     			@autoreleasepool {
         			// Update UI
@@ -98,45 +96,35 @@ You also need to link against SystemConfiguration.framework
     	}
     });
 
-
-\* POST methods return int. These are called *return codes*. See below for more.<br />
-\*\* GET methods return id. This can be either an NSDictionary, NSArray, NSString, UIImage or nil. See below for errors
+**Grand Central Dispatch**
 
 So what are those `GCDBackgroundThread` and `GCDMainThread`?<br />
-They are macros for dispatch_async()/dispatch_sync(). 
+They are macros for `dispatch_async()` and `dispatch_sync()`, respectively. They make using GCD much easier. 
 
+**About POST requests**
 
-<br />
-**About Return Codes**<br />
-(These apply to any method that returns an int)<br />
+POST methods return NSError. If there is no error, they will return `nil`. This includes the xAuth login method.
 
-0 - Success <br />
-1 - API Error (Params are invalid - It's my fault if whole (name and value) params are missing) <br />
-2 - Insufficient input (missing a parameter, your fault)<br />
-3 - Image too large (bigger than 700KB. Again, your fault)<br />
-4 - User unauthorized <br />
-304 to 504 - HTTP/Twitter response code. Check them out [here](https://dev.twitter.com/docs/error-codes-responses). (My favorite is Error 420 - Enhance Your Calm)
+**General networking comments**
 
-(You can look them up using the lookupErrorCode: method)
-
-*Return codes 2 & 3 are your fault*
-
+FHSTwitterEngine will attempt to preëmtively detect errors in your requests 
 
 **About GET request return codes**
 
-There are three keys:
+GET methods return id. There are a few kinds of returned values:
 
-- FHSTwitterEngineBOOLKeyYES<br />
-- FHSTwitterEngineBOOLKeyNO<br />
-- FHSTwitterEngineBOOLKeyERROR<br />
+- `NSDictionary`
+- `NSArray`
+- `UIImage`
+- `NSString`
+- `NSError`
+- `nil`
 
-Check to see if the returned object is both an NSString and equal to one of these values.
-
-
+In the case of `authenticatedUserIsBlocking:isID:`, an NSString will be returned. It will be `@"YES"` to indicate YES and `@"NO"` to indicate NO. It will also return an NSError if it fails.
 
 **For the future**
 
-Nothing for now... feel free to [email](mailto:nate@natesymer.com) me for suggestions.
+Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 
 **IMPORTANT**
 
@@ -147,11 +135,9 @@ Some of the libraries included are (heavily) modified:
 
 You should use the included versions instead of other version of the libraries because the included versions are *considerably* better.
 
-
-
 **Fixes for some common problems** (and best practices)
 
-- If you have any errors concerning multiple declarations for any class, check to make sure that any class is not importing another class which is importing the first class (AKA `#import` loop)
+- If you have any errors concerning multiple declarations for any class, check to make sure that any class is not importing another class which is importing the first class (AKA `#import` loop - A imports B which imports A which imports B...)
 
 
 
