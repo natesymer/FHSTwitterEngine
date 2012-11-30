@@ -90,9 +90,17 @@
     dispatch_async(GCDBackgroundThread, ^{
         @autoreleasepool {
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"Timeline" message:[[self.engine getTimelineForUser:self.engine.loggedInUsername isID:NO count:5]description] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-            [av show];
-            [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+            
+            NSString *followers = [[self.engine getFollowers]description];
+            NSLog(@"followers:\n%@",followers);
+            
+            dispatch_sync(GCDMainThread, ^{
+                @autoreleasepool {
+                    UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"Complete!" message:@"Your list of followers has been fetched" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                    [av show];
+                    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                }
+            });
         }
     });
 }
@@ -133,8 +141,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+
     
-    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
+    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"MhgSItbeGPfGAxN2iEaVw" andSecret:@"kn5w5O2G0RpB1jz7FYMLbF4yDesFnySIUeOZ8mUCxA"];
     [tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
 }
 

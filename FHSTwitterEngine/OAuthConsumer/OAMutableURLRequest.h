@@ -57,6 +57,4 @@
 - (NSArray *)parameters;
 - (void)setParameters:(NSArray *)parameters;
 
-- (NSData *)sendSynchronousConnection;
-
 @end

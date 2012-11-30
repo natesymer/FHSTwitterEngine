@@ -107,7 +107,7 @@ POST methods return NSError. If there is no error, they will return `nil`. This 
 
 **General networking comments**
 
-FHSTwitterEngine will attempt to preëmtively detect errors in your requests 
+FHSTwitterEngine will attempt to preëmtively detect errors in your requests. This is designed to prevent flawed requests from being needlessly sent. This helps with rate limiting. 
 
 **About GET request return codes**
 

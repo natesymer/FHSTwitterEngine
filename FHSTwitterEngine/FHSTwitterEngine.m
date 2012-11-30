@@ -88,6 +88,7 @@
 // Trims tweets and direct messages to 140 characters
 // after trimming out extra spaces and newlines
 - (NSString *)trimForTwitter;
+- (BOOL)isNumeric;
 
 @end
 
@@ -103,6 +104,17 @@
     return string;
 }
 
+- (BOOL)isNumeric {
+	const char *raw = (const char *)[self UTF8String];
+	
+	for (int i = 0; i < strlen(raw); i++) {
+		if (raw[i] < '0' || raw[i] > '9') {
+            return NO;
+        }
+	}
+	return YES;
+}
+
 @end
 
 @implementation FHSTwitterEngine
@@ -111,6 +123,11 @@
 
 
 - (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description {
+    
+    if (name.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/create.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -125,10 +142,21 @@
         isPrivateP.value = @"public";
     }
     
-    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:isPrivateP, nameP, descriptionP, nil]];
+    NSMutableArray *params = [[NSMutableArray alloc]initWithObjects:nameP, isPrivateP, nil];
+    
+    if (description.length > 0 && description != nil) {
+        [params addObject:descriptionP];
+    }
+    
+    return [self sendPOSTRequest:request withParameters:params];
 }
 
 - (id)getListWithID:(NSString *)listID {
+    
+    if (listID.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/show.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -138,6 +166,15 @@
 }
 
 - (NSError *)changeDescriptionOfListWithID:(NSString *)listID toDescription:(NSString *)newName {
+    
+    if (listID.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
+    if (newName.length == 0 ) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/update.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -149,6 +186,15 @@
 }
 
 - (NSError *)changeNameOfListWithID:(NSString *)listID toName:(NSString *)newName {
+    
+    if (listID.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
+    if (newName.length == 0 ) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/update.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -161,6 +207,11 @@
 }
 
 - (NSError *)setModeOfListWithID:(NSString *)listID toPrivate:(BOOL)isPrivate {
+    
+    if (listID.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/update.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -179,6 +230,11 @@
 }
 
 - (id)getListsThatUserIsMemberOf:(NSString *)user {
+    
+    if (user.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/memberships.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -188,6 +244,11 @@
 }
 
 - (id)listUsersInListWithID:(NSString *)listID {
+    
+    if (listID.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/members.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
 
@@ -197,6 +258,11 @@
 }
 
 - (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users {
+    
+    if (listID.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     if (users.count >= 99) {
         return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
     }
@@ -210,6 +276,11 @@
 }
 
 - (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users {
+    
+    if (listID.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     if (users.count >= 99) {
         return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
     }
@@ -227,6 +298,11 @@
 }
 
 - (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
+    
+    
+    if (listID.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/statuses.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
@@ -259,6 +335,11 @@
 }
 
 - (id)getListsForUser:(NSString *)user isID:(BOOL)isID {
+    
+    if (user.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/list.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     OARequestParameter *userP = [[OARequestParameter alloc]initWithName:@"screen_name" value:user];
@@ -271,6 +352,11 @@
 }
 
 - (id)getRetweetsForTweet:(NSString *)identifier count:(int)count {
+    
+    if (identifier.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/statuses/retweets/%@.json",identifier]];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     OARequestParameter *identifierP = [[OARequestParameter alloc]initWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
@@ -348,6 +434,19 @@
 }
 
 - (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt {
+    
+    if (tweetString.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
+    if (theData == nil) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
+    if (irt.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/update_with_media.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -367,6 +466,11 @@
 }
 
 - (NSError *)destoryTweet:(NSString *)identifier {
+    
+    if (identifier.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/destroy.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     OARequestParameter *identifierP = [[OARequestParameter alloc]initWithName:@"id" value:identifier];
@@ -374,6 +478,11 @@
 }
 
 - (id)getDetailsForTweet:(NSString *)identifier {
+    
+    if (identifier.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/show.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     OARequestParameter *identifierP = [[OARequestParameter alloc]initWithName:@"id" value:identifier];
@@ -382,6 +491,11 @@
 }
 
 - (id)oembedTweet:(NSString *)identifier maxWidth:(float)maxWidth alignmentMode:(FHSTwitterEngineAlignMode)alignmentMode {
+    
+    if (identifier.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/oembed.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -398,43 +512,24 @@
 }
 
 - (NSError *)retweet:(NSString *)identifier {
+    
+    if (identifier.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/statuses/retweet/%@.json",identifier]];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     return [self sendPOSTRequest:request withParameters:nil];
 }
 
 - (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count {
-    if (user.length == 0) {
-        return nil;
-    }
-    
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/user_timeline.json"];
-    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
-    
-    NSMutableArray *params = [[NSMutableArray alloc]init];
-    
-    OARequestParameter *countP = [[OARequestParameter alloc]initWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
-    
-    OARequestParameter *userP = [[OARequestParameter alloc]initWithName:@"screen_name" value:user];
-    OARequestParameter *excludeRepliesP = [[OARequestParameter alloc]initWithName:@"exclude_replies" value:@"false"];
-    OARequestParameter *includeRTsP = [[OARequestParameter alloc]initWithName:@"include_rts" value:@"true"];
-    
-    if (isID) {
-        userP.name = @"user_id";
-    }
-    
-    [params addObject:countP];
-    [params addObject:userP];
-    [params addObject:excludeRepliesP];
-    [params addObject:includeRTsP];
-    
-    return [self sendGETRequest:request withParameters:params];
+    return [self getTimelineForUser:user isID:isID count:count sinceID:nil maxID:nil];
 }
 
 - (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
     
     if (user.length == 0) {
-        return nil;
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/user_timeline.json"];
@@ -457,12 +552,12 @@
     [params addObject:excludeRepliesP];
     [params addObject:includeRTsP];
     
-    if (sinceID.length > 0 || sinceID != nil) {
+    if (sinceID.length > 0) {
         OARequestParameter *sinceIDP = [[OARequestParameter alloc]initWithName:@"since_id" value:sinceID];
         [params addObject:sinceIDP];
     }
     
-    if (maxID.length > 0 || maxID != nil) {
+    if (maxID.length > 0) {
         OARequestParameter *maxIDP = [[OARequestParameter alloc]initWithName:@"max_id" value:maxID];
         [params addObject:maxIDP];
     }
@@ -485,7 +580,7 @@
 - (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size {
     
     if (username.length == 0) {
-        return nil;
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/users/show.json"];
@@ -496,11 +591,11 @@
     
     id userShowReturn = [self sendGETRequest:request withParameters:params];
     
+    if ([userShowReturn isKindOfClass:[NSError class]]) {
+        return [NSError errorWithDomain:[(NSError *)userShowReturn domain] code:[(NSError *)userShowReturn code] userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+    }
+    
     if ([userShowReturn isKindOfClass:[NSDictionary class]]) {
-        if ([userShowReturn objectForKey:@"error"]) {
-            return nil;
-        } else {
-            
             NSString *finalURL = nil;
             NSString *rawProfileURL = [userShowReturn objectForKey:@"profile_image_url"];
             
@@ -515,7 +610,6 @@
             } else if (size == 3) { // original
                 finalURL = [[rawProfileURL stringByDeletingPathExtension]stringByReplacingOccurrencesOfString:@"_normal" withString:@""];
             }
-            NSLog(@"finalURL: %@",finalURL);
             
             NSURLRequest *imageRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:finalURL]];
             
@@ -525,22 +619,25 @@
             NSData *imageData = [NSURLConnection sendSynchronousRequest:imageRequest returningResponse:&response error:&error];
             
             if (response == nil || error != nil) {
-                return nil;
+                return error;
             }
             
-            if (([response statusCode] >= 304)) {
-                return nil;
+            if ((response.statusCode >= 304)) {
+                return error;
             }
             
             return [UIImage imageWithData:imageData];
-            
-        }
     }
     
-    return nil;
+    return [NSError errorWithDomain:@"Bad Request: the request you attempted to make messed up royally." code:400 userInfo:nil];
 }
 
 - (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID {
+    
+    if (user.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/blocks/exists.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
@@ -556,19 +653,23 @@
     id obj = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:skipstatusP, userP, nil]];
     
     if (!obj) {
-        return FHSTwitterEngineBOOLKeyERROR;
+        return [NSError errorWithDomain:[(NSError *)obj domain] code:[(NSError *)obj code] userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+    }
+    
+    if ([obj isKindOfClass:[NSError class]]) {
+        return [NSError errorWithDomain:[(NSError *)obj domain] code:[(NSError *)obj code] userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
     }
     
     if ([obj isKindOfClass:[NSDictionary class]]) {
         BOOL blockDoesntExist = [[obj objectForKey:@"error"]isEqualToString:@"You are not blocking this user."];
         if (blockDoesntExist) {
-            return FHSTwitterEngineBOOLKeyNO;
+            return @"NO";
         } else {
-            return FHSTwitterEngineBOOLKeyYES;
+            return @"YES";
         }
     }
     
-    return FHSTwitterEngineBOOLKeyERROR;
+    return [NSError errorWithDomain:@"Bad Request: the request you attempted to make messed up royally." code:400 userInfo:nil];
 }
 
 - (id)listBlockedUsers {
@@ -609,7 +710,7 @@
 - (NSError *)reportUserAsSpam:(NSString *)user isID:(BOOL)isID {
     
     if (user.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/report_spam.json"];
@@ -628,7 +729,7 @@
 - (id)showDirectMessage:(NSString *)messageID {
     
     if (messageID.length == 0) {
-        return nil;
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/direct_messages/show/%@.json",messageID]];
@@ -639,11 +740,11 @@
 - (NSError *)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID {
     
     if (user.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     if (body.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     body = [body trimForTwitter];
@@ -667,7 +768,7 @@
 - (id)getSentDirectMessages:(int)count {
     
     if (count == 0) {
-        return nil;
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/direct_messages/sent.json"];
@@ -680,7 +781,7 @@
 - (NSError *)deleteDirectMessage:(NSString *)messageID {
     
     if (messageID.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/direct_messages/destroy/%@.json",messageID]];
@@ -691,7 +792,7 @@
 - (id)getDirectMessages:(int)count {
     
     if (count == 0) {
-        return nil;
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/direct_messages.json"];
@@ -744,7 +845,7 @@
 - (NSError *)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID {
     
     if (user.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/friendships/update.json"];
@@ -813,6 +914,10 @@
 
 - (id)lookupFriends:(NSArray *)users areIDs:(BOOL)areIDs {
     
+    if (users.count == 0) {
+        return nil;
+    }
+    
     NSMutableArray *returnedDictionaries = [[NSMutableArray alloc]init];
     NSArray *reqStrings = [self generateRequestURLSForIDs:users];
     
@@ -841,7 +946,7 @@
 - (NSError *)unfollowUser:(NSString *)user isUsername:(BOOL)isUsername {
     
     if (user.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/friendships/destroy.json"];
@@ -862,7 +967,7 @@
 - (NSError *)followUser:(NSString *)user isUsername:(BOOL)isUsername {
     
     if (user.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/friendships/create.json"];
@@ -883,11 +988,11 @@
 - (id)user:(NSString *)user followsUser:(NSString *)userTwo areUsernames:(BOOL)areUsernames {
     
     if (user.length == 0) {
-        return nil;
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     if (userTwo.length == 0) {
-        return nil;
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/friendships/exists.json"]; // fix this
@@ -911,8 +1016,8 @@
     
     int length = queryString.length;
     
-    if ((length == 0) || (length > 1000)) {
-        return nil;
+    if (length == 0 || length > 1000) {
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://search.twitter.com/search.json"];
@@ -938,7 +1043,7 @@
     }
     
     if (user.length == 0) {
-        return nil;
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/favorites.json"];
@@ -958,7 +1063,7 @@
 - (NSError *)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag {
     
     if (tweetID.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/favorites/%@.json",flag?@"create":@"destroy"]];
@@ -1127,7 +1232,7 @@
 - (NSError *)updateUserProfileWithDictionary:(NSDictionary *)settings {
     
     if (!settings) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     // all of the values are just non-normalized strings. They appear:
@@ -1178,7 +1283,7 @@
 - (NSError *)updateSettingsWithDictionary:(NSDictionary *)settings {
     
     if (!settings) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     // Dictionary with keys:
@@ -1232,7 +1337,7 @@
 - (NSError *)disableNotificationsForID:(NSString *)identifier {
     
     if (identifier.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/notifications/leave.json"];
@@ -1246,7 +1351,7 @@
 - (NSError *)disableNotificationsForUsername:(NSString *)username {
     
     if (username.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/notifications/leave.json"];
@@ -1260,7 +1365,7 @@
 - (NSError *)enableNotificationsForID:(NSString *)identifier {
     
     if (identifier.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/notifications/follow.json"];
@@ -1274,7 +1379,7 @@
 - (NSError *)enableNotificationsForUsername:(NSString *)username {
     
     if (username.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/notifications/follow.json"];
@@ -1292,7 +1397,7 @@
     }
     
     if (users.count > 99) {
-        return nil; // change to error message later
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make has invalid parameters." code:400 userInfo:nil];
     }
     
     NSString *userString = nil;
@@ -1333,7 +1438,7 @@
 - (NSError *)unblock:(NSString *)username {
     
     if (username.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/blocks/destroy.json"];
@@ -1347,7 +1452,7 @@
 - (NSError *)block:(NSString *)username {
     
     if (username.length == 0) {
-        return [NSError errorWithDomain:@"The request you are trying to make is missing parameters." code:13372 userInfo:nil];
+        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/blocks/create.json"];
@@ -1440,7 +1545,7 @@
         for (int iii = 0; iii < remainder; iii++) {
             
             // handle getting the correct string
-            NSString *currentID = [[[idsArray objectAtIndex:(numberOfStrings*99)+iii]stringValue]stringByAppendingString:@","];
+            NSString *currentID = [[idsArray objectAtIndex:(numberOfStrings*99)+iii]stringByAppendingString:@","];
             
             // append the string
             reqString = [reqString stringByAppendingString:currentID];
@@ -1463,11 +1568,12 @@
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/followers/ids.json"];
     
     OARequestParameter *param = [[OARequestParameter alloc]initWithName:@"screen_name" value:self.loggedInUsername];
+    OARequestParameter *stringify_ids = [[OARequestParameter alloc]initWithName:@"stringify_ids" value:@"true"];
     
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     
-    id returnedValue = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:param, nil]];
+    id returnedValue = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:param, stringify_ids, nil]];
     
     NSMutableArray *identifiersFromRequest = nil;
     
@@ -1478,6 +1584,10 @@
         }
     }
     
+    if ([returnedValue isKindOfClass:[NSError class]]) {
+        return nil;
+    }
+    
     if (identifiersFromRequest.count == 0) {
         return nil;
     }
@@ -1486,7 +1596,7 @@
     
     NSArray *usernameListStrings = [self generateRequestURLSForIDs:identifiersFromRequest];
     
-    for (NSString *idListString in [usernameListStrings mutableCopy]) {
+    for (NSString *idListString in usernameListStrings) {
         baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/users/lookup.json"];
         
         OARequestParameter *iden = [[OARequestParameter alloc]initWithName:@"user_id" value:idListString];
@@ -1496,16 +1606,8 @@
         
         id parsed = [self sendGETRequest:requestTwo withParameters:[NSArray arrayWithObjects:iden, includeEntities, nil]];
         
-        if (!parsed) {
-            return nil;
-        }
-        
         if ([parsed isKindOfClass:[NSDictionary class]]) {
-            if ([(NSDictionary *)parsed objectForKey:@"error"]) {
-                return nil;
-            } else {
-                [usernames addObject:[parsed objectForKey:@"screen_name"]];
-            }
+            [usernames addObject:[parsed objectForKey:@"screen_name"]];
         }
         
         if ([parsed isKindOfClass:[NSMutableArray class]]) {
@@ -1516,7 +1618,8 @@
             }
         }
     }
-    return usernames;
+    
+    return [usernames sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
 }
 
 - (NSArray *)getFriends {
@@ -1524,11 +1627,12 @@
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/friends/ids.json"];
     
     OARequestParameter *param = [[OARequestParameter alloc]initWithName:@"screen_name" value:self.loggedInUsername];
+    OARequestParameter *stringify_ids = [[OARequestParameter alloc]initWithName:@"stringify_ids" value:@"true"];
     
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     
-    id returnedValue = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:param, nil]];
+    id returnedValue = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:param, stringify_ids, nil]];
     
     NSMutableArray *identifiersFromRequest = nil;
     
@@ -1539,6 +1643,10 @@
         }
     }
     
+    if ([returnedValue isKindOfClass:[NSError class]]) {
+        return nil;
+    }
+    
     if (identifiersFromRequest.count == 0) {
         return nil;
     }
@@ -1547,7 +1655,7 @@
     
     NSArray *usernameListStrings = [self generateRequestURLSForIDs:identifiersFromRequest];
     
-    for (NSString *idListString in [usernameListStrings mutableCopy]) {
+    for (NSString *idListString in usernameListStrings) {
         baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/users/lookup.json"];
         
         OARequestParameter *iden = [[OARequestParameter alloc]initWithName:@"user_id" value:idListString];
@@ -1557,16 +1665,8 @@
         
         id parsed = [self sendGETRequest:requestTwo withParameters:[NSArray arrayWithObjects:iden, includeEntities, nil]];
         
-        if (!parsed) {
-            return nil;
-        }
-        
         if ([parsed isKindOfClass:[NSDictionary class]]) {
-            if ([(NSDictionary *)parsed objectForKey:@"error"]) {
-                return nil;
-            } else {
-                [usernames addObject:[parsed objectForKey:@"screen_name"]];
-            }
+            [usernames addObject:[parsed objectForKey:@"screen_name"]];
         }
         
         if ([parsed isKindOfClass:[NSMutableArray class]]) {
@@ -1577,7 +1677,8 @@
             }
         }
     }
-    return usernames;
+    
+    return [usernames sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
 }
 
 - (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString {
@@ -1781,6 +1882,11 @@
 // OAuth
 //
 
+/*
+ This section of code is pretty crufty. I know. It works well enough 
+ and is not accessed by the user. Move along. You didn't see anything.
+ */
+
 - (NSString *)getRequestTokenString {
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"];
     
@@ -1843,6 +1949,10 @@
     return 0;
 }
 
+//
+// Access Token Management
+//
+
 - (void)loadAccessToken {
     
     NSString *savedHttpBody = nil;
@@ -1894,6 +2004,26 @@
 	}
 	
 	return nil;
+}
+
+- (BOOL)isAuthorized {
+    if (!self.consumer) {
+        return NO;
+    }
+    
+	if (self.accessToken.key && self.accessToken.secret) {
+        if ((self.accessToken.key.length > 0) && (self.accessToken.secret.length > 0)) {
+            return YES;
+        }
+    }
+    
+	return NO;
+}
+
+- (void)clearAccessToken {
+    [self storeAccessToken:@""];
+	self.accessToken = nil;
+    self.loggedInUsername = nil;
 }
 
 - (NSString *)extractUserIDFromHTTPBody:(NSString *)body {
@@ -2071,26 +2201,6 @@
     return dict;
 }
 
-- (BOOL)isAuthorized {
-    if (!self.consumer) {
-        return NO;
-    }
-    
-	if (self.accessToken.key && self.accessToken.secret) {
-        if ((self.accessToken.key.length > 0) && (self.accessToken.secret.length > 0)) {
-            return YES;
-        }
-    }
-    
-	return NO;
-}
-
-- (void)clearAccessToken {
-    [self storeAccessToken:@""];
-	self.accessToken = nil;
-    self.loggedInUsername = nil;
-}
-
 - (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender {
     [sender presentModalViewController:[self OAuthLoginWindow] animated:YES];
 }
@@ -2137,30 +2247,6 @@
 }
 
 @end
-
-
-
-@interface NSString (isNumeric)
-
-- (BOOL)isNumeric;
-
-@end
-
-@implementation NSString (isNumeric)
-
-- (BOOL)isNumeric {
-	const char *raw = (const char *)[self UTF8String];
-	
-	for (int i = 0; i < strlen(raw); i++) {
-		if (raw[i] < '0' || raw[i] > '9') {
-            return NO;
-        }
-	}
-	return YES;
-}
-
-@end
-
 
 @implementation FHSTwitterEngineController
 

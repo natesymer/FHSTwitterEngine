@@ -58,16 +58,11 @@
 #import <Foundation/Foundation.h>
 #import "OAuthConsumer.h"
 
-// BOOL keys
-// Used to return boolean values while accounting for errors
-#define FHSTwitterEngineBOOLKeyYES @"YES"
-#define FHSTwitterEngineBOOLKeyNO @"NO"
-#define FHSTwitterEngineBOOLKeyERROR @"ERROR"
-
 // These are for the dispatch_async() calls that you use to get around the synchronous-ness
 #define GCDBackgroundThread dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
 #define GCDMainThread dispatch_get_main_queue()
 
+// oEmbed align modes
 typedef enum {
     FHSTwitterEngineAlignModeLeft,
     FHSTwitterEngineAlignModeRight,
@@ -76,13 +71,13 @@ typedef enum {
 } FHSTwitterEngineAlignMode;
 
 // Return Code Keys
-typedef enum {
+/*typedef enum {
     FHSTwitterEngineReturnCodeOK,
     FHSTwitterEngineReturnCodeAPIError,
     FHSTwitterEngineReturnCodeInsufficientInput,
     FHSTwitterEngineReturnCodeImageTooLarge,
     FHSTwitterEngineReturnCodeUserUnauthorized
-} FHSTwitterEngineReturnCode;
+} FHSTwitterEngineReturnCode;*/
 
 // Image sizes
 typedef enum {

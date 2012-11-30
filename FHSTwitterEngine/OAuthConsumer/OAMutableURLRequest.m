@@ -78,14 +78,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 
 // Setting a timestamp and nonce to known
 // values can be helpful for testing
-- (id)initWithURL:(NSURL *)aUrl
-		 consumer:(OAConsumer *)aConsumer
-			token:(OAToken *)aToken
-            realm:(NSString *)aRealm
-signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
-            nonce:(NSString *)aNonce
-        timestamp:(NSString *)aTimestamp 
-{
+- (id)initWithURL:(NSURL *)aUrl consumer:(OAConsumer *)aConsumer token:(OAToken *)aToken realm:(NSString *)aRealm signatureProvider:(id<OASignatureProviding, NSObject>)aProvider nonce:(NSString *)aNonce timestamp:(NSString *)aTimestamp {
 	
     self = [super initWithURL:aUrl cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:10.0];
     
@@ -94,7 +87,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 		
 		// empty token for Unauthorized Request Token transaction
 		if (aToken == nil) {
-			token = [[OAToken alloc] init];
+			token = [[OAToken alloc]init];
 		} else {
 			token = [aToken retain];
         }
@@ -234,22 +227,6 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
     }
 }
 
-- (NSData *)sendSynchronousConnection {
-    NSError *error = nil;
-    NSHTTPURLResponse *response = nil;
-    
-    NSData *responseData = [NSURLConnection sendSynchronousRequest:self returningResponse:&response error:&error];
-    
-    if (response == nil || responseData == nil || error != nil) {
-        return nil;
-    }
-    
-    return responseData;
-}
-
-#pragma mark -
-#pragma mark Private
-
 - (void)_generateTimestamp {
     [self setTimestamp:[NSString stringWithFormat:@"%ld", time(NULL)]];
 }
@@ -265,7 +242,7 @@ signatureProvider:(id<OASignatureProviding, NSObject>)aProvider
 - (NSString *)_signatureBaseString {
     // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
     // build a sorted array of both request parameters and OAuth header parameters
-    NSMutableArray *parameterPairs = [NSMutableArray  arrayWithCapacity:(6 + [self parameters].count)]; // 6 being the number of OAuth params in the Signature Base String
+    NSMutableArray *parameterPairs = [NSMutableArray  arrayWithCapacity:(6+[self parameters].count)]; // 6 being the number of OAuth params in the Signature Base String
     
 	[parameterPairs addObject:[[OARequestParameter requestParameterWithName:@"oauth_consumer_key" value:consumer.key] URLEncodedNameValuePair]];
 	[parameterPairs addObject:[[OARequestParameter requestParameterWithName:@"oauth_signature_method" value:[signatureProvider name]] URLEncodedNameValuePair]];
