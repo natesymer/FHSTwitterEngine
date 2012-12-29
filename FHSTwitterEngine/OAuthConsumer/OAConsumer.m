@@ -25,26 +25,20 @@
 
 #import "OAConsumer.h"
 
-
 @implementation OAConsumer
 @synthesize key, secret;
 
-#pragma mark init
-
-- (id)initWithKey:(NSString *)aKey secret:(NSString *)aSecret 
-{
-	if (self = [super init])
-	{
+- (id)initWithKey:(NSString *)aKey secret:(NSString *)aSecret {
+	if (self = [super init]) {
 		self.key = aKey;
 		self.secret = aSecret;
 	}
 	return self;
 }
 
-- (void)dealloc
-{
-	[key release];
-	[secret release];
+- (void)dealloc {
+	[self.key release];
+	[self.secret release];
 	[super dealloc];
 }
 

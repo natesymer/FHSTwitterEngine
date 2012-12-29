@@ -36,7 +36,7 @@
 }
 
 - (NSString *)URLDecodedString {
-    CFStringRef url = CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)self, CFSTR(""), kCFStringEncodingUTF8);    
+    CFStringRef url = CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)self, CFSTR(""), kCFStringEncodingUTF8);
 	NSString *result = (NSString *)url;
 	[result autorelease];
     return result;

@@ -24,19 +24,11 @@
 
 #import <Foundation/Foundation.h>
 
-#import "OAMutableURLRequest.h"
-#import "OAServiceTicket.h"
+@class OAServiceTicket;
+@class OAMutableURLRequest;
 
-@interface OAAsynchronousDataFetcher : NSObject {
-    OAMutableURLRequest *request;
-}
+@interface OAAsynchronousDataFetcher : NSObject
 
-@property (nonatomic, assign) OAMutableURLRequest *request;
-
-+ (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest;
-- (id)initWithRequest:(OAMutableURLRequest *)aRequest;
-
-- (void)startWithBlock:(void (^)(OAServiceTicket *, NSData *, NSError *))block;
-//- (void)cancel;
++ (void)fetchDataForRequest:(OAMutableURLRequest *)request withCompletionHandler:(void (^)(OAServiceTicket *, NSData *, NSError *))block;
 
 @end

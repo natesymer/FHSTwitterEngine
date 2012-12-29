@@ -30,6 +30,10 @@
 
 @implementation OAHMAC_SHA1SignatureProvider
 
++ (OAHMAC_SHA1SignatureProvider *)OAHMAC_SHA1SignatureProvider {
+    return [[[[self class]alloc]init]autorelease];
+}
+
 - (NSString *)name {
     return @"HMAC-SHA1";
 }

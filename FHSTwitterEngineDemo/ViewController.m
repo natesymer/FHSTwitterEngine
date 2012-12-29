@@ -24,33 +24,26 @@
                 NSError *returnCode = [self.engine getXAuthAccessTokenForUsername:username password:password];
                 [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 
-                NSString *title = nil;
-                NSString *message = nil;
-                
-                if ([returnCode isKindOfClass:[NSError class]]) {
-                    title = [NSString stringWithFormat:@"Error %d",returnCode.code];
-                    message = returnCode.domain;
-                } else {
-                    title = @"Success";
-                    message = @"You have successfully logged in via XAuth";
-                }
-                
                 dispatch_sync(GCDMainThread, ^{
-                    UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-                    [av show];
-                });
-                
-                dispatch_sync(GCDMainThread, ^{
-                    UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-                    [av show];
-                    
-                    if (returnCode == 0) {
-                        NSString *username = self.engine.loggedInUsername;
-                        if (username.length > 0) {
-                            loggedInUserLabel.text = [NSString stringWithFormat:@"Logged in as %@.",username];
+                    @autoreleasepool {
+                        NSString *title = nil;
+                        NSString *message = nil;
+                        
+                        if (returnCode) {
+                            title = [NSString stringWithFormat:@"Error %d",returnCode.code];
+                            message = returnCode.domain;
                         } else {
-                            loggedInUserLabel.text = @"You are not logged in.";
+                            title = @"Success";
+                            message = @"You have successfully logged in via XAuth";
+                            NSString *username = self.engine.loggedInUsername;
+                            if (username.length > 0) {
+                                loggedInUserLabel.text = [NSString stringWithFormat:@"Logged in as %@.",username];
+                            } else {
+                                loggedInUserLabel.text = @"You are not logged in.";
+                            }
                         }
+                        UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                        [av show];
                     }
                 });
             }
@@ -85,14 +78,14 @@
 }
 
 - (IBAction)listFriends:(id)sender {
-
     [tweetField resignFirstResponder];
     dispatch_async(GCDBackgroundThread, ^{
         @autoreleasepool {
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
             
-            NSString *followers = [[self.engine getFollowers]description];
-            NSLog(@"followers:\n%@",followers);
+            NSLog(@"%@",[self.engine getUserInformationForUsers:[NSArray arrayWithObjects:@"fhsjaagshs", @"twitter", nil] areUsers:YES]);
+            
+            NSLog(@"followers:\n%@",[self.engine getFollowers]);
             
             dispatch_sync(GCDMainThread, ^{
                 @autoreleasepool {
@@ -112,23 +105,19 @@
     dispatch_async(GCDBackgroundThread, ^{
         @autoreleasepool {
             
-            NSString *tweet = tweetField.text;
-            
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            
-            NSError *returnCode = [self.engine postTweet:tweet];
-            
+            NSError *returnCode = [self.engine postTweet:tweetField.text];
             [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
             
             NSString *title = nil;
             NSString *message = nil;
             
-            if ([returnCode isKindOfClass:[NSError class]]) {
+            if (returnCode) {
                 title = [NSString stringWithFormat:@"Error %d",returnCode.code];
                 message = returnCode.domain;
             } else {
                 title = @"Tweet Posted";
-                message = tweet;
+                message = tweetField.text;
             }
             
             dispatch_sync(GCDMainThread, ^{
@@ -141,8 +130,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-    
     self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"MhgSItbeGPfGAxN2iEaVw" andSecret:@"kn5w5O2G0RpB1jz7FYMLbF4yDesFnySIUeOZ8mUCxA"];
     [tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
 }
@@ -155,11 +142,6 @@
     } else {
         loggedInUserLabel.text = @"You are not logged in.";
     }
-}
-
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
 }
 
 @end

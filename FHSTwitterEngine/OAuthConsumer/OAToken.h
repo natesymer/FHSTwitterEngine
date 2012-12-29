@@ -25,18 +25,16 @@
 
 #import <Foundation/Foundation.h>
 
-@interface OAToken : NSObject {
-@protected
-	NSString *key;
-	NSString *secret;
-	NSString *verifier;
-    NSString *pin;
-}
+@interface OAToken : NSObject
 
-@property(retain) NSString *verifier;
-@property(retain) NSString *key;
-@property(retain) NSString *secret;
-@property(retain) NSString *pin;
+@property (nonatomic, retain) NSString *verifier;
+@property (nonatomic, retain) NSString *key;
+@property (nonatomic, retain) NSString *secret;
+
++ (OAToken *)token;
+
+- (void)setPin:(NSString *)aPin;
+- (NSString *)pin;
 
 - (id)initWithKey:(NSString *)aKey secret:(NSString *)aSecret;
 - (id)initWithUserDefaultsUsingServiceProviderName:(NSString *)provider prefix:(NSString *)prefix;

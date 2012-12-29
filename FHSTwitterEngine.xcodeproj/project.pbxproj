@@ -27,7 +27,6 @@
 		9B31B96015E56E34003FC89D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B95F15E56E34003FC89D /* UIKit.framework */; };
 		9B31B96215E56E34003FC89D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96115E56E34003FC89D /* Foundation.framework */; };
 		9B31B96415E56E34003FC89D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96315E56E34003FC89D /* CoreGraphics.framework */; };
-		9B44287416152DDD000C9EE1 /* TouchJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B44287316152DDC000C9EE1 /* TouchJSON.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F1E39F9916645C380049DAB1 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */; };
 /* End PBXBuildFile section */
 
@@ -69,8 +68,6 @@
 		9B31B95F15E56E34003FC89D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		9B31B96115E56E34003FC89D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		9B31B96315E56E34003FC89D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		9B44287216152DDC000C9EE1 /* TouchJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TouchJSON.h; path = FHSTwitterEngine/TouchJSON.h; sourceTree = SOURCE_ROOT; };
-		9B44287316152DDC000C9EE1 /* TouchJSON.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TouchJSON.m; path = FHSTwitterEngine/TouchJSON.m; sourceTree = SOURCE_ROOT; };
 		F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -120,7 +117,6 @@
 			children = (
 				9B2A1C0815E807D9007E66E0 /* FHSTwitterEngine.h */,
 				9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */,
-				9B44287616152DEA000C9EE1 /* TouchJSON */,
 				9B2A1C0A15E807D9007E66E0 /* OAuthConsumer */,
 			);
 			path = FHSTwitterEngine;
@@ -196,16 +192,6 @@
 				9B31B96315E56E34003FC89D /* CoreGraphics.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		9B44287616152DEA000C9EE1 /* TouchJSON */ = {
-			isa = PBXGroup;
-			children = (
-				9B44287216152DDC000C9EE1 /* TouchJSON.h */,
-				9B44287316152DDC000C9EE1 /* TouchJSON.m */,
-			);
-			name = TouchJSON;
-			path = OAuthConsumer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -286,7 +272,6 @@
 				9B2A1C3415E807D9007E66E0 /* OARequestParameter.m in Sources */,
 				9B2A1C3515E807D9007E66E0 /* OAServiceTicket.m in Sources */,
 				9B2A1C3615E807D9007E66E0 /* OAToken.m in Sources */,
-				9B44287416152DDD000C9EE1 /* TouchJSON.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

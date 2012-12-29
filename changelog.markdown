@@ -1,15 +1,38 @@
-FHSTwitterEngine Changelog
+**Changelog**
 ===
 
-<br />
+FHSTwitterEngine
+===
 
-**Version 0.1 to Version 0.9**
+**Initial Commits**
 
 - Added more endpoints
 - Fixed a variety of bugs
 
-Version 1.0
+**Version 1.0**
 
 - Finished endpoints
 - FHSTwitterEngine now uses Twitter API v1.1
 - Changed the return of errors (now returns NSError, see readme.markdown for more)
+
+**Version 1.1**
+
+- Fixed a TON of bugs
+- Cut dependency on TouchJSON
+
+OAuthConsumer
+===
+*Version numbers below refer to FHSTwitterEngine versions*
+
+**Initial Commits**
+
+- Condense
+
+**Version 1.0**
+
+- Fix some memory leaks
+
+**Version 1.1**
+
+- Fix most remaining memory leaks
+- Add better support the pin/verifier property in OAToken (The version of OAuthConsumer in SA_OAuthTwitterEngine uses the pin property)

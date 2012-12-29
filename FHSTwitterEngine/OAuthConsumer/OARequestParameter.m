@@ -30,25 +30,21 @@
 @implementation OARequestParameter
 @synthesize name, value;
 
-+ (id)requestParameterWithName:(NSString *)aName value:(NSString *)aValue 
-{
++ (id)requestParameterWithName:(NSString *)aName value:(NSString *)aValue {
 	return [[[[self class]alloc]initWithName:aName value:aValue]autorelease];
 }
 
-- (id)initWithName:(NSString *)aName value:(NSString *)aValue 
-{
-    if (self = [super init])
-	{
+- (id)initWithName:(NSString *)aName value:(NSString *)aValue {
+    if (self = [super init]) {
 		self.name = aName;
 		self.value = aValue;
 	}
     return self;
 }
 
-- (void)dealloc
-{
-	[name release];
-	[value release];
+- (void)dealloc {
+	[self.name release];
+	[self.value release];
 	[super dealloc];
 }
 

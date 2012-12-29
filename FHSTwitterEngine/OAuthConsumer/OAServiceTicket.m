@@ -30,8 +30,7 @@
 @implementation OAServiceTicket
 @synthesize request, response, didSucceed;
 
-- (id)initWithRequest:(OAMutableURLRequest *)aRequest response:(NSURLResponse *)aResponse didSucceed:(BOOL)success 
-{
+- (id)initWithRequest:(OAMutableURLRequest *)aRequest response:(NSURLResponse *)aResponse didSucceed:(BOOL)success {
     if (self = [super init]) {
 		self.request = aRequest;
 		self.response = aResponse;
@@ -40,10 +39,9 @@
     return self;
 }
 
-- (void)dealloc
-{
-	[request release];
-	[response release];
+- (void)dealloc {
+	[self.request release];
+	[self.response release];
 	[super dealloc];
 }
 

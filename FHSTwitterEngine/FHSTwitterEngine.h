@@ -29,7 +29,6 @@
 // The synchronous Twitter engine that doesn’t suck!!
 //
 
-
 // FHSTwitterEngine is Synchronous
 // That means you will have to thread. Boo Hoo.
 
@@ -39,24 +38,13 @@
 // USAGE
 // See README.markdown
 
-// Return Codes:
-// (These apply to any method that returns an int)
-// (You can look them up using the lookupErrorCode: method)
-// 0 - Success
-// 1 - API Error (Params are invalid - missing params here are my fault)
-// 2 - Insufficient input (missing a parameter, your fault)
-// 3 - Image too large (bigger than 700KB)
-// 4 - User unauthorized
-// 304 to 504 - HTTP/Twitter response code. Look these up here. (My favorite is Error 420 - Enhance Your Calm)
-
 //
 // NOTE TO CONTRIBUTORS
-// Use the included TouchJSON. It's only slightly modified (to use the isEqual methods in some cases)
+// Use NSJSONSerialization with removeNull(). Life is easy that way.
 //
 
 
 #import <Foundation/Foundation.h>
-#import "OAuthConsumer.h"
 
 // These are for the dispatch_async() calls that you use to get around the synchronous-ness
 #define GCDBackgroundThread dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
@@ -70,15 +58,6 @@ typedef enum {
     FHSTwitterEngineAlignModeNone
 } FHSTwitterEngineAlignMode;
 
-// Return Code Keys
-/*typedef enum {
-    FHSTwitterEngineReturnCodeOK,
-    FHSTwitterEngineReturnCodeAPIError,
-    FHSTwitterEngineReturnCodeInsufficientInput,
-    FHSTwitterEngineReturnCodeImageTooLarge,
-    FHSTwitterEngineReturnCodeUserUnauthorized
-} FHSTwitterEngineReturnCode;*/
-
 // Image sizes
 typedef enum {
     FHSTwitterEngineImageSizeMini, // 24px by 24px
@@ -86,6 +65,10 @@ typedef enum {
     FHSTwitterEngineImageSizeBigger, // 73x73
     FHSTwitterEngineImageSizeOriginal // original size of image
 } FHSTwitterEngineImageSize;
+
+// Remove NSNulls from NSDictionary and NSArray
+// Credit for this function goes to Conrad Kramer
+id removeNull(id rootObject);
 
 @protocol FHSTwitterEngineAccessTokenDelegate <NSObject>
 
@@ -112,7 +95,7 @@ typedef enum {
 - (NSArray *)getFriends; // friends/ids & users/lookup
 
 //
-// Normal REST API methods
+// Standard REST API methods
 //
 
 // statuses/update
@@ -141,7 +124,7 @@ typedef enum {
 - (NSError *)enableNotificationsForUsername:(NSString *)identifier;
 
 // account/totals
-- (NSDictionary *)getTotals;
+- (id)getTotals;
 
 // account/update_profile_image
 - (NSError *)setProfileImageWithImageAtPath:(NSString *)file;
@@ -149,7 +132,7 @@ typedef enum {
 // account/settings POST & GET
 // See FHSTwitterEngine.m For details
 - (NSError *)updateSettingsWithDictionary:(NSDictionary *)settings;
-- (NSDictionary *)getUserSettings;
+- (id)getUserSettings;
 
 // account/update_profile
 // See FHSTwitterEngine.m for details
@@ -183,10 +166,10 @@ typedef enum {
 - (id)user:(NSString *)user followsUser:(NSString *)userTwo areUsernames:(BOOL)areUsernames;
 
 // friendships/create
-- (NSError *)followUser:(NSString *)user isUsername:(BOOL)isUsername;
+- (NSError *)followUser:(NSString *)user isID:(BOOL)isID;
 
 // friendships/destroy
-- (NSError *)unfollowUser:(NSString *)user isUsername:(BOOL)isUsername;
+- (NSError *)unfollowUser:(NSString *)user isID:(BOOL)isID;
 
 // friendships/lookup
 - (id)lookupFriends:(NSArray *)users areIDs:(BOOL)areIDs;
@@ -240,11 +223,9 @@ typedef enum {
 - (id)listBlockedUsers;
 
 // blocks/exists
-// Returns NSString, use the FHSTwitterEngineBOOLKey's
 - (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID;
 
 // users/profile_image
-// Returns UIImage, either nil or the image
 - (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
 
 // trends/daily
@@ -338,14 +319,6 @@ typedef enum {
 // Date parser
 - (NSDate *)getDateFromTwitterCreatedAt:(NSString *)twitterDate;
 
-// Error code lookup
-// (so you don't have to)
-// Keys:
-// message - (its the error message)
-// title - (its the error code and title)
-// Feed this to a UIAlertView or something of the like
-- (NSDictionary *)lookupErrorCode:(int)errorCode;
-
 // init method
 - (id)initWithConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
 
@@ -360,10 +333,5 @@ typedef enum {
 
 // Will be called to store the accesstoken
 @property (nonatomic, strong) id<FHSTwitterEngineAccessTokenDelegate> delegate;
-
-// normally hidden
-@property (strong, nonatomic) OAToken *accessToken;
-
-@property (strong, nonatomic) OAConsumer *consumer;
 
 @end

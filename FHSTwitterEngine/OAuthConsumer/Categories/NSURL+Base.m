@@ -26,21 +26,21 @@
 
 #import "NSURL+Base.h"
 
-
 @implementation NSURL (OABaseAdditions)
 
 - (NSString *)URLStringWithoutQuery {
     NSString *absoluteString = self.absoluteString;
-    
-    if (!absoluteString) {
-        absoluteString = @"";
-    }
-    
+
     if (absoluteString.length == 0) {
         return nil;
     }
     
     NSArray *parts = [absoluteString componentsSeparatedByString:@"?"];
+    
+    if (parts.count == 0) {
+        return nil;
+    }
+    
     return [parts objectAtIndex:0];
 }
 

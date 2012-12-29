@@ -23,35 +23,15 @@
 //  THE SOFTWARE.
 
 #import "OAAsynchronousDataFetcher.h"
-
+#import "OAMutableURLRequest.h"
 #import "OAServiceTicket.h"
 
 @implementation OAAsynchronousDataFetcher
 
-@synthesize request;
-
-+ (id)asynchronousDataFetcherWithRequest:(OAMutableURLRequest *)aRequest {
-    return [[[OAAsynchronousDataFetcher alloc]initWithRequest:aRequest]autorelease];
-}
-
-- (id)initWithRequest:(OAMutableURLRequest *)aRequest {
-    self = [super init];
-	if (self) {
-		self.request = [aRequest retain];
-	}
-	return self;
-}
-
-- (void)dealloc {
-    [self.request release];
-	[super dealloc];
-}
-
-- (void)startWithBlock:(void (^)(OAServiceTicket *, NSData *, NSError *))block {
-
-    [self.request prepare];
-
-    [NSURLConnection sendAsynchronousRequest:self.request queue:[[[NSOperationQueue alloc]init]autorelease] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
++ (void)fetchDataForRequest:(OAMutableURLRequest *)request withCompletionHandler:(void (^)(OAServiceTicket *, NSData *, NSError *))block {
+    [request prepare];
+    
+    [NSURLConnection sendAsynchronousRequest:request queue:[[[NSOperationQueue alloc]init]autorelease] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         OAServiceTicket *ticket = [[OAServiceTicket alloc]initWithRequest:request response:nil didSucceed:(error == nil)];
         block(ticket, data, error);
     }];
