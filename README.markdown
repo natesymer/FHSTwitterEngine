@@ -28,7 +28,7 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
 
 1. Add the folder "FHSTwitterEngine" to your project and `#import "FHSTwitterEngine.h"` (I recommend `Prefix.pch`)
 2. Link against `SystemConfiguration.framework`
-3. In **Compile Sources** in the **Build Phases** tab of your target (e.g. MyCoolApp.app with the target icon next to it), add the `-fno-objc-arc` compiler flag to all files starting with `OA` (In other words, the `OAuthConsumer` library)
+3. In **Compile Sources** in the **Build Phases** tab of your target (e.g. MyCoolApp.app with the target icon next to it), add the `-fno-objc-arc` compiler flag to all files starting with `OA` (In other words, the `OAuthConsumer` library, *nothing* else)
 4. Profit!!!!
 
 **Usage:**
