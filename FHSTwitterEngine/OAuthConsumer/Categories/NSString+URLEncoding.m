@@ -25,7 +25,6 @@
 
 #import "NSString+URLEncoding.h"
 
-
 @implementation NSString (OAURLEncodingAdditions)
 
 - (NSString *)URLEncodedString {

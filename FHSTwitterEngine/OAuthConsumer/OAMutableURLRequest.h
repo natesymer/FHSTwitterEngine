@@ -28,8 +28,6 @@
 #import "OAConsumer.h"
 #import "OAToken.h"
 #import "OAHMAC_SHA1SignatureProvider.h"
-#import "NSURL+Base.h"
-
 
 @interface OAMutableURLRequest : NSMutableURLRequest
 

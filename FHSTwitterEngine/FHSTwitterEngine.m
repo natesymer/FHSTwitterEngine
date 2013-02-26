@@ -43,7 +43,7 @@ id removeNull(id rootObject) {
                 [sanitizedDictionary setObject:sanitized forKey:key];
             }
         }];
-        return [NSDictionary dictionaryWithDictionary:sanitizedDictionary];
+        return [NSMutableDictionary dictionaryWithDictionary:sanitizedDictionary];
     }
     
     if ([rootObject isKindOfClass:[NSArray class]]) {
@@ -56,7 +56,7 @@ id removeNull(id rootObject) {
                 [sanitizedArray replaceObjectAtIndex:[sanitizedArray indexOfObject:obj] withObject:sanitized];
             }
         }];
-        return [NSArray arrayWithArray:sanitizedArray];
+        return [NSMutableArray arrayWithArray:sanitizedArray];
     }
 
     if ([rootObject isKindOfClass:[NSNull class]]) {
@@ -90,30 +90,15 @@ id removeNull(id rootObject) {
 // used for users/lookup
 - (NSArray *)generateRequestURLSForIDs:(NSArray *)idsArray;
 
-// sendRequest methods, use these for every request
-- (NSError *)sendPOSTRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
-- (id)sendGETRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
-
 // Login stuff
 - (NSString *)getRequestTokenString;
 - (NSString *)extractUserIDFromHTTPBody:(NSString *)body;
 - (NSString *)extractUsernameFromHTTPBody:(NSString *)body;
 
 // These are here to obfuscate them from prying eyes
-@property (strong, nonatomic) OAToken *accessToken;
+
 @property (strong, nonatomic) OAConsumer *consumer;
 
-@end
-
-@interface NSData (Base64)
-+ (NSData *)dataWithBase64EncodedString:(NSString *)string;
-- (id)initWithBase64EncodedString:(NSString *)string;
-- (NSString *)base64EncodingWithLineLength:(unsigned int)lineLength;
-@end
-
-@interface NSString (FHSTwitterEngine)
-- (NSString *)trimForTwitter;
-- (BOOL)isNumeric;
 @end
 
 @implementation NSString (FHSTwitterEngine)
@@ -2053,31 +2038,36 @@ id removeNull(id rootObject) {
     zeroAddress.sin_family = AF_INET;
     
     SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithAddress(kCFAllocatorDefault, (const struct sockaddr *)&zeroAddress);
-    if(reachability != nil) {
+    if (reachability != nil) {
         SCNetworkReachabilityFlags flags;
         if (SCNetworkReachabilityGetFlags(reachability, &flags)) {
             
             if ((flags & kSCNetworkReachabilityFlagsReachable) == 0) {
+                CFRelease(reachability);
                 return NO;
             }
             
             if ((flags & kSCNetworkReachabilityFlagsConnectionRequired) == 0) {
+                CFRelease(reachability);
                 return YES;
             }
             
             
             if ((((flags & kSCNetworkReachabilityFlagsConnectionOnDemand) != 0) || (flags & kSCNetworkReachabilityFlagsConnectionOnTraffic) != 0)) {
                 if ((flags & kSCNetworkReachabilityFlagsInterventionRequired) == 0) {
+                    CFRelease(reachability);
                     return YES;
                 }
             }
             
             if ((flags & kSCNetworkReachabilityFlagsIsWWAN) == kSCNetworkReachabilityFlagsIsWWAN) {
+                CFRelease(reachability);
                 return YES;
             }
         }
     }
     
+    CFRelease(reachability);
     return NO;
 }
 
@@ -2088,7 +2078,6 @@ id removeNull(id rootObject) {
 @synthesize theWebView, requestToken, engine, navBar, blockerView, pinCopyBar;
 
 - (id)initWithEngine:(FHSTwitterEngine *)theEngine {
-    
     if (self = [super init]) {
         self.engine = theEngine;
     }
@@ -2285,6 +2274,10 @@ id removeNull(id rootObject) {
 		return NO;
 	}
 	return YES;
+}
+
+- (void)close {
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 - (void)dismissModalViewControllerAnimated:(BOOL)animated {

@@ -40,6 +40,23 @@
 
 @end
 
+@interface NSURL (OABaseAdditions)
+- (NSString *)URLStringWithoutQuery;
+@end
+
+@implementation NSURL (OABaseAdditions)
+
+- (NSString *)URLStringWithoutQuery {
+    if (self.absoluteString.length == 0) {
+        return nil;
+    }
+    
+    NSArray *parts = [self.absoluteString componentsSeparatedByString:@"?"];
+    return (parts.count == 0)?nil:[parts objectAtIndex:0];
+}
+
+@end
+
 @implementation OAMutableURLRequest
 @synthesize signature, nonce, timestamp;
 @synthesize consumer, token, realm, signatureProvider, extraOAuthParameters;
@@ -111,22 +128,8 @@
     return self;
 }
 
-- (void)dealloc {
-    [self setExtraOAuthParameters:nil];
-    [self setConsumer:nil];
-    [self setToken:nil];
-    [self setRealm:nil];
-    [self setSignatureProvider:nil];
-    [self setTimestamp:nil];
-    [self setNonce:nil];
-    [self setSignature:nil];
-	[super dealloc];
-}
-
-#pragma mark -
-#pragma mark Public
-
 - (void)setOAuthParameterName:(NSString*)parameterName withValue:(NSString*)parameterValue {
+    
     if (!parameterName && !parameterValue) {
         NSLog(@"%s There was not parameter name nor value specified.", __PRETTY_FUNCTION__);
         return;
@@ -170,7 +173,7 @@
 
 - (NSArray *)parameters {
     
-    NSString *encodedParameters;
+    NSString *encodedParameters = nil;
 
     if ([self.HTTPMethod isEqualToString:@"GET"] || [self.HTTPMethod isEqualToString:@"DELETE"]) {
         encodedParameters = self.URL.query;
@@ -211,7 +214,7 @@
     } else if ([self.HTTPMethod isEqualToString:@"POST"] || [self.HTTPMethod isEqualToString:@"PUT"]) {
         NSData *postData = [encodedParameterPairs dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
         [self setHTTPBody:postData];
-        [self setValue:[NSString stringWithFormat:@"%d", postData.length] forHTTPHeaderField:@"Content-Length"];
+        [self setValue:[NSString stringWithFormat:@"%d",postData.length] forHTTPHeaderField:@"Content-Length"];
         [self setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     }
 }
@@ -260,6 +263,18 @@
     // OAuth Spec, Section 9.1.2 "Concatenate Request Elements"
     NSString *ret = [NSString stringWithFormat:@"%@&%@&%@", self.HTTPMethod, [[self.URL URLStringWithoutQuery]URLEncodedString], [normalizedRequestParameters URLEncodedString]];
 	return ret;
+}
+
+- (void)dealloc {
+    [self setExtraOAuthParameters:nil];
+    [self setConsumer:nil];
+    [self setToken:nil];
+    [self setRealm:nil];
+    [self setSignatureProvider:nil];
+    [self setTimestamp:nil];
+    [self setNonce:nil];
+    [self setSignature:nil];
+	[super dealloc];
 }
 
 @end

@@ -103,7 +103,6 @@
 }
 
 - (void)dealloc {
-    [self.pin release];
 	[self.verifier release];
 	[self.key release];
 	[self.secret release];

@@ -79,6 +79,7 @@ id removeNull(id rootObject);
 
 @class OAToken;
 @class OAConsumer;
+@class OAMutableURLRequest;
 
 @interface FHSTwitterEngine : NSObject <UIWebViewDelegate>
 
@@ -311,6 +312,9 @@ id removeNull(id rootObject);
 - (void)loadAccessToken;
 - (BOOL)isAuthorized;
 
+// sendRequest methods, use these for every request
+- (NSError *)sendPOSTRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
+- (id)sendGETRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
 
 //
 // Misc Methods
@@ -334,4 +338,18 @@ id removeNull(id rootObject);
 // Will be called to store the accesstoken
 @property (nonatomic, strong) id<FHSTwitterEngineAccessTokenDelegate> delegate;
 
+// Access Token
+@property (strong, nonatomic) OAToken *accessToken;
+
+@end
+
+@interface NSData (Base64)
++ (NSData *)dataWithBase64EncodedString:(NSString *)string;
+- (id)initWithBase64EncodedString:(NSString *)string;
+- (NSString *)base64EncodingWithLineLength:(unsigned int)lineLength;
+@end
+
+@interface NSString (FHSTwitterEngine)
+- (NSString *)trimForTwitter;
+- (BOOL)isNumeric;
 @end
