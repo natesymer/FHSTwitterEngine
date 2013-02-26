@@ -3,7 +3,7 @@ FHSTwitterEngine
 
 ***The synchronous Twitter engine that doesn't suck!!***
 
-Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [fhsjaagshs](http://twitter.com/fhsjaagshs)
+Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](http://twitter.com/natesymer)
 
 
 `FHSTwitterEngine` can:
