@@ -20,6 +20,11 @@ FHSTwitterEngine
 - Fixed a TON of bugs
 - Cut dependency on TouchJSON
 
+**Version 1.2**
+
+- Fixed the postTweet:withImageData:inReplyTo: method.
+
+
 OAuthConsumer
 ===
 *Version numbers below refer to FHSTwitterEngine versions*
@@ -36,3 +41,4 @@ OAuthConsumer
 
 - Fix most remaining memory leaks
 - Add better support the pin/verifier property in OAToken (The version of OAuthConsumer in SA_OAuthTwitterEngine uses the pin property)
+

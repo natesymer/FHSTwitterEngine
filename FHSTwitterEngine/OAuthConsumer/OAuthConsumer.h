@@ -23,6 +23,13 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
+
+//
+//
+// FHSTwitterEngine OAuthConsumer Version 1.1
+// As modified by Nate Symer (@natesymer)
+//
+
 #import <Foundation/Foundation.h>
 #import "OAToken.h"
 #import "OAConsumer.h"

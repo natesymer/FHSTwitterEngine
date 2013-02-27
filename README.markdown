@@ -5,7 +5,6 @@ FHSTwitterEngine
 
 Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](http://twitter.com/natesymer)
 
-
 `FHSTwitterEngine` can:
 
 - Login through xAuth.
@@ -71,7 +70,7 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
 
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		NSError *error = [engine twitterAPIMethod]; // POST
+    		NSError *error = [engine twitterAPIMethod]; 
     		// Handle error
     		dispatch_sync(GCDMainThread, ^{
     			@autoreleasepool {
@@ -85,8 +84,8 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
 
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		id twitterData = [engine twitterAPIMethod]; // GET
-    		// Handle twitterData
+    		id twitterData = [engine twitterAPIMethod];
+    		// Handle twitterData (see "About GET REquests")
     		dispatch_sync(GCDMainThread, ^{
     			@autoreleasepool {
         			// Update UI
@@ -98,19 +97,19 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
 **Grand Central Dispatch**
 
 So what are those `GCDBackgroundThread` and `GCDMainThread`?<br />
-They are macros for `dispatch_async()` and `dispatch_sync()`, respectively. They make using GCD much easier.
+They are macros for `dispatch_async()` and `dispatch_sync()`, respectively. They make using GCD much easier. Yes, GCD is the designated way of adding async functionality to FHSTwitterEngine without losing the procedural paradigm.
 
 **About POST requests**
 
-All methods that send POST requests, including the xAuth login method, return `NSError`. If there is no error, they will return `nil`.
+All methods that send POST requests, including the xAuth login method, return `NSError`. If there is no error, they should return `nil`.
 
 **General networking comments**
 
-`FHSTwitterEngine` will attempt to preëmtively detect errors in your requests. This is designed to prevent flawed requests from being needlessly sent. This helps with rate limiting and turnover times.
+`FHSTwitterEngine` will attempt to preëmtively detect errors in your requests. This is designed to prevent flawed requests from being needlessly sent. This helps with rate limiting and networking turnover times.
 
-**About GET request return codes**
+**About GET requests**
 
-GET methods return id. There are a few kinds of returned values:
+GET methods return id. There returned object can be a member of one of the following classes:
 
 - `NSDictionary`
 - `NSArray`
@@ -119,11 +118,14 @@ GET methods return id. There are a few kinds of returned values:
 - `NSError`
 - `nil`
 
-In the case of `authenticatedUserIsBlocking:isID:`, an NSString will be returned. It will be `@"YES"` to indicate YES and `@"NO"` to indicate NO. Additionally, it will return an NSError if it fails.
+In the case of `authenticatedUserIsBlocking:isID:`, an NSString will be returned. It will be `@"YES"` to indicate YES and `@"NO"` to indicate NO. Additionally, it will return an NSError if it fails. How else could I prevent false negatives?
 
 **For the future**
 
 Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
+
+- Specify AppID and Secret for each request for added security
+- Add full search API support
 
 **IMPORTANT**
 
@@ -133,10 +135,11 @@ Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 - Fixed string comparisons
 - Fixed memory leaks
 - Fixed bugs
+- Compatibility with alternative versions of OAuthConsumer
 
 **Fixes for some common problems** (and best practices)
 
-- If you have any errors concerning multiple declarations for any class, check to make sure that any class is not importing another class which is importing the first class (AKA `#import` loop - A imports B which imports A which imports B...)
+- If you have any errors concerning multiple declarations for any class, check to make sure that any class is not importing another class which is importing the first class (aka `#import` loop - A imports B which imports A which imports B...)
 
 
 
