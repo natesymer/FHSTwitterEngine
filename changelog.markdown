@@ -4,6 +4,8 @@
 FHSTwitterEngine
 ===
 
+Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngine used to be 100% undocumented.
+
 **Initial Commits**
 
 - Added more endpoints
@@ -23,6 +25,7 @@ FHSTwitterEngine
 **Version 1.2**
 
 - Fixed the postTweet:withImageData:inReplyTo: method.
+- Added Search API stuffs
 
 
 OAuthConsumer
