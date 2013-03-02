@@ -125,6 +125,82 @@ id removeNull(id rootObject) {
 
 @synthesize consumer, accessToken, loggedInUsername, loggedInID, delegate;
 
+- (id)searchUsersWithQuery:(NSString *)q andCount:(int)count {
+    
+    if (q.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The query string was empty." code:403 userInfo:nil];
+    }
+    
+    if (q.length > 1000) {
+        q = [q substringToIndex:1000];
+    }
+    
+    if (count == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The number of results you specified was 0." code:403 userInfo:nil];
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/users/search.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:@"false"];
+    OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
+    OARequestParameter *qP = [OARequestParameter requestParameterWithName:@"q" value:q];
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, countP, qP, nil]];
+}
+
+- (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
+    
+    if (q.length == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The query string was empty." code:403 userInfo:nil];
+    }
+    
+    if (q.length > 1000) {
+        q = [q substringToIndex:1000];
+    }
+    
+    if (count == 0) {
+        return [NSError errorWithDomain:@"Bad Request: The number of results you specified was 0." code:403 userInfo:nil];
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/search/tweets.json"];
+    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
+    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:@"false"];
+    OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
+    OARequestParameter *sinceIDP = [OARequestParameter requestParameterWithName:@"since_id" value:sinceID];
+    OARequestParameter *maxIDP = [OARequestParameter requestParameterWithName:@"max_id" value:maxID];
+    OARequestParameter *untilP = [OARequestParameter requestParameterWithName:@"until" value:nil];
+    OARequestParameter *result_typeP = [OARequestParameter requestParameterWithName:@"result_type" value:nil];
+    OARequestParameter *qP = [OARequestParameter requestParameterWithName:@"q" value:q];
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc]init];
+    formatter.dateFormat = @"YYYY-MM-DD";
+    NSString *untilString = [formatter stringFromDate:untilDate];
+    untilP.value = untilString;
+
+    if (resultType == FHSTwitterEngineResultTypeMixed) {
+        result_typeP.value = @"mixed";
+    } else if (resultType == FHSTwitterEngineResultTypeRecent) {
+        result_typeP.value = @"recent";
+    } else if (resultType == FHSTwitterEngineResultTypePopular) {
+        result_typeP.value = @"popular";
+    }
+    
+    NSMutableArray *params = [NSMutableArray array];
+    
+    if (maxID.length > 0) {
+        [params addObject:maxIDP];
+    }
+    
+    if (sinceID.length > 0) {
+        [params addObject:sinceIDP];
+    }
+    
+    [params addObject:countP];
+    [params addObject:include_entitiesP];
+    [params addObject:qP];
+    
+    return [self sendGETRequest:request withParameters:params];
+}
+
 - (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description {
     
     if (name.length == 0) {
@@ -915,27 +991,9 @@ id removeNull(id rootObject) {
     return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:userP, userTwoP, nil]];
 }
 
-- (id)searchTwitterWithQuery:(NSString *)queryString {
-    
-    int length = queryString.length;
-    
-    if (length == 0 || length > 1000) {
-        return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
-    }
-    
-    NSURL *baseURL = [NSURL URLWithString:@"https://search.twitter.com/search.json"];
-    OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
-    
-    OARequestParameter *queryP = [OARequestParameter requestParameterWithName:@"q" value:queryString];
-    
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:queryP, nil]];
-}
-
 - (id)verifyCredentials {
-    
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/account/verify_credentials.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
-    
     return [self sendGETRequest:request withParameters:nil];
 }
 
