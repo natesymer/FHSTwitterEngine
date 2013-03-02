@@ -345,6 +345,9 @@ id removeNull(id rootObject);
 // Determines your internet status
 + (BOOL)isConnectedToInternet;
 
+// Determines if entities should be included
+@property (nonatomic, assign) BOOL includeEntities;
+
 // Logged in user's username
 @property (nonatomic, strong) NSString *loggedInUsername;
 

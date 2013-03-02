@@ -123,7 +123,7 @@ id removeNull(id rootObject) {
 
 @implementation FHSTwitterEngine
 
-@synthesize consumer, accessToken, loggedInUsername, loggedInID, delegate;
+@synthesize consumer, accessToken, loggedInUsername, loggedInID, delegate, includeEntities;
 
 - (id)searchUsersWithQuery:(NSString *)q andCount:(int)count {
     
@@ -141,7 +141,7 @@ id removeNull(id rootObject) {
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/users/search.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
-    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:@"false"];
+    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
     OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
     OARequestParameter *qP = [OARequestParameter requestParameterWithName:@"q" value:q];
     return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, countP, qP, nil]];
@@ -163,7 +163,7 @@ id removeNull(id rootObject) {
     
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/search/tweets.json"];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
-    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:@"false"];
+    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
     OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
     OARequestParameter *sinceIDP = [OARequestParameter requestParameterWithName:@"since_id" value:sinceID];
     OARequestParameter *maxIDP = [OARequestParameter requestParameterWithName:@"max_id" value:maxID];
@@ -1536,11 +1536,11 @@ id removeNull(id rootObject) {
         baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/users/lookup.json"];
         
         OARequestParameter *iden = [OARequestParameter requestParameterWithName:@"user_id" value:idListString];
-        OARequestParameter *includeEntities = [OARequestParameter requestParameterWithName:@"include_entities" value:@"false"];
+        OARequestParameter *includeEntitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
         
         OAMutableURLRequest *requestTwo = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
         
-        id parsed = [self sendGETRequest:requestTwo withParameters:[NSArray arrayWithObjects:iden, includeEntities, nil]];
+        id parsed = [self sendGETRequest:requestTwo withParameters:[NSArray arrayWithObjects:iden, includeEntitiesP, nil]];
         
         if ([parsed isKindOfClass:[NSDictionary class]]) {
             [usernames addObject:[parsed objectForKey:@"screen_name"]];
@@ -1588,11 +1588,11 @@ id removeNull(id rootObject) {
         baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/users/lookup.json"];
         
         OARequestParameter *iden = [OARequestParameter requestParameterWithName:@"user_id" value:idListString];
-        OARequestParameter *includeEntities = [OARequestParameter requestParameterWithName:@"include_entities" value:@"false"]; 
+        OARequestParameter *includeEntitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
         
         OAMutableURLRequest *requestTwo = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
         
-        id parsed = [self sendGETRequest:requestTwo withParameters:[NSArray arrayWithObjects:iden, includeEntities, nil]];
+        id parsed = [self sendGETRequest:requestTwo withParameters:[NSArray arrayWithObjects:iden, includeEntitiesP, nil]];
         
         if ([parsed isKindOfClass:[NSDictionary class]]) {
             [usernames addObject:[parsed objectForKey:@"screen_name"]];
