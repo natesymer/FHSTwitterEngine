@@ -27,6 +27,8 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Fixed the postTweet:withImageData:inReplyTo: method.
 - Added Search API stuffs
 
+**Version 1.3**
+- Added self.includeEntities to turn on or off the inclusion of entities. Defaults to off.
 
 OAuthConsumer
 ===
@@ -44,4 +46,3 @@ OAuthConsumer
 
 - Fix most remaining memory leaks
 - Add better support the pin/verifier property in OAToken (The version of OAuthConsumer in SA_OAuthTwitterEngine uses the pin property)
-
