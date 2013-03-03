@@ -125,7 +125,7 @@ In the case of `authenticatedUserIsBlocking:isID:`, an NSString will be returned
 Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 
 - Specify AppID and Secret for each request for added security
-- Add full search API support
+- Mac support
 
 **IMPORTANT**
 
@@ -137,9 +137,12 @@ Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 - Fixed bugs
 - Compatibility with alternative versions of OAuthConsumer
 
+**I'm from New Jersey, so pardon my sarcastic comments, mkay?**
+
 **Fixes for some common problems** (and best practices)
 
 - If you have any errors concerning multiple declarations for any class, check to make sure that any class is not importing another class which is importing the first class (aka `#import` loop - A imports B which imports A which imports B...)
 
+kthxbye
 
 
