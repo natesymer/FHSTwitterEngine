@@ -130,7 +130,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"MhgSItbeGPfGAxN2iEaVw" andSecret:@"kn5w5O2G0RpB1jz7FYMLbF4yDesFnySIUeOZ8mUCxA"];
+    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"" andSecret:@""];
     [tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
 }
 

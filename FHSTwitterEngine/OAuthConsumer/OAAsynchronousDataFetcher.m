@@ -32,9 +32,8 @@
     [request prepare];
     
     [NSURLConnection sendAsynchronousRequest:request queue:[[[NSOperationQueue alloc]init]autorelease] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
-        OAServiceTicket *ticket = [[OAServiceTicket alloc]initWithRequest:request response:response didSucceed:(error == nil)];
+        OAServiceTicket *ticket = [[[OAServiceTicket alloc]initWithRequest:request response:response didSucceed:(error == nil)]autorelease];
         block(ticket, data, error);
-        [ticket release];
     }];
 }
 

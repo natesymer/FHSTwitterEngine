@@ -14,7 +14,6 @@
 		9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BC315E805D1007E66E0 /* ViewController.m */; };
 		9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */; };
 		9B2A1C2B15E807D9007E66E0 /* NSString+URLEncoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0F15E807D9007E66E0 /* NSString+URLEncoding.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		9B2A1C2D15E807D9007E66E0 /* Base64Transcoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1315E807D9007E66E0 /* Base64Transcoder.c */; };
 		9B2A1C2E15E807D9007E66E0 /* OAAsynchronousDataFetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1615E807D9007E66E0 /* OAAsynchronousDataFetcher.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C2F15E807D9007E66E0 /* OAConsumer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1815E807D9007E66E0 /* OAConsumer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C3115E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1C15E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -26,6 +25,7 @@
 		9B31B96015E56E34003FC89D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B95F15E56E34003FC89D /* UIKit.framework */; };
 		9B31B96215E56E34003FC89D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96115E56E34003FC89D /* Foundation.framework */; };
 		9B31B96415E56E34003FC89D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96315E56E34003FC89D /* CoreGraphics.framework */; };
+		F1BD926D16E8E49F005A9C1F /* Base64TranscoderFHS.c in Sources */ = {isa = PBXBuildFile; fileRef = F1BD926B16E8E49F005A9C1F /* Base64TranscoderFHS.c */; };
 		F1E39F9916645C380049DAB1 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */; };
 /* End PBXBuildFile section */
 
@@ -43,8 +43,6 @@
 		9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FHSTwitterEngine.m; sourceTree = "<group>"; };
 		9B2A1C0E15E807D9007E66E0 /* NSString+URLEncoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+URLEncoding.h"; sourceTree = "<group>"; };
 		9B2A1C0F15E807D9007E66E0 /* NSString+URLEncoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+URLEncoding.m"; sourceTree = "<group>"; };
-		9B2A1C1315E807D9007E66E0 /* Base64Transcoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Base64Transcoder.c; sourceTree = "<group>"; };
-		9B2A1C1415E807D9007E66E0 /* Base64Transcoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64Transcoder.h; sourceTree = "<group>"; };
 		9B2A1C1515E807D9007E66E0 /* OAAsynchronousDataFetcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAAsynchronousDataFetcher.h; sourceTree = "<group>"; };
 		9B2A1C1615E807D9007E66E0 /* OAAsynchronousDataFetcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAAsynchronousDataFetcher.m; sourceTree = "<group>"; };
 		9B2A1C1715E807D9007E66E0 /* OAConsumer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAConsumer.h; sourceTree = "<group>"; };
@@ -65,6 +63,8 @@
 		9B31B95F15E56E34003FC89D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		9B31B96115E56E34003FC89D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		9B31B96315E56E34003FC89D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		F1BD926B16E8E49F005A9C1F /* Base64TranscoderFHS.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Base64TranscoderFHS.c; sourceTree = "<group>"; };
+		F1BD926C16E8E49F005A9C1F /* Base64TranscoderFHS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64TranscoderFHS.h; sourceTree = "<group>"; };
 		F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -155,8 +155,8 @@
 		9B2A1C1215E807D9007E66E0 /* Crytpo */ = {
 			isa = PBXGroup;
 			children = (
-				9B2A1C1415E807D9007E66E0 /* Base64Transcoder.h */,
-				9B2A1C1315E807D9007E66E0 /* Base64Transcoder.c */,
+				F1BD926B16E8E49F005A9C1F /* Base64TranscoderFHS.c */,
+				F1BD926C16E8E49F005A9C1F /* Base64TranscoderFHS.h */,
 			);
 			path = Crytpo;
 			sourceTree = "<group>";
@@ -258,7 +258,6 @@
 				9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */,
 				9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */,
 				9B2A1C2B15E807D9007E66E0 /* NSString+URLEncoding.m in Sources */,
-				9B2A1C2D15E807D9007E66E0 /* Base64Transcoder.c in Sources */,
 				9B2A1C2E15E807D9007E66E0 /* OAAsynchronousDataFetcher.m in Sources */,
 				9B2A1C2F15E807D9007E66E0 /* OAConsumer.m in Sources */,
 				9B2A1C3115E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m in Sources */,
@@ -266,6 +265,7 @@
 				9B2A1C3415E807D9007E66E0 /* OARequestParameter.m in Sources */,
 				9B2A1C3515E807D9007E66E0 /* OAServiceTicket.m in Sources */,
 				9B2A1C3615E807D9007E66E0 /* OAToken.m in Sources */,
+				F1BD926D16E8E49F005A9C1F /* Base64TranscoderFHS.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -25,8 +25,8 @@
 
 //
 //
-// //// Version 1.3 ////
-// FHSTwitterEngine //OAuthConsumer// Version 1.1
+// //// Version 1.3.1 ////
+// FHSTwitterEngine //OAuthConsumer// Version 1.2
 //
 //
 
@@ -358,7 +358,7 @@ id removeNull(id rootObject);
 @property (nonatomic, strong) id<FHSTwitterEngineAccessTokenDelegate> delegate;
 
 // Access Token
-@property (strong, nonatomic) OAToken *accessToken;
+@property (nonatomic, strong) OAToken *accessToken;
 
 @end
 

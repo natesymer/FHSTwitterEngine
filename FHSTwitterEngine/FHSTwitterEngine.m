@@ -2119,9 +2119,8 @@ id removeNull(id rootObject) {
                 return YES;
             }
         }
+        CFRelease(reachability);
     }
-    
-    CFRelease(reachability);
     return NO;
 }
 
@@ -2365,7 +2364,8 @@ static char encodingTable[64] = {
 		unsigned long ixtext = 0;
 		unsigned long lentext = 0;
 		unsigned char ch = 0;
-		unsigned char inbuf[4], outbuf[3];
+		// unsigned char inbuf[4], outbuf[3];
+        unsigned char inbuf[4] = {0,0,0,0}, outbuf[3] = {0,0,0};
 		short ixinbuf = 0;
 		BOOL flignore = NO;
 		BOOL flendtext = NO;

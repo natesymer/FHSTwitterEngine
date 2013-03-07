@@ -40,8 +40,8 @@
 }
 
 - (void)dealloc {
-	[self.request release];
-	[self.response release];
+    [self setRequest:nil];
+    [self setResponse:nil];
 	[super dealloc];
 }
 

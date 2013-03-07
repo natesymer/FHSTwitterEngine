@@ -103,9 +103,9 @@
 }
 
 - (void)dealloc {
-	[self.verifier release];
-	[self.key release];
-	[self.secret release];
+    [self setVerifier:nil];
+    [self setKey:nil];
+    [self setSecret:nil];
 	[super dealloc];
 }
 
