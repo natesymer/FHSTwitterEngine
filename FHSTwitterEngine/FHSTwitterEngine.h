@@ -25,8 +25,8 @@
 
 //
 //
-// //// Version 1.3.1 ////
-// FHSTwitterEngine //OAuthConsumer// Version 1.2
+// //// FHSTwitterEngine Version 1.3.2 ////
+//    Modified OAuthConsumer Version 1.2
 //
 //
 
@@ -328,6 +328,9 @@ id removeNull(id rootObject);
 - (void)loadAccessToken;
 - (BOOL)isAuthorized;
 
+// Clear Keys
+- (void)clearConsumer;
+
 // sendRequest methods, use these for every request
 - (NSError *)sendPOSTRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
 - (id)sendGETRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
@@ -338,6 +341,12 @@ id removeNull(id rootObject);
 
 // Date parser
 - (NSDate *)getDateFromTwitterCreatedAt:(NSString *)twitterDate;
+
+// Temporaryily set keys
+// if you don't want your keys in memory, simply use
+// this method. You will have to use it before logging in.
+// Use the standard -[FHSTwitterEngine init] method.
+- (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
 
 // init method
 - (id)initWithConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;

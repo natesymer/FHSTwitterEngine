@@ -98,6 +98,7 @@ id removeNull(id rootObject) {
 // These are here to obfuscate them from prying eyes
 
 @property (strong, nonatomic) OAConsumer *consumer;
+@property (assign, nonatomic) BOOL shouldClearConsumer;
 
 @end
 
@@ -1665,6 +1666,11 @@ id removeNull(id rootObject) {
     
     [request prepare];
     
+    if (self.shouldClearConsumer) {
+        self.shouldClearConsumer = NO;
+        self.consumer = nil;
+    }
+    
     NSError *error = nil;
     NSHTTPURLResponse *response = nil;
     
@@ -1706,6 +1712,11 @@ id removeNull(id rootObject) {
     [request setHTTPMethod:@"POST"];
     [request setParameters:params];
     [request prepare];
+    
+    if (self.shouldClearConsumer) {
+        self.shouldClearConsumer = NO;
+        self.consumer = nil;
+    }
     
     NSError *error = nil;
     NSHTTPURLResponse *response = nil;
@@ -1752,6 +1763,11 @@ id removeNull(id rootObject) {
     [request setHTTPMethod:@"GET"];
     [request setParameters:params];
     [request prepare];
+    
+    if (self.shouldClearConsumer) {
+        self.shouldClearConsumer = NO;
+        self.consumer = nil;
+    }
     
     NSError *error = nil;
     NSHTTPURLResponse *response = nil;
@@ -1833,6 +1849,11 @@ id removeNull(id rootObject) {
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:url consumer:self.consumer token:reqToken realm:nil signatureProvider:nil];
     [request setHTTPMethod:@"POST"];
     [request prepare];
+    
+    if (self.shouldClearConsumer) {
+        self.shouldClearConsumer = NO;
+        self.consumer = nil;
+    }
     
     NSError *error = nil;
     NSHTTPURLResponse *response = nil;
@@ -1961,6 +1982,7 @@ id removeNull(id rootObject) {
 	return nil;
 }
 
+
 - (NSDate *)getDateFromTwitterCreatedAt:(NSString *)twitterDate {
     // Twitter API datestamps are UTC
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
@@ -1969,10 +1991,21 @@ id removeNull(id rootObject) {
     [dateFormatter setDateStyle:NSDateFormatterLongStyle];
     [dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
     
-    [dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss +0000 yyyy"];
+    // according to some chinese programmer, this is wrong.
+    //[dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss +0000 yyyy"];
     
-    NSDate *date = [dateFormatter dateFromString:twitterDate];
-    return date;
+    [dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss ZZZZ yyyy"];
+    
+    return [dateFormatter dateFromString:twitterDate];
+}
+
+- (void)clearConsumer {
+    self.consumer = nil;
+}
+
+- (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret {
+    self.shouldClearConsumer = YES;
+    self.consumer = [[OAConsumer alloc]initWithKey:consumerKey secret:consumerSecret];
 }
 
 - (NSString *)getSarcasticErrorDescriptionForErrorCode:(int)errorCode {

@@ -30,8 +30,13 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 **Version 1.3**
 - Added self.includeEntities to turn on or off the inclusion of entities. Defaults to NO.
 
-**Version 3.1.3**
+**Version 1.3.1**
 - Fixed some potential problems in base64EncodingWithLineLength:
+
+**Version 1.3.2**
+- Fixed an issue with the date format from twitter, thanks to Jason Hsu.
+- Added the ability to set your consumer key and secret on a per-request basis.
+
 
 
 OAuthConsumer

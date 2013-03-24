@@ -36,6 +36,10 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
 
     FHSTwitterEngine *engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
     
+    // or 
+    
+    FHSTwitterEngine *engine = [[FHSTwitterEngine alloc]init]; // If you plan to set your keys on a per-request basis
+    
 --> Login via OAuth:
     
     [engine showOAuthLoginControllerFromViewController:self];
@@ -53,6 +57,15 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
        		});
     	}
     });
+    
+--> Set up your consumer manually and temorarily
+	
+	// your keys will be cleared after the next request is prepared, before it is sent.
+	[engine temporarilySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
+	
+	// if you are really paranoid, use this
+	[engine clearConsumer];
+	
     
 --> Reload a saved access_token:
 
