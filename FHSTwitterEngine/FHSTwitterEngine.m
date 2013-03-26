@@ -1431,7 +1431,11 @@ id removeNull(id rootObject) {
     OARequestParameter *since_id = [OARequestParameter requestParameterWithName:@"since_id" value:sinceID];
     OARequestParameter *countParam = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d", count]];
     
-    NSArray *params = [NSArray arrayWithObjects:since_id, countParam, nil];
+    NSMutableArray *params = [NSMutableArray arrayWithObjects:countParam, nil];
+    
+    if (sinceID.length > 0) {
+        [params addObject:since_id];
+    }
     
     return [self sendGETRequest:request withParameters:params];
 }
