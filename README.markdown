@@ -3,9 +3,9 @@ FHSTwitterEngine
 
 ***The synchronous Twitter engine that doesn't suck!!***
 
-Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](http://twitter.com/natesymer)
+Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](http://twitter.com/natesymer) 
 
-<input value="Donate" alt="Buy me a coffee or graphics card" type="button" onClick="parent.href='http://natesymer.com/donate/'">
+Feel free to <a href="http://natesymer.com/donate/" alt="Buy me a coffee or graphics card">buy me a coffee</a> (donation).
 
 
 `FHSTwitterEngine` can:
