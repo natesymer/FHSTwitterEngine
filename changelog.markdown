@@ -52,7 +52,7 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 
 OAuthConsumer
 ===
-*Version numbers below refer to FHSTwitterEngine versions*
+*Version numbers below are for \_my\_ version of OAuthConsumer*
 
 **Initial Commits**
 
