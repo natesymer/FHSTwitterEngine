@@ -46,7 +46,7 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 
 **Version 1.4**
 
-- Fixed misspelling of "Destroy" (was destory) in a method name (I think it was destoryTweet:). Thanks to Conrad Kramer ([@conradev](http://twitter.com/conradev))
+- Fixed misspelling of "Destroy" (was destory) in a method name (I think it was destoryTweet:). Thanks to Conrad Kramer ([@conradev](http://twitter.com/conradev)) for pointing this out.
 - Added completion block to OAuth login method
 - Fixed lag with the date parsing method by not lazily allocating the NSDateFormatter. A 200ms delay is now gone. *And there was much rejoycing*.
 
