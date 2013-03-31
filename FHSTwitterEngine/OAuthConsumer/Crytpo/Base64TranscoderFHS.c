@@ -101,130 +101,125 @@ const u_int8_t kBits_11000000_ = 0xC0;
 const u_int8_t kBits_11110000_ = 0xF0;
 const u_int8_t kBits_11111100_ = 0xFC;
 
-size_t EstimateBas64EncodedDataSizeFHS(size_t inDataSize)
-{
-size_t theEncodedDataSize = (int)ceil(inDataSize / 3.0) * 4;
-theEncodedDataSize = theEncodedDataSize / 72 * 74 + theEncodedDataSize % 72;
-return(theEncodedDataSize);
+size_t EstimateBas64EncodedDataSizeFHS(size_t inDataSize) {
+    size_t theEncodedDataSize = (int)ceil(inDataSize / 3.0) * 4;
+    theEncodedDataSize = theEncodedDataSize / 72 * 74 + theEncodedDataSize % 72;
+    return(theEncodedDataSize);
 }
 
-size_t EstimateBas64DecodedDataSizeFHS(size_t inDataSize)
-{
-size_t theDecodedDataSize = (int)ceil(inDataSize / 4.0) * 3;
-//theDecodedDataSize = theDecodedDataSize / 72 * 74 + theDecodedDataSize % 72;
-return(theDecodedDataSize);
+size_t EstimateBas64DecodedDataSizeFHS(size_t inDataSize)   {
+    size_t theDecodedDataSize = (int)ceil(inDataSize / 4.0) * 3;
+    //theDecodedDataSize = theDecodedDataSize / 72 * 74 + theDecodedDataSize % 72;
+    return(theDecodedDataSize);
 }
 
-bool Base64EncodeDataFHS(const void *inInputData, size_t inInputDataSize, char *outOutputData, size_t *ioOutputDataSize)
-{
-size_t theEncodedDataSize = EstimateBas64EncodedDataSizeFHS(inInputDataSize);
-if (*ioOutputDataSize < theEncodedDataSize)
-	return(false);
-*ioOutputDataSize = theEncodedDataSize;
-const u_int8_t *theInPtr = (const u_int8_t *)inInputData;
-u_int32_t theInIndex = 0, theOutIndex = 0;
-for (; theInIndex < (inInputDataSize / 3) * 3; theInIndex += 3)
-	{
-	outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_11111100_) >> 2];
-	outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_00000011_) << 4 | (theInPtr[theInIndex + 1] & kBits_11110000_) >> 4];
-	outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex + 1] & kBits_00001111_) << 2 | (theInPtr[theInIndex + 2] & kBits_11000000_) >> 6];
-	outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex + 2] & kBits_00111111_) >> 0];
-	if (theOutIndex % 74 == 72)
-		{
-		outOutputData[theOutIndex++] = '\r';
-		outOutputData[theOutIndex++] = '\n';
+bool Base64EncodeDataFHS(const void *inInputData, size_t inInputDataSize, char *outOutputData, size_t *ioOutputDataSize) {
+    
+    size_t theEncodedDataSize = EstimateBas64EncodedDataSizeFHS(inInputDataSize);
+    if (*ioOutputDataSize < theEncodedDataSize) {
+        return false;
+    }
+    
+    *ioOutputDataSize = theEncodedDataSize;
+    const u_int8_t *theInPtr = (const u_int8_t *)inInputData;
+    u_int32_t theInIndex = 0, theOutIndex = 0;
+    for (; theInIndex < (inInputDataSize / 3) * 3; theInIndex += 3) {
+        outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_11111100_) >> 2];
+        outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_00000011_) << 4 | (theInPtr[theInIndex + 1] & kBits_11110000_) >> 4];
+        outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex + 1] & kBits_00001111_) << 2 | (theInPtr[theInIndex + 2] & kBits_11000000_) >> 6];
+        outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex + 2] & kBits_00111111_) >> 0];
+        
+        if (theOutIndex % 74 == 72) {
+            outOutputData[theOutIndex++] = '\r';
+            outOutputData[theOutIndex++] = '\n';
 		}
 	}
-const size_t theRemainingBytes = inInputDataSize - theInIndex;
-if (theRemainingBytes == 1)
-	{
-	outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_11111100_) >> 2];
-	outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_00000011_) << 4 | (0 & kBits_11110000_) >> 4];
-	outOutputData[theOutIndex++] = '=';
-	outOutputData[theOutIndex++] = '=';
-	if (theOutIndex % 74 == 72)
-		{
-		outOutputData[theOutIndex++] = '\r';
-		outOutputData[theOutIndex++] = '\n';
+    
+    const size_t theRemainingBytes = inInputDataSize - theInIndex;
+    
+    if (theRemainingBytes == 1) {
+        outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_11111100_) >> 2];
+        outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_00000011_) << 4 | (0 & kBits_11110000_) >> 4];
+        outOutputData[theOutIndex++] = '=';
+        outOutputData[theOutIndex++] = '=';
+        
+        if (theOutIndex % 74 == 72) {
+            outOutputData[theOutIndex++] = '\r';
+            outOutputData[theOutIndex++] = '\n';
+		}
+	} else if (theRemainingBytes == 2) {
+        outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_11111100_) >> 2];
+        outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_00000011_) << 4 | (theInPtr[theInIndex + 1] & kBits_11110000_) >> 4];
+        outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex + 1] & kBits_00001111_) << 2 | (0 & kBits_11000000_) >> 6];
+        outOutputData[theOutIndex++] = '=';
+        
+        if (theOutIndex % 74 == 72) {
+            outOutputData[theOutIndex++] = '\r';
+            outOutputData[theOutIndex++] = '\n';
 		}
 	}
-else if (theRemainingBytes == 2)
-	{
-	outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_11111100_) >> 2];
-	outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex] & kBits_00000011_) << 4 | (theInPtr[theInIndex + 1] & kBits_11110000_) >> 4];
-	outOutputData[theOutIndex++] = kBase64EncodeTable_[(theInPtr[theInIndex + 1] & kBits_00001111_) << 2 | (0 & kBits_11000000_) >> 6];
-	outOutputData[theOutIndex++] = '=';
-	if (theOutIndex % 74 == 72)
-		{
-		outOutputData[theOutIndex++] = '\r';
-		outOutputData[theOutIndex++] = '\n';
-		}
-	}
-return(true);
+    
+    return true;
 }
 
-bool Base64DecodeData_(const void *inInputData, size_t inInputDataSize, void *ioOutputData, size_t *ioOutputDataSize)
-{
-memset(ioOutputData, '.', *ioOutputDataSize);
+bool Base64DecodeData_(const void *inInputData, size_t inInputDataSize, void *ioOutputData, size_t *ioOutputDataSize) {
+    
+    memset(ioOutputData, '.', *ioOutputDataSize);
 
-size_t theDecodedDataSize = EstimateBas64DecodedDataSizeFHS(inInputDataSize);
-if (*ioOutputDataSize < theDecodedDataSize)
-	return(false);
-*ioOutputDataSize = 0;
-const u_int8_t *theInPtr = (const u_int8_t *)inInputData;
-u_int8_t *theOutPtr = (u_int8_t *)ioOutputData;
-size_t theInIndex = 0, theOutIndex = 0;
-u_int8_t theOutputOctet;
-size_t theSequence = 0;
-for (; theInIndex < inInputDataSize; )
-	{
-	int8_t theSextet = 0;
+    size_t theDecodedDataSize = EstimateBas64DecodedDataSizeFHS(inInputDataSize);
+    if (*ioOutputDataSize < theDecodedDataSize) {
+        return false;
+    }
+
+    *ioOutputDataSize = 0;
+    const u_int8_t *theInPtr = (const u_int8_t *)inInputData;
+    u_int8_t *theOutPtr = (u_int8_t *)ioOutputData;
+    size_t theInIndex = 0, theOutIndex = 0;
+    u_int8_t theOutputOctet;
+    size_t theSequence = 0;
+    for (; theInIndex < inInputDataSize; ) {
+        int8_t theSextet = 0;
 	
-	int8_t theCurrentInputOctet = theInPtr[theInIndex];
-	theSextet = kBase64DecodeTable_[theCurrentInputOctet];
-	if (theSextet == -1)
-		break;
-	while (theSextet == -2)
-		{
-		theCurrentInputOctet = theInPtr[++theInIndex];
-		theSextet = kBase64DecodeTable_[theCurrentInputOctet];
+        int8_t theCurrentInputOctet = theInPtr[theInIndex];
+        theSextet = kBase64DecodeTable_[theCurrentInputOctet];
+        
+        if (theSextet == -1) {
+            break;
+        }
+        
+        while (theSextet == -2) {
+            theCurrentInputOctet = theInPtr[++theInIndex];
+            theSextet = kBase64DecodeTable_[theCurrentInputOctet];
 		}
-	while (theSextet == -3)
-		{
-		theCurrentInputOctet = theInPtr[++theInIndex];
-		theSextet = kBase64DecodeTable_[theCurrentInputOctet];
+        
+        while (theSextet == -3) {
+            theCurrentInputOctet = theInPtr[++theInIndex];
+            theSextet = kBase64DecodeTable_[theCurrentInputOctet];
 		}
-	if (theSequence == 0)
-		{
-		theOutputOctet = (theSextet >= 0 ? theSextet : 0) << 2 & kBits_11111100_;
+        
+        if (theSequence == 0) {
+            theOutputOctet = (theSextet >= 0 ? theSextet : 0) << 2 & kBits_11111100_;
+		} else if (theSequence == 1) {
+            theOutputOctet |= (theSextet >- 0 ? theSextet : 0) >> 4 & kBits_00000011_;
+            theOutPtr[theOutIndex++] = theOutputOctet;
+		} else if (theSequence == 2) {
+            theOutputOctet = (theSextet >= 0 ? theSextet : 0) << 4 & kBits_11110000_;
+		} else if (theSequence == 3) {
+            theOutputOctet |= (theSextet >= 0 ? theSextet : 0) >> 2 & kBits_00001111_;
+            theOutPtr[theOutIndex++] = theOutputOctet;
+		} else if (theSequence == 4) {
+            theOutputOctet = (theSextet >= 0 ? theSextet : 0) << 6 & kBits_11000000_;
+		} else if (theSequence == 5) {
+            theOutputOctet |= (theSextet >= 0 ? theSextet : 0) >> 0 & kBits_00111111_;
+            theOutPtr[theOutIndex++] = theOutputOctet;
 		}
-	else if (theSequence == 1)
-		{
-		theOutputOctet |= (theSextet >- 0 ? theSextet : 0) >> 4 & kBits_00000011_;
-		theOutPtr[theOutIndex++] = theOutputOctet;
-		}
-	else if (theSequence == 2)
-		{
-		theOutputOctet = (theSextet >= 0 ? theSextet : 0) << 4 & kBits_11110000_;
-		}
-	else if (theSequence == 3)
-		{
-		theOutputOctet |= (theSextet >= 0 ? theSextet : 0) >> 2 & kBits_00001111_;
-		theOutPtr[theOutIndex++] = theOutputOctet;
-		}
-	else if (theSequence == 4)
-		{
-		theOutputOctet = (theSextet >= 0 ? theSextet : 0) << 6 & kBits_11000000_;
-		}
-	else if (theSequence == 5)
-		{
-		theOutputOctet |= (theSextet >= 0 ? theSextet : 0) >> 0 & kBits_00111111_;
-		theOutPtr[theOutIndex++] = theOutputOctet;
-		}
-	theSequence = (theSequence + 1) % 6;
-	if (theSequence != 2 && theSequence != 4)
-		theInIndex++;
-	}
-*ioOutputDataSize = theOutIndex;
-return(true);
+        
+        theSequence = (theSequence+1)%6;
+        
+        if (theSequence != 2 && theSequence != 4) {
+            theInIndex++;
+        }
+    }
+    *ioOutputDataSize = theOutIndex;
+    return true;
 }

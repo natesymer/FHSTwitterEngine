@@ -60,7 +60,15 @@
 }
 
 - (IBAction)showLoginWindow:(id)sender {
-    [self presentModalViewController:[self.engine OAuthLoginWindow] animated:YES];
+    [self.engine showOAuthLoginControllerFromViewController:self withCompletion:^(BOOL success) {
+        
+        if (success) {
+            NSLog(@"L0L success");
+        } else {
+            NSLog(@"O noes!!! Loggen faylur!!!");
+        }
+       
+    }];
 }
 
 - (IBAction)logout:(id)sender {
@@ -84,7 +92,6 @@
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
             
             NSLog(@"%@",[self.engine getUserInformationForUsers:[NSArray arrayWithObjects:@"fhsjaagshs", @"twitter", nil] areUsers:YES]);
-            
             NSLog(@"followers:\n%@",[self.engine getFollowers]);
             
             dispatch_sync(GCDMainThread, ^{
@@ -130,7 +137,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"" andSecret:@""];
+    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"Xg3ACDprWAH8loEPjMzRg" andSecret:@"9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0"];
     [tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
 }
 

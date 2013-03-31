@@ -31,6 +31,7 @@
 #import <sys/socket.h>
 #import <netinet/in.h>
 #import <ifaddrs.h>
+#import <objc/runtime.h>
 
 id removeNull(id rootObject) {
     if ([rootObject isKindOfClass:[NSDictionary class]]) {
@@ -99,6 +100,7 @@ id removeNull(id rootObject) {
 
 @property (strong, nonatomic) OAConsumer *consumer;
 @property (assign, nonatomic) BOOL shouldClearConsumer;
+@property (strong, nonatomic) NSDateFormatter *dateFormatter;
 
 @end
 
@@ -124,7 +126,15 @@ id removeNull(id rootObject) {
 
 @implementation FHSTwitterEngine
 
-@synthesize consumer, accessToken, loggedInUsername, loggedInID, delegate, includeEntities;
+@synthesize consumer, accessToken, loggedInUsername, loggedInID, delegate, includeEntities, dateFormatter;
+
+static NSString * const url_users_search = @"https://api.twitter.com/1.1/users/search.json";
+static NSString * const url_search_tweets = @"https://api.twitter.com/1.1/search/tweets.json";
+static NSString * const url_lists_create = @"https://api.twitter.com/1.1/lists/create.json";
+static NSString * const url_lists_show = @"https://api.twitter.com/1.1/lists/show.json";
+static NSString * const url_lists_update = @"https://api.twitter.com/1.1/lists/update.json";
+static NSString * const url_lists_memberships = @"https://api.twitter.com/1.1/lists/memberships.json";
+static NSString * const url_lists_members = @"https://api.twitter.com/1.1/lists/members.json";
 
 - (id)searchUsersWithQuery:(NSString *)q andCount:(int)count {
     
@@ -140,7 +150,7 @@ id removeNull(id rootObject) {
         return [NSError errorWithDomain:@"Bad Request: The number of results you specified was 0." code:403 userInfo:nil];
     }
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/users/search.json"];
+    NSURL *baseURL = [NSURL URLWithString:url_users_search];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
     OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
@@ -162,7 +172,7 @@ id removeNull(id rootObject) {
         return [NSError errorWithDomain:@"Bad Request: The number of results you specified was 0." code:403 userInfo:nil];
     }
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/search/tweets.json"];
+    NSURL *baseURL = [NSURL URLWithString:url_search_tweets];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
     OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
@@ -208,7 +218,7 @@ id removeNull(id rootObject) {
         return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/create.json"];
+    NSURL *baseURL = [NSURL URLWithString:url_lists_create];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     OARequestParameter *nameP = [OARequestParameter requestParameterWithName:@"name" value:name];
@@ -236,7 +246,7 @@ id removeNull(id rootObject) {
         return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/show.json"];
+    NSURL *baseURL = [NSURL URLWithString:url_lists_show];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     OARequestParameter *listIDP = [OARequestParameter requestParameterWithName:@"list_id" value:listID];
@@ -254,7 +264,7 @@ id removeNull(id rootObject) {
         return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/update.json"];
+    NSURL *baseURL = [NSURL URLWithString:url_lists_update];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     OARequestParameter *listIDP = [OARequestParameter requestParameterWithName:@"list_id" value:listID];
@@ -273,7 +283,7 @@ id removeNull(id rootObject) {
         return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/update.json"];
+    NSURL *baseURL = [NSURL URLWithString:url_lists_update];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     OARequestParameter *listIDP = [OARequestParameter requestParameterWithName:@"list_id" value:listID];
@@ -288,7 +298,7 @@ id removeNull(id rootObject) {
         return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/update.json"];
+    NSURL *baseURL = [NSURL URLWithString:url_lists_update];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     OARequestParameter *listIDP = [OARequestParameter requestParameterWithName:@"list_id" value:listID];
@@ -309,7 +319,7 @@ id removeNull(id rootObject) {
         return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/memberships.json"];
+    NSURL *baseURL = [NSURL URLWithString:url_lists_memberships];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
     
     OARequestParameter *listIDP = [OARequestParameter requestParameterWithName:@"screen_name" value:user];
@@ -323,7 +333,7 @@ id removeNull(id rootObject) {
         return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
     }
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/lists/members.json"];
+    NSURL *baseURL = [NSURL URLWithString:url_lists_members];
     OAMutableURLRequest *request = [[OAMutableURLRequest alloc]initWithURL:baseURL consumer:self.consumer token:self.accessToken realm:nil signatureProvider:nil];
 
     OARequestParameter *listIDP = [OARequestParameter requestParameterWithName:@"list_id" value:listID];
@@ -524,7 +534,7 @@ id removeNull(id rootObject) {
     return [self sendPOSTRequest:request withParameters:params];
 }
 
-- (NSError *)destoryTweet:(NSString *)identifier {
+- (NSError *)destroyTweet:(NSString *)identifier {
     
     if (identifier.length == 0) {
         return [NSError errorWithDomain:@"Bad Request: The request you are trying to make is missing parameters." code:400 userInfo:nil];
@@ -1440,8 +1450,26 @@ id removeNull(id rootObject) {
     return [self sendGETRequest:request withParameters:params];
 }
 
-- (id)initWithConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret {
+- (id)init {
     self = [super init];
+    if (self) {
+        // Twitter API datestamps are UTC
+        self.dateFormatter = [[NSDateFormatter alloc]init];
+        NSLocale *usLocale = [[NSLocale alloc]initWithLocaleIdentifier:@"en_US"];
+        [self.dateFormatter setLocale:usLocale];
+        [self.dateFormatter setDateStyle:NSDateFormatterLongStyle];
+        [self.dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        
+        // according to some chinese programmer, this is wrong.
+        //[self.dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss +0000 yyyy"];
+        
+        [self.dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss ZZZZ yyyy"];
+    }
+    return self;
+}
+
+- (id)initWithConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret {
+    self = [self init];
     if (self) {
         self.consumer = [[OAConsumer alloc]initWithKey:consumerKey secret:consumerSecret];
     }
@@ -1891,7 +1919,7 @@ id removeNull(id rootObject) {
     
     NSString *savedHttpBody = nil;
     
-    if ([self.delegate respondsToSelector:@selector(loadAccessToken)]) {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(loadAccessToken)]) {
         savedHttpBody = [self.delegate loadAccessToken];
     } else {
         savedHttpBody = [[NSUserDefaults standardUserDefaults]objectForKey:@"SavedAccessHTTPBody"];
@@ -1986,21 +2014,8 @@ id removeNull(id rootObject) {
 	return nil;
 }
 
-
 - (NSDate *)getDateFromTwitterCreatedAt:(NSString *)twitterDate {
-    // Twitter API datestamps are UTC
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
-    NSLocale *usLocale = [[NSLocale alloc]initWithLocaleIdentifier:@"en_US"];
-    [dateFormatter setLocale:usLocale];
-    [dateFormatter setDateStyle:NSDateFormatterLongStyle];
-    [dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-    
-    // according to some chinese programmer, this is wrong.
-    //[dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss +0000 yyyy"];
-    
-    [dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss ZZZZ yyyy"];
-    
-    return [dateFormatter dateFromString:twitterDate];
+    return [self.dateFormatter dateFromString:twitterDate];
 }
 
 - (void)clearConsumer {
@@ -2113,13 +2128,14 @@ id removeNull(id rootObject) {
 }
 
 - (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender {
-    [sender presentModalViewController:[self OAuthLoginWindow] animated:YES];
+    [self showOAuthLoginControllerFromViewController:sender withCompletion:nil];
 }
 
-- (UIViewController *)OAuthLoginWindow {
+- (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender withCompletion:(void(^)(BOOL success))block {
     FHSTwitterEngineController *vc = [[FHSTwitterEngineController alloc]initWithEngine:self];
     vc.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
-    return vc;
+    objc_setAssociatedObject(self, "FHSTwitterEngineOAuthCompletion", [block copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [sender presentModalViewController:vc animated:YES];
 }
 
 + (BOOL)isConnectedToInternet {
@@ -2243,7 +2259,15 @@ id removeNull(id rootObject) {
 
 - (void)gotPin:(NSString *)pin {
     [self.requestToken setVerifier:pin];
-    [self.engine finishAuthWithPin:pin andRequestToken:self.requestToken];
+    
+    int ret = [self.engine finishAuthWithPin:pin andRequestToken:self.requestToken];
+    
+    void(^block)(BOOL success) = objc_getAssociatedObject(self.engine, "FHSTwitterEngineOAuthCompletion");
+    
+    if (block) {
+        block(!ret);
+    }
+    
     [self dismissModalViewControllerAnimated:YES];
 }
 

@@ -25,7 +25,7 @@
 
 //
 //
-// //// FHSTwitterEngine Version 1.3.3 ////
+// //// FHSTwitterEngine Version 1.4 ////
 //    Modified OAuthConsumer Version 1.2
 //
 //
@@ -261,8 +261,8 @@ id removeNull(id rootObject);
 // statuses/show
 - (id)getDetailsForTweet:(NSString *)identifier;
 
-// statuses/destory
-- (NSError *)destoryTweet:(NSString *)identifier;
+// statuses/destroy
+- (NSError *)destroyTweet:(NSString *)identifier;
 
 // statuses/update_with_media
 - (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
@@ -320,8 +320,8 @@ id removeNull(id rootObject);
 - (NSError *)getXAuthAccessTokenForUsername:(NSString *)username password:(NSString *)password;
 
 // OAuth login
-- (UIViewController *)OAuthLoginWindow; // You want to use it with something other than presentModalViewController:animated:
-- (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender; // just one less line of code
+- (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender;
+- (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender withCompletion:(void(^)(BOOL success))completionBlock;
 
 // Access Token Mangement
 - (void)clearAccessToken;

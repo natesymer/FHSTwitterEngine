@@ -41,11 +41,20 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
     
     // or 
     
-    FHSTwitterEngine *engine = [[FHSTwitterEngine alloc]init]; // If you plan to set your keys on a per-request basis
+    // If you plan to set your keys on a per-request basis
+    FHSTwitterEngine *engine = [[FHSTwitterEngine alloc]init]; 
     
 --> Login via OAuth:
     
-    [engine showOAuthLoginControllerFromViewController:self];
+    [self.engine showOAuthLoginControllerFromViewController:self withCompletion:^(BOOL success) {
+        
+        if (success) {
+            NSLog(@"L0L success");
+        } else {
+            NSLog(@"O noes!!! Loggen faylur!!!");
+        }
+       
+    }];
     
 --> Login via XAuth:
     
@@ -112,16 +121,16 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
 
 **Grand Central Dispatch**
 
-So what are those `GCDBackgroundThread` and `GCDMainThread`?<br />
-They are macros for `dispatch_async()` and `dispatch_sync()`, respectively. They make using GCD much easier. Yes, GCD is the designated way of adding async functionality to FHSTwitterEngine without losing the procedural paradigm.
+So what are those `GCDBackgroundThread` and `GCDMainThread` defines?<br />
+They are macros for `dispatch_async()` and `dispatch_sync()`, respectively. They make using GCD much easier. Yes, GCD is the best way to make FHSTwitterEngine asynchonous. GCD allows for FHSTwitterEngine to remain procedural, but you knew that.
 
-**About POST requests**
+**General Comments**
+
+`FHSTwitterEngine` will attempt to preëmtively detect errors in your requests. This is designed to prevent flawed requests from being needlessly sent.
+
+**About POST Requests**
 
 All methods that send POST requests, including the xAuth login method, return `NSError`. If there is no error, they should return `nil`.
-
-**General networking comments**
-
-`FHSTwitterEngine` will attempt to preëmtively detect errors in your requests. This is designed to prevent flawed requests from being needlessly sent. This helps with rate limiting and networking turnover times.
 
 **About GET requests**
 
@@ -134,24 +143,23 @@ GET methods return id. There returned object can be a member of one of the follo
 - `NSError`
 - `nil`
 
-In the case of `authenticatedUserIsBlocking:isID:`, an NSString will be returned. It will be `@"YES"` to indicate YES and `@"NO"` to indicate NO. Additionally, it will return an NSError if it fails. How else could I prevent false negatives?
+In the case of `authenticatedUserIsBlocking:isID:`, an NSString will be returned. It will be `@"YES"` to indicate YES and `@"NO"` to indicate NO. Additionally, it will return an `NSError` if it fails. How else could I prevent false negatives?
 
 **For the future**
 
 Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 
-- Specify AppID and Secret for each request for added security
 - Mac support
 
 **IMPORTANT**
 
 `FHSTwitterEngine` contains an overhauled version of OAuthConsumer. The changes are:
 - Removed `OADataFetcher`
-- `OAAsynchronousDataFetcher` is now just a class method that takes arguments of a request and a block.
+- `OAAsynchronousDataFetcher` now contains one method that takes arguments of a request and a block.
 - Fixed string comparisons
 - Fixed memory leaks
 - Fixed bugs
-- Compatibility with alternative versions of OAuthConsumer
+- Added compatibility with alternative versions of OAuthConsumer
 
 **I'm from New Jersey, so pardon my sarcastic comments, mkay?**
 

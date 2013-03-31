@@ -155,8 +155,8 @@
 		9B2A1C1215E807D9007E66E0 /* Crytpo */ = {
 			isa = PBXGroup;
 			children = (
-				F1BD926B16E8E49F005A9C1F /* Base64TranscoderFHS.c */,
 				F1BD926C16E8E49F005A9C1F /* Base64TranscoderFHS.h */,
+				F1BD926B16E8E49F005A9C1F /* Base64TranscoderFHS.c */,
 			);
 			path = Crytpo;
 			sourceTree = "<group>";

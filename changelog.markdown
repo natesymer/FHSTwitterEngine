@@ -40,11 +40,15 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Fixed an issue with the date format from twitter, thanks to Jason Hsu.
 - Added the ability to set your consumer key and secret on a per-request basis.
 
-**Version 1.3.1**
+**Version 1.3.3**
 
 - since_id is now optional for - [FHSTwitterEngine getHomeTimelineSinceID:count:]
 
+**Version 1.4**
 
+- Fixed misspelling of "Destroy" (was destory) in a method name (I think it was destoryTweet:). Thanks to Conrad Kramer ([@conradev](http://twitter.com/conradev))
+- Added completion block to OAuth login method
+- Fixed lag with the date parsing method by not lazily allocating the NSDateFormatter. A 200ms delay is now gone. *And there was much rejoycing*.
 
 OAuthConsumer
 ===
