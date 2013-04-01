@@ -33,4 +33,6 @@
 
 - (id)initWithKey:(NSString *)aKey secret:(NSString *)aSecret;
 
++ (OAConsumer *)consumerWithKey:(NSString *)aKey secret:(NSString *)aSecret;
+
 @end

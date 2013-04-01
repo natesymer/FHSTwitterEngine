@@ -31,14 +31,18 @@
 @property (nonatomic, retain) NSString *key;
 @property (nonatomic, retain) NSString *secret;
 
-+ (OAToken *)token;
-
-- (void)setPin:(NSString *)aPin;
 - (NSString *)pin;
+- (void)setPin:(NSString *)aPin;
 
 - (id)initWithKey:(NSString *)aKey secret:(NSString *)aSecret;
 - (id)initWithUserDefaultsUsingServiceProviderName:(NSString *)provider prefix:(NSString *)prefix;
 - (id)initWithHTTPResponseBody:(NSString *)body;
-- (int)storeInUserDefaultsWithServiceProviderName:(NSString *)provider prefix:(NSString *)prefix;
+
++ (OAToken *)token;
++ (OAToken *)tokenWithKey:(NSString *)aKey secret:(NSString *)aSecret;
++ (OAToken *)tokenWithHTTPResponseBody:(NSString *)body;
++ (OAToken *)tokenWithUserDefaultsUsingServiceProviderName:(NSString *)provider prefix:(NSString *)prefix;
+
+- (void)storeInUserDefaultsWithServiceProviderName:(NSString *)provider prefix:(NSString *)prefix;
 
 @end

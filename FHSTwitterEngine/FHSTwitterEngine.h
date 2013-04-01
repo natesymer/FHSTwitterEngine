@@ -25,8 +25,8 @@
 
 //
 //
-// //// FHSTwitterEngine Version 1.4 ////
-//    Modified OAuthConsumer Version 1.2
+// //// FHSTwitterEngine Version 1.4.1 ////
+//    Modified OAuthConsumer Version 1.2.1
 //
 //
 
@@ -120,7 +120,7 @@ id removeNull(id rootObject);
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
 
 // help/test
-- (BOOL)testService;
+- (id)testService;
 
 // blocks/create
 - (NSError *)block:(NSString *)username;
@@ -378,6 +378,7 @@ id removeNull(id rootObject);
 @end
 
 @interface NSString (FHSTwitterEngine)
-- (NSString *)trimForTwitter;
-- (BOOL)isNumeric;
+- (NSString *)fhs_trimForTwitter;
+- (NSString *)fhs_stringWithRange:(NSRange)range;
+- (BOOL)fhs_isNumeric;
 @end

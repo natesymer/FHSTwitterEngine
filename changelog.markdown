@@ -50,13 +50,22 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Added completion block to OAuth login method
 - Fixed lag with the date parsing method by not lazily allocating the NSDateFormatter. A 200ms delay is now gone. *And there was much rejoycing*.
 
+**Version 1.4.1**
+
+- Rewrite horrible bits of code
+- Move all URLs to static constants. Both for convenience and the minute performance enhancement.
+- Adapt code to be more easily refactored to non ARC (MRC)
+- Make code more readable
+
+
 OAuthConsumer
 ===
 *Version numbers below are for \_my\_ version of OAuthConsumer*
 
 **Initial Commits**
 
-- Condense
+- Condense code
+- Weed out useless stuff
 
 **Version 1.0**
 
@@ -65,9 +74,15 @@ OAuthConsumer
 **Version 1.1**
 
 - Fix most remaining memory leaks
-- Add better support the pin/verifier property in OAToken (The version of OAuthConsumer in SA_OAuthTwitterEngine uses the pin property)
+- Add better support the pin/verifier property in `OAToken` (The version of `OAuthConsumer` in `SA_OAuthTwitterEngine` uses the `pin` property)
 
 **Version 1.2**
 
 - Fix some potential memory leaks
+
+**Version 1.2.1**
+
+- Add convenience init methods to OAMutableURLRequest, OAToken, and OAConsumer
+- Moved `fetchDataForRequest:` to OAMutableURLRequest.m
+
 

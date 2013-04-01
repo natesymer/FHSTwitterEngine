@@ -26,6 +26,7 @@
 
 #import "OAMutableURLRequest.h"
 #import "OARequestParameter.h"
+#import "OAServiceTicket.h"
 
 @interface OAMutableURLRequest ()
 - (void)_generateTimestamp;
@@ -60,6 +61,23 @@
 @implementation OAMutableURLRequest
 @synthesize signature, nonce, timestamp;
 @synthesize consumer, token, realm, signatureProvider, extraOAuthParameters;
+
++ (void)fetchDataForRequest:(OAMutableURLRequest *)request withCompletionHandler:(void(^)(OAServiceTicket *, NSData *, NSError *))block {
+    [request prepare];
+    
+    [NSURLConnection sendAsynchronousRequest:request queue:[[[NSOperationQueue alloc]init]autorelease] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+        OAServiceTicket *ticket = [[[OAServiceTicket alloc]initWithRequest:request response:response didSucceed:(error == nil)]autorelease];
+        block(ticket, data, error);
+    }];
+}
+
++ (OAMutableURLRequest *)requestWithURL:(NSURL *)aUrl consumer:(OAConsumer *)aConsumer token:(OAToken *)aToken {
+    return [[[[self class]alloc]initWithURL:aUrl consumer:aConsumer token:aToken realm:nil signatureProvider:nil]autorelease];
+}
+
++ (OAMutableURLRequest *)requestWithURL:(NSURL *)aUrl consumer:(OAConsumer *)aConsumer token:(OAToken *)aToken realm:(NSString *)aRealm signatureProvider:(id<OASignatureProviding, NSObject>)aProvider {
+    return [[[[self class]alloc]initWithURL:aUrl consumer:aConsumer token:aToken realm:aRealm signatureProvider:aProvider]autorelease];
+}
 
 - (id)initWithURL:(NSURL *)aUrl consumer:(OAConsumer *)aConsumer token:(OAToken *)aToken realm:(NSString *)aRealm signatureProvider:(id<OASignatureProviding, NSObject>)aProvider {
     

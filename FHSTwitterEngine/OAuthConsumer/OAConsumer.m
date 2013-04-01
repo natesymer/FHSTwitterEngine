@@ -28,6 +28,10 @@
 @implementation OAConsumer
 @synthesize key, secret;
 
++ (OAConsumer *)consumerWithKey:(NSString *)aKey secret:(NSString *)aSecret {
+    return [[[[self class]alloc]initWithKey:aKey secret:aSecret]autorelease];
+}
+
 - (id)initWithKey:(NSString *)aKey secret:(NSString *)aSecret {
 	if (self = [super init]) {
 		self.key = aKey;

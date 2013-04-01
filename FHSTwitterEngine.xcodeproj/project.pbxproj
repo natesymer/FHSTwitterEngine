@@ -14,7 +14,6 @@
 		9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BC315E805D1007E66E0 /* ViewController.m */; };
 		9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */; };
 		9B2A1C2B15E807D9007E66E0 /* NSString+URLEncoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0F15E807D9007E66E0 /* NSString+URLEncoding.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		9B2A1C2E15E807D9007E66E0 /* OAAsynchronousDataFetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1615E807D9007E66E0 /* OAAsynchronousDataFetcher.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C2F15E807D9007E66E0 /* OAConsumer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1815E807D9007E66E0 /* OAConsumer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C3115E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1C15E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C3215E807D9007E66E0 /* OAMutableURLRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1E15E807D9007E66E0 /* OAMutableURLRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -43,8 +42,6 @@
 		9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FHSTwitterEngine.m; sourceTree = "<group>"; };
 		9B2A1C0E15E807D9007E66E0 /* NSString+URLEncoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+URLEncoding.h"; sourceTree = "<group>"; };
 		9B2A1C0F15E807D9007E66E0 /* NSString+URLEncoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+URLEncoding.m"; sourceTree = "<group>"; };
-		9B2A1C1515E807D9007E66E0 /* OAAsynchronousDataFetcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAAsynchronousDataFetcher.h; sourceTree = "<group>"; };
-		9B2A1C1615E807D9007E66E0 /* OAAsynchronousDataFetcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAAsynchronousDataFetcher.m; sourceTree = "<group>"; };
 		9B2A1C1715E807D9007E66E0 /* OAConsumer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAConsumer.h; sourceTree = "<group>"; };
 		9B2A1C1815E807D9007E66E0 /* OAConsumer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAConsumer.m; sourceTree = "<group>"; };
 		9B2A1C1B15E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAHMAC_SHA1SignatureProvider.h; sourceTree = "<group>"; };
@@ -124,8 +121,6 @@
 			children = (
 				9B2A1C0B15E807D9007E66E0 /* Categories */,
 				9B2A1C1215E807D9007E66E0 /* Crytpo */,
-				9B2A1C1515E807D9007E66E0 /* OAAsynchronousDataFetcher.h */,
-				9B2A1C1615E807D9007E66E0 /* OAAsynchronousDataFetcher.m */,
 				9B2A1C1715E807D9007E66E0 /* OAConsumer.h */,
 				9B2A1C1815E807D9007E66E0 /* OAConsumer.m */,
 				9B2A1C1B15E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.h */,
@@ -258,7 +253,6 @@
 				9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */,
 				9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */,
 				9B2A1C2B15E807D9007E66E0 /* NSString+URLEncoding.m in Sources */,
-				9B2A1C2E15E807D9007E66E0 /* OAAsynchronousDataFetcher.m in Sources */,
 				9B2A1C2F15E807D9007E66E0 /* OAConsumer.m in Sources */,
 				9B2A1C3115E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m in Sources */,
 				9B2A1C3215E807D9007E66E0 /* OAMutableURLRequest.m in Sources */,

@@ -29,11 +29,19 @@
 #import "OAToken.h"
 #import "OAHMAC_SHA1SignatureProvider.h"
 
+@class OAServiceTicket;
+
 @interface OAMutableURLRequest : NSMutableURLRequest
 
 @property (nonatomic, assign) NSString *signature;
 @property (nonatomic, assign) NSString *nonce;
 @property (nonatomic, assign) NSString *timestamp;
+
++ (void)fetchDataForRequest:(OAMutableURLRequest *)request withCompletionHandler:(void(^)(OAServiceTicket *, NSData *, NSError *))block;
+
++ (OAMutableURLRequest *)requestWithURL:(NSURL *)aUrl consumer:(OAConsumer *)aConsumer token:(OAToken *)aToken realm:(NSString *)aRealm signatureProvider:(id<OASignatureProviding, NSObject>)aProvider;
+
++ (OAMutableURLRequest *)requestWithURL:(NSURL *)aUrl consumer:(OAConsumer *)aConsumer token:(OAToken *)aToken;
 
 - (id)initWithURL:(NSURL *)aUrl consumer:(OAConsumer *)aConsumer token:(OAToken *)aToken realm:(NSString *)aRealm signatureProvider:(id<OASignatureProviding, NSObject>)aProvider;
 

@@ -9,6 +9,15 @@
 #import "ViewController.h"
 #import "FHSTwitterEngine.h"
 
+@interface ViewController () <FHSTwitterEngineAccessTokenDelegate, UIAlertViewDelegate>
+
+@property (nonatomic, strong) FHSTwitterEngine *engine;
+
+@property (nonatomic, strong) IBOutlet UITextField *tweetField;
+@property (nonatomic, strong) IBOutlet UILabel *loggedInUserLabel;
+
+@end
+
 @implementation ViewController
 
 @synthesize engine, tweetField, loggedInUserLabel;
