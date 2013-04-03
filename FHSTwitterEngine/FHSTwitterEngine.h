@@ -25,7 +25,7 @@
 
 //
 //
-// //// FHSTwitterEngine Version 1.4.1 ////
+// //// FHSTwitterEngine Version 1.5 ////
 //    Modified OAuthConsumer Version 1.2.1
 //
 //
@@ -83,6 +83,17 @@ typedef enum {
 // Credit for this function goes to Conrad Kramer
 id removeNull(id rootObject);
 
+extern NSString * const FHSProfileBackgroundColorKey;
+extern NSString * const FHSProfileLinkColorKey;
+extern NSString * const FHSProfileSidebarBorderColorKey;
+extern NSString * const FHSProfileSidebarFillColorKey;
+extern NSString * const FHSProfileTextColorKey;
+
+extern NSString * const FHSProfileNameKey;
+extern NSString * const FHSProfileURLKey;
+extern NSString * const FHSProfileLocationKey;
+extern NSString * const FHSProfileDescriptionKey;
+
 @protocol FHSTwitterEngineAccessTokenDelegate <NSObject>
 
 - (void)storeAccessToken:(NSString *)accessToken;
@@ -102,19 +113,19 @@ id removeNull(id rootObject);
 
 //
 // Custom REST API methods
-// (The second method is called once for every 99 id's) - can be expensive CACHE CACHE CACHE
+// Can be expensive CACHE CACHE CACHE
 //
 
-- (NSArray *)getFollowers; // followers/ids & users/lookup
-- (NSArray *)getFriends; // friends/ids & users/lookup
+- (id)getFollowers; // followers/ids & users/lookup
+- (id)getFriends; // friends/ids & users/lookup
 
 //
 // Standard REST API methods
 //
 
 // statuses/update
-- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
 - (NSError *)postTweet:(NSString *)tweetString;
+- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
 
 // statuses/home_timeline
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
@@ -129,34 +140,27 @@ id removeNull(id rootObject);
 - (NSError *)unblock:(NSString *)username;
 
 // users/lookup
-- (id)getUserInformationForUsers:(NSArray *)users areUsers:(BOOL)flag;
+- (id)lookupUsers:(NSArray *)users areIDs:(BOOL)areIDs;
 
 // users/search
 - (id)searchUsersWithQuery:(NSString *)q andCount:(int)count;
 
-// notifications/follow & notifications/leave
-- (NSError *)disableNotificationsForID:(NSString *)identifier;
-- (NSError *)disableNotificationsForUsername:(NSString *)username;
-- (NSError *)enableNotificationsForID:(NSString *)identifier;
-- (NSError *)enableNotificationsForUsername:(NSString *)identifier;
-
-// account/totals
-- (id)getTotals;
-
 // account/update_profile_image
 - (NSError *)setProfileImageWithImageAtPath:(NSString *)file;
+- (NSError *)setProfileImageWithImageData:(NSData *)data;
 
-// account/settings POST & GET
+// account/settings GET and POST
 // See FHSTwitterEngine.m For details
-- (NSError *)updateSettingsWithDictionary:(NSDictionary *)settings;
 - (id)getUserSettings;
+- (NSError *)updateSettingsWithDictionary:(NSDictionary *)settings;
 
 // account/update_profile
 // See FHSTwitterEngine.m for details
 - (NSError *)updateUserProfileWithDictionary:(NSDictionary *)settings;
 
 // account/update_profile_background_image
-- (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)flag;
+- (NSError *)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled;
+- (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled;
 - (NSError *)setUseProfileBackgroundImage:(BOOL)shouldUseProfileBackgroundImage;
 
 // account/update_profile_colors
@@ -170,14 +174,12 @@ id removeNull(id rootObject);
 // favorites/create, favorites/destroy
 - (NSError *)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag;
 
-// favorites
+// favorites/list
 - (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count;
+- (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 // account/verify_credentials
 - (id)verifyCredentials;
-
-// friendships/exists
-- (id)user:(NSString *)user followsUser:(NSString *)userTwo areUsernames:(BOOL)areUsernames;
 
 // friendships/create
 - (NSError *)followUser:(NSString *)user isID:(BOOL)isID;
@@ -186,7 +188,7 @@ id removeNull(id rootObject);
 - (NSError *)unfollowUser:(NSString *)user isID:(BOOL)isID;
 
 // friendships/lookup
-- (id)lookupFriends:(NSArray *)users areIDs:(BOOL)areIDs;
+- (id)lookupFriendshipStatusForUsers:(NSArray *)users areIDs:(BOOL)areIDs;
 
 // friendships/incoming
 - (id)getPendingIncomingFollowers;
@@ -200,10 +202,10 @@ id removeNull(id rootObject);
 // friendships/no_retweet_ids
 - (id)getNoRetweetIDs;
 
-// legal/tos
+// help/tos
 - (id)getTermsOfService;
 
-// legal/privacy
+// help/privacy
 - (id)getPrivacyPolicy;
 
 // direct_messages
@@ -221,7 +223,7 @@ id removeNull(id rootObject);
 // direct_messages/show
 - (id)showDirectMessage:(NSString *)messageID;
 
-// report_spam
+// users/report_spam
 - (NSError *)reportUserAsSpam:(NSString *)user isID:(BOOL)isID;
 
 // help/configuration
@@ -241,12 +243,6 @@ id removeNull(id rootObject);
 
 // users/profile_image
 - (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
-
-// trends/daily
-- (id)getDailyTrends;
-
-// trends/weekly
-- (id)getWeeklyTrends;
 
 // statuses/user_timeline
 - (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count;
@@ -269,8 +265,8 @@ id removeNull(id rootObject);
 - (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
 
 // statuses/mentions_timeline
-- (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 - (id)getMentionsTimelineWithCount:(int)count;
+- (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 // statuses/retweets_of_me
 - (id)getRetweetedTimelineWithCount:(int)count;
@@ -295,9 +291,6 @@ id removeNull(id rootObject);
 // lists/members
 - (id)listUsersInListWithID:(NSString *)listID;
 
-// lists/memberships
-- (id)getListsThatUserIsMemberOf:(NSString *)user;
-
 // lists/update
 - (NSError *)setModeOfListWithID:(NSString *)listID toPrivate:(BOOL)isPrivate;
 - (NSError *)changeNameOfListWithID:(NSString *)listID toName:(NSString *)newName;
@@ -309,8 +302,14 @@ id removeNull(id rootObject);
 // lists/create
 - (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
 
-// search
+// tweets/search
 - (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+
+// followers/ids
+- (id)getFollowersIDs;
+
+// friends/ids
+- (id)getFriendsIDs;
 
 //
 // Login and Auth

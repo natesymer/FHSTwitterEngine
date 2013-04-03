@@ -100,8 +100,10 @@
         @autoreleasepool {
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
             
-            NSLog(@"%@",[self.engine getUserInformationForUsers:[NSArray arrayWithObjects:@"fhsjaagshs", @"twitter", nil] areUsers:YES]);
+         //   NSLog(@"%@",[self.engine lookupUsers:[NSArray arrayWithObjects:@"natesymer", @"twitter", nil] areIDs:NO]);
             NSLog(@"followers:\n%@",[self.engine getFollowers]);
+            
+            //NSLog(@"%@",[self.engine showDirectMessage:@"261995031622201344"]);
             
             dispatch_sync(GCDMainThread, ^{
                 @autoreleasepool {
@@ -146,7 +148,14 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"Xg3ACDprWAH8loEPjMzRg" andSecret:@"9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0"];
+    
+    NSMutableArray *array = [NSMutableArray array];
+    
+    for (int i = 0; i < 1000; ++i) {
+        [array addObject:[NSString stringWithFormat:@"shit%d",i]];
+    }
+    
+    self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"iD3JmMTXZ36MlISkfmkFvg" andSecret:@"B7HLYGJpwnyZr8fJeUGidW129i3cpgI2WsyGsHM2s"];
     [tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
 }
 

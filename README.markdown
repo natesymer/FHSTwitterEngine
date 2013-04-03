@@ -145,11 +145,12 @@ GET methods return id. There returned object can be a member of one of the follo
 
 In the case of `authenticatedUserIsBlocking:isID:` and `testService`, an NSString will be returned. It will be `@"YES"` to indicate YES and `@"NO"` to indicate NO. Additionally, it will return an `NSError` if it fails. How else could I prevent false negatives?
 
-**For the future**
+**For the future/To Do**
 
 Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 
 - Mac support
+- Add custom objects for profile settings
 
 **IMPORTANT**
 

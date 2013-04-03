@@ -50,19 +50,22 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Added completion block to OAuth login method
 - Fixed lag with the date parsing method by not lazily allocating the NSDateFormatter. A 200ms delay is now gone. *And there was much rejoycing*.
 
-**Version 1.4.1**
+**Version 1.5**
 
-- Rewrite horrible bits of code
-- Move all URLs to static constants. Both for convenience and the minute performance enhancement.
-- Adapt code to be more easily refactored to non ARC (MRC)
-- Make code more readable
-
+- Rewrote whole methods
+- Removed deprecated methods/endpoints
+- Moved all URLs to static constants
+- Adapted code to be more easily refactored to non ARC (MRC)
+- Added methods for `account/update_profile_image` and `account/update_profile_background_image` that accept an NSData argument
+- Added direct methods for `friends/ids` and `followers/ids`
+- Fixed incorrect key in `updateProfileColorsWithDictionary:`
+- Added keys for profile settings
 
 OAuthConsumer
 ===
-*Version numbers below are for \_my\_ version of OAuthConsumer*
+*Version numbers below are for **\_my\_** version of OAuthConsumer*
 
-**Initial Commits**
+**Pre-1.0 Versions**
 
 - Condense code
 - Weed out useless stuff
@@ -82,7 +85,7 @@ OAuthConsumer
 
 **Version 1.2.1**
 
-- Add convenience init methods to OAMutableURLRequest, OAToken, and OAConsumer
-- Moved `fetchDataForRequest:` to OAMutableURLRequest.m
+- Add convenience init methods to `OAMutableURLRequest`, `OAToken`, and `OAConsumer`
+- Moved `fetchDataForRequest:` to OAMutableURLRequest.m, removed `OAAsynchronousDataFetcher`
 
 
