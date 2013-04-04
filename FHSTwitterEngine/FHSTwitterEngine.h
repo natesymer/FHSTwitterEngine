@@ -25,7 +25,7 @@
 
 //
 //
-// //// FHSTwitterEngine Version 1.5 ////
+// //// FHSTwitterEngine Version 1.5.1 ////
 //    Modified OAuthConsumer Version 1.2.1
 //
 //
@@ -279,8 +279,10 @@ extern NSString * const FHSProfileDescriptionKey;
 - (id)getListsForUser:(NSString *)user isID:(BOOL)isID;
 
 // lists/statuses
-- (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 - (id)getTimelineForListWithID:(NSString *)listID count:(int)count;
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count excludeRetweets:(BOOL)excludeRetweets excludeReplies:(BOOL)excludeReplies;
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID excludeRetweets:(BOOL)excludeRetweets excludeReplies:(BOOL)excludeReplies;
 
 // lists/members/create_all
 - (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;

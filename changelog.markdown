@@ -61,6 +61,13 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Fixed incorrect key in `updateProfileColorsWithDictionary:`
 - Added keys for profile settings
 
+**Version 1.5.1**
+
+- Cleaned up error messages
+- Streamlined the sending of requests
+- Fixed handling of users string with the methods that take an NSArray of users as a param
+
+
 OAuthConsumer
 ===
 *Version numbers below are for **\_my\_** version of OAuthConsumer*
