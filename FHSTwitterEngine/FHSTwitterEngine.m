@@ -97,9 +97,7 @@ NSError *getBadRequestError() {
 
 - (id)initWithEngine:(FHSTwitterEngine *)theEngine;
 - (NSString *)locatePin;
-
 - (void)showPinCopyPrompt;
-- (void)removePinCopyPrompt;
 
 @end
 
@@ -114,7 +112,7 @@ NSError *getBadRequestError() {
 - (NSString *)extractUsernameFromHTTPBody:(NSString *)body;
 
 // General Get request sender
-- (id)sendPlainRequest:(NSURLRequest *)request;
+- (id)sendRequest:(NSURLRequest *)request;
 
 // These are here to obfuscate them from prying eyes
 @property (strong, nonatomic) OAConsumer *consumer;
@@ -727,7 +725,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         }
             
         NSURLRequest *imageRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:finalURL]];
-        id ret = [self sendPlainRequest:imageRequest];
+        id ret = [self sendRequest:imageRequest];
         
         if ([ret isKindOfClass:[NSData class]]) {
             return [UIImage imageWithData:(NSData *)ret];
@@ -1587,7 +1585,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         self.consumer = nil;
     }
     
-    id ret = [self sendPlainRequest:request];
+    id ret = [self sendRequest:request];
     
     if ([ret isKindOfClass:[NSError class]]) {
         return ret;
@@ -1608,7 +1606,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 // sendRequest:
 //
 
-- (id)sendPlainRequest:(NSURLRequest *)request {
+- (id)sendRequest:(NSURLRequest *)request {
     
     NSHTTPURLResponse *response = nil;
     NSError *error = nil;
@@ -1654,7 +1652,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     }
     
     
-    id retobj = [self sendPlainRequest:request];
+    id retobj = [self sendRequest:request];
     
     if ([retobj isKindOfClass:[NSError class]]) {
         return retobj;
@@ -1698,7 +1696,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         self.consumer = nil;
     }
     
-    id retobj = [self sendPlainRequest:request];
+    id retobj = [self sendRequest:request];
     
     if ([retobj isKindOfClass:[NSError class]]) {
         return retobj;
@@ -1744,7 +1742,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     [request prepare];
     
-    id retobj = [self sendPlainRequest:request];
+    id retobj = [self sendRequest:request];
     
     if ([retobj isKindOfClass:[NSError class]]) {
         return nil;
@@ -1772,7 +1770,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         self.consumer = nil;
     }
     
-    id retobj = [self sendPlainRequest:request];
+    id retobj = [self sendRequest:request];
     
     if ([retobj isKindOfClass:[NSError class]]) {
         return NO;
@@ -1959,6 +1957,9 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 
 @implementation FHSTwitterEngineController
 
+static NSString * const newPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
+static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";
+
 @synthesize theWebView, requestToken, engine, navBar, blockerView, pinCopyBar;
 
 - (id)initWithEngine:(FHSTwitterEngine *)theEngine {
@@ -1993,6 +1994,11 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 	self.blockerView.center = CGPointMake(self.view.bounds.size.width/2, self.view.bounds.size.height/2);
 	self.blockerView.clipsToBounds = YES;
     self.blockerView.layer.cornerRadius = 10;
+    
+    self.pinCopyBar = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 44, self.view.bounds.size.width, 44)];
+    self.pinCopyBar.barStyle = UIBarStyleBlackTranslucent;
+    self.pinCopyBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    self.pinCopyBar.items = [NSArray arrayWithObjects:[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], [[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil], [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], nil];
 	
 	UILabel	*label = [[UILabel alloc]initWithFrame:CGRectMake(0, 5, blockerView.bounds.size.width, 15)];
 	label.text = @"Please Wait...";
@@ -2066,17 +2072,12 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 }
 
 - (NSString *)locatePin {
-    // JavaScript for the newer Twitter PIN image
-	NSString *js = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); " \
-    "if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
-	NSString *pin = [[self.theWebView stringByEvaluatingJavaScriptFromString:js]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	NSString *pin = [[self.theWebView stringByEvaluatingJavaScriptFromString:newPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	
 	if (pin.length == 7) {
 		return pin;
 	} else {
-		// Older version of Twitter PIN Image
-        js = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";
-		pin = [[self.theWebView stringByEvaluatingJavaScriptFromString:js]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+		pin = [[self.theWebView stringByEvaluatingJavaScriptFromString:oldPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 		
 		if (pin.length == 7) {
 			return pin;
@@ -2111,33 +2112,16 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 }
 
 - (void)showPinCopyPrompt {
-	if (self.pinCopyPromptBar.superview) {
+	if (self.pinCopyBar.superview) {
         return;
     }
     
-	self.pinCopyPromptBar.center = CGPointMake(self.pinCopyPromptBar.bounds.size.width/2, self.pinCopyPromptBar.bounds.size.height/2);
-	[self.view insertSubview:self.pinCopyPromptBar belowSubview:navBar];
+	self.pinCopyBar.center = CGPointMake(self.pinCopyBar.bounds.size.width/2, self.pinCopyBar.bounds.size.height/2);
+	[self.view insertSubview:self.pinCopyBar belowSubview:self.navBar];
 	
 	[UIView beginAnimations:nil context:nil];
-    self.pinCopyBar.center = CGPointMake(self.pinCopyPromptBar.bounds.size.width/2, navBar.bounds.size.height+pinCopyBar.bounds.size.height/2);
+    self.pinCopyBar.center = CGPointMake(self.pinCopyBar.bounds.size.width/2, self.navBar.bounds.size.height+self.pinCopyBar.bounds.size.height/2);
 	[UIView commitAnimations];
-}
-
-- (void)removePinCopyPrompt {
-    if (self.pinCopyBar.superview) {
-        [self.pinCopyBar removeFromSuperview];
-    }
-}
-
-- (UIView *)pinCopyPromptBar {
-	if (self.pinCopyBar == nil) {
-		self.pinCopyBar = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 44, self.view.bounds.size.width, 44)];
-		self.pinCopyBar.barStyle = UIBarStyleBlackTranslucent;
-		self.pinCopyBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
-        self.pinCopyBar.items = [NSArray arrayWithObjects:[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], [[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil], [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], nil];
-        
-	}
-	return self.pinCopyBar;
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
@@ -2151,20 +2135,19 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
     
-    BOOL isNotCancelLink = !strstr([[NSString stringWithFormat:@"%@",request.URL]UTF8String], "denied=");
-    
-	NSData *data = [request HTTPBody];
-	char *raw = data?(char *)[data bytes]:"";
-    
-    if (!isNotCancelLink) {
+    if (strstr([request.URL.absoluteString UTF8String], "denied=")) {
         [self dismissModalViewControllerAnimated:YES];
         return NO;
     }
+    
+    NSData *data = request.HTTPBody;
+	char *raw = data?(char *)[data bytes]:"";
 	
 	if (raw && (strstr(raw, "cancel=") || strstr(raw, "deny="))) {
 		[self dismissModalViewControllerAnimated:YES];
 		return NO;
 	}
+    
 	return YES;
 }
 
