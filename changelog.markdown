@@ -67,6 +67,9 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Streamlined the sending of requests
 - Fixed handling of users string with the methods that take an NSArray of users as a param
 
+**Version 1.5.2**
+
+- Cleaned up the OAuth login controller and the base64 encoding methods.
 
 OAuthConsumer
 ===

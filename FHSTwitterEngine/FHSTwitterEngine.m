@@ -1642,7 +1642,6 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
     [request setTimeoutInterval:25];
     [request setHTTPMethod:@"POST"];
-    
     [request setParameters:params];
     [request prepare];
     
@@ -1686,7 +1685,6 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
     [request setTimeoutInterval:25];
-    
     [request setHTTPMethod:@"GET"];
     [request setParameters:params];
     [request prepare];
@@ -1751,11 +1749,8 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     return [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
 }
 
-- (BOOL)finishAuthWithPin:(NSString *)pin andRequestToken:(OAToken *)reqToken {
-    if (pin.length != 7) {
-        return NO;
-    }
-    
+- (BOOL)finishAuthWithRequestToken:(OAToken *)reqToken {
+
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
     
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:url consumer:self.consumer token:reqToken];
@@ -1801,13 +1796,13 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         savedHttpBody = [[NSUserDefaults standardUserDefaults]objectForKey:@"SavedAccessHTTPBody"];
     }
     
-    self.accessToken = [[OAToken alloc]initWithHTTPResponseBody:savedHttpBody];
+    self.accessToken = [OAToken tokenWithHTTPResponseBody:savedHttpBody];
     self.loggedInUsername = [self extractUsernameFromHTTPBody:savedHttpBody];
     self.loggedInID = [self extractUserIDFromHTTPBody:savedHttpBody];
 }
 
 - (void)storeAccessToken:(NSString *)accessTokenZ {
-    self.accessToken = [[OAToken alloc]initWithHTTPResponseBody:accessTokenZ];
+    self.accessToken = [OAToken tokenWithHTTPResponseBody:accessTokenZ];
     self.loggedInUsername = [self extractUsernameFromHTTPBody:accessTokenZ];
     self.loggedInID = [self extractUserIDFromHTTPBody:accessTokenZ];
     
@@ -1831,9 +1826,9 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 	for (NSString *tuple in tuples) {
 		NSArray *keyValueArray = [tuple componentsSeparatedByString:@"="];
 		
-		if (keyValueArray.count == 2) {
-			NSString *key = [keyValueArray objectAtIndex: 0];
-			NSString *value = [keyValueArray objectAtIndex: 1];
+		if (keyValueArray.count >= 2) {
+			NSString *key = [keyValueArray objectAtIndex:0];
+			NSString *value = [keyValueArray objectAtIndex:1];
 			
 			if ([key isEqualToString:@"screen_name"]) {
                 return value;
@@ -1921,34 +1916,33 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     zeroAddress.sin_family = AF_INET;
     
     SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithAddress(kCFAllocatorDefault, (const struct sockaddr *)&zeroAddress);
-    if (reachability != nil) {
+    if (reachability) {
         SCNetworkReachabilityFlags flags;
-        if (SCNetworkReachabilityGetFlags(reachability, &flags)) {
+        BOOL worked = SCNetworkReachabilityGetFlags(reachability, &flags);
+        CFRelease(reachability);
+        
+        if (worked) {
             
             if ((flags & kSCNetworkReachabilityFlagsReachable) == 0) {
-                CFRelease(reachability);
                 return NO;
             }
             
             if ((flags & kSCNetworkReachabilityFlagsConnectionRequired) == 0) {
-                CFRelease(reachability);
                 return YES;
             }
             
             
             if ((((flags & kSCNetworkReachabilityFlagsConnectionOnDemand) != 0) || (flags & kSCNetworkReachabilityFlagsConnectionOnTraffic) != 0)) {
                 if ((flags & kSCNetworkReachabilityFlagsInterventionRequired) == 0) {
-                    CFRelease(reachability);
                     return YES;
                 }
             }
             
             if ((flags & kSCNetworkReachabilityFlagsIsWWAN) == kSCNetworkReachabilityFlagsIsWWAN) {
-                CFRelease(reachability);
                 return YES;
             }
         }
-        CFRelease(reachability);
+        
     }
     return NO;
 }
@@ -2044,7 +2038,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 - (void)gotPin:(NSString *)pin {
     [self.requestToken setVerifier:pin];
     
-    BOOL ret = [self.engine finishAuthWithPin:pin andRequestToken:self.requestToken];
+    BOOL ret = [self.engine finishAuthWithRequestToken:self.requestToken];
     
     void(^block)(BOOL success) = objc_getAssociatedObject(self.engine, "FHSTwitterEngineOAuthCompletion");
     
@@ -2062,13 +2056,11 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
         return;
     }
 	
-	NSString *copied = pb.string;
-	
-	if (copied.length != 7 || !copied.fhs_isNumeric) {
+	if (pb.string.length != 7 || !pb.string.fhs_isNumeric) {
         return;
     }
 	
-	[self gotPin:copied];
+	[self gotPin:pb.string];
 }
 
 - (NSString *)locatePin {
@@ -2174,8 +2166,7 @@ static char encodingTable[64] = {
 @implementation NSData (Base64)
 
 + (NSData *)dataWithBase64EncodedString:(NSString *) string {
-	NSData *result = [[NSData alloc]initWithBase64EncodedString:string];
-	return result;
+	return [[NSData alloc]initWithBase64EncodedString:string];
 }
 
 - (id)initWithBase64EncodedString:(NSString *)string {
@@ -2183,21 +2174,17 @@ static char encodingTable[64] = {
     
 	if (string) {
 		unsigned long ixtext = 0;
-		unsigned long lentext = 0;
 		unsigned char ch = 0;
         unsigned char inbuf[4] = {0,0,0,0};
         unsigned char outbuf[3] = {0,0,0};
 		short ixinbuf = 0;
 		BOOL flignore = NO;
 		BOOL flendtext = NO;
-		NSData *base64Data = nil;
-		const unsigned char *base64Bytes = nil;
         
-		// Convert the string to ASCII data.
-		base64Data = [string dataUsingEncoding:NSASCIIStringEncoding];
-		base64Bytes = [base64Data bytes];
-		mutableData = [NSMutableData dataWithCapacity:[base64Data length]];
-		lentext = [base64Data length];
+		NSData *base64Data = [string dataUsingEncoding:NSASCIIStringEncoding];
+		const unsigned char *base64Bytes = [base64Data bytes];
+		mutableData = [NSMutableData dataWithCapacity:base64Data.length];
+		unsigned long lentext = [base64Data length];
         
 		while (YES) {
 			if (ixtext >= lentext) {
@@ -2246,9 +2233,9 @@ static char encodingTable[64] = {
                 
 				if (ixinbuf == 4) {
 					ixinbuf = 0;
-					outbuf [0] = (inbuf[0] << 2) | ((inbuf[1] & 0x30) >> 4);
-					outbuf [1] = ((inbuf[1] & 0x0F) << 4 ) | ((inbuf[2] & 0x3C) >> 2);
-					outbuf [2] = ((inbuf[2] & 0x03) << 6 ) | (inbuf[3] & 0x3F);
+					outbuf[0] = (inbuf[0] << 2) | ((inbuf[1] & 0x30) >> 4);
+					outbuf[1] = ((inbuf[1] & 0x0F) << 4) | ((inbuf[2] & 0x3C) >> 2);
+					outbuf[2] = ((inbuf[2] & 0x03) << 6) | (inbuf[3] & 0x3F);
                     
 					for (int i = 0; i < ctcharsinbuf; i++) {
 						[mutableData appendBytes:&outbuf[i] length:1];
@@ -2273,12 +2260,15 @@ static char encodingTable[64] = {
 	unsigned long ixtext = 0;
 	unsigned long lentext = [self length];
 	long ctremaining = 0;
-	unsigned char inbuf[3], outbuf[4];
-	short charsonline = 0, ctcopy = 0;
+    unsigned char inbuf[3] = {0,0,0};
+    unsigned char outbuf[4] = {0,0,0,0};
+    
+	short charsonline = 0;
+    short ctcopy = 0;
 	unsigned long ix = 0;
     
 	while (YES) {
-		ctremaining = lentext - ixtext;
+		ctremaining = lentext-ixtext;
         
 		if (ctremaining <= 0) {
             break;
@@ -2289,14 +2279,14 @@ static char encodingTable[64] = {
 			if (ix < lentext) {
                 inbuf[i] = bytes[ix];
             } else {
-                inbuf [i] = 0;
+                inbuf[i] = 0;
             }
 		}
         
-		outbuf [0] = (inbuf [0] & 0xFC) >> 2;
-		outbuf [1] = ((inbuf [0] & 0x03) << 4) | ((inbuf [1] & 0xF0) >> 4);
-		outbuf [2] = ((inbuf [1] & 0x0F) << 2) | ((inbuf [2] & 0xC0) >> 6);
-		outbuf [3] = inbuf [2] & 0x3F;
+		outbuf[0] = (inbuf[0] & 0xFC) >> 2;
+		outbuf[1] = ((inbuf[0] & 0x03) << 4) | ((inbuf[1] & 0xF0) >> 4);
+		outbuf[2] = ((inbuf[1] & 0x0F) << 2) | ((inbuf[2] & 0xC0) >> 6);
+		outbuf[3] = inbuf[2] & 0x3F;
 		ctcopy = 4;
         
 		switch (ctremaining) {
