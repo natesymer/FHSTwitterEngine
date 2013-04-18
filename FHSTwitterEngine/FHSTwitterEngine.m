@@ -47,6 +47,8 @@ NSString * const FHSProfileDescriptionKey = @"description";
 
 static NSString * const errorFourhundred = @"Bad Request: The request you are trying to make has missing or bad parameters.";
 
+static NSString * const authBlockKey = nil;
+
 id removeNull(id rootObject) {
     if ([rootObject isKindOfClass:[NSDictionary class]]) {
         NSMutableDictionary *sanitizedDictionary = [NSMutableDictionary dictionaryWithDictionary:rootObject];
@@ -81,19 +83,23 @@ id removeNull(id rootObject) {
     }
 }
 
-NSError *getBadRequestError() {
+NSError * getBadRequestError() {
     return [NSError errorWithDomain:errorFourhundred code:400 userInfo:nil];
+}
+
+NSError * getNilReturnLengthError() {
+    return [NSError errorWithDomain:@"Twitter successfully processed the request, but did not return any content" code:204 userInfo:nil];
 }
 
 @interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate> 
 
-@property (strong, nonatomic) UINavigationBar *navBar;
-@property (strong, nonatomic) UIView *blockerView;
-@property (strong, nonatomic) UIToolbar *pinCopyBar;
+@property (nonatomic, retain) UINavigationBar *navBar;
+@property (nonatomic, retain) UIView *blockerView;
+@property (nonatomic, retain) UIToolbar *pinCopyBar;
 
-@property (strong, nonatomic) FHSTwitterEngine *engine;
-@property (strong, nonatomic) UIWebView *theWebView;
-@property (strong, nonatomic) OAToken *requestToken;
+@property (nonatomic, retain) FHSTwitterEngine *engine;
+@property (nonatomic, retain) UIWebView *theWebView;
+@property (nonatomic, retain) OAToken *requestToken;
 
 - (id)initWithEngine:(FHSTwitterEngine *)theEngine;
 - (NSString *)locatePin;
@@ -1653,6 +1659,10 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     id retobj = [self sendRequest:request];
     
+    if (retobj == nil) {
+        return getNilReturnLengthError();
+    }
+    
     if ([retobj isKindOfClass:[NSError class]]) {
         return retobj;
     }
@@ -1695,6 +1705,10 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     }
     
     id retobj = [self sendRequest:request];
+    
+    if (retobj == nil) {
+        return getNilReturnLengthError();
+    }
     
     if ([retobj isKindOfClass:[NSError class]]) {
         return retobj;
@@ -1967,29 +1981,29 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     [super loadView];
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(pasteboardChanged:) name:UIPasteboardChangedNotification object:nil];
     
-    self.view = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 460)];
+    self.view = [[[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 460)]autorelease];
     self.view.backgroundColor = [UIColor grayColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    self.theWebView = [[UIWebView alloc]initWithFrame:CGRectMake(0, 44, 320, 416)];
+    self.theWebView = [[[UIWebView alloc]initWithFrame:CGRectMake(0, 44, 320, 416)]autorelease];
     self.theWebView.hidden = YES;
     self.theWebView.delegate = self;
     self.theWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.theWebView.dataDetectorTypes = UIDataDetectorTypeNone;
     
-    self.navBar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, 320, 44)];
+    self.navBar = [[[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, 320, 44)]autorelease];
     self.navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
 	
 	[self.view addSubview:self.theWebView];
 	[self.view addSubview:self.navBar];
     
-	self.blockerView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 200, 60)];
+	self.blockerView = [[[UIView alloc]initWithFrame:CGRectMake(0, 0, 200, 60)]autorelease];
 	self.blockerView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.8];
 	self.blockerView.center = CGPointMake(self.view.bounds.size.width/2, self.view.bounds.size.height/2);
 	self.blockerView.clipsToBounds = YES;
     self.blockerView.layer.cornerRadius = 10;
     
-    self.pinCopyBar = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 44, self.view.bounds.size.width, 44)];
+    self.pinCopyBar = [[[UIToolbar alloc]initWithFrame:CGRectMake(0, 44, self.view.bounds.size.width, 44)]autorelease];
     self.pinCopyBar.barStyle = UIBarStyleBlackTranslucent;
     self.pinCopyBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     self.pinCopyBar.items = [NSArray arrayWithObjects:[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], [[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil], [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], nil];
@@ -2001,37 +2015,42 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 	label.textAlignment = UITextAlignmentCenter;
 	label.font = [UIFont boldSystemFontOfSize:15];
 	[self.blockerView addSubview:label];
+    [label release];
 	
 	UIActivityIndicatorView	*spinner = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
 	spinner.center = CGPointMake(self.blockerView.bounds.size.width/2, (self.blockerView.bounds.size.height/2)+10);
 	[self.blockerView addSubview:spinner];
 	[self.view addSubview:self.blockerView];
 	[spinner startAnimating];
+    [spinner release];
 	
 	UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"Twitter Login"];
 	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
 	[self.navBar pushNavigationItem:navItem animated:NO];
+    [navItem release];
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
     dispatch_async(GCDBackgroundThread, ^{
-        @autoreleasepool {
-            NSString *reqString = [self.engine getRequestTokenString];
-            
-            if (reqString.length == 0) {
-                [self dismissModalViewControllerAnimated:YES];
-                return;
-            }
-            
-            self.requestToken = [OAToken tokenWithHTTPResponseBody:reqString];
-            NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",self.requestToken.key]]];
-            
-            dispatch_sync(GCDMainThread, ^{
-                @autoreleasepool {
-                    [self.theWebView loadRequest:request];
-                }
-            });
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc]init];
+        
+        NSString *reqString = [self.engine getRequestTokenString];
+        
+        if (reqString.length == 0) {
+            [self dismissModalViewControllerAnimated:YES];
+            return;
         }
+        
+        self.requestToken = [OAToken tokenWithHTTPResponseBody:reqString];
+        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",self.requestToken.key]]];
+        
+        dispatch_sync(GCDMainThread, ^{
+            NSAutoreleasePool *poolTwo = [[NSAutoreleasePool alloc]init];
+            [self.theWebView loadRequest:request];
+            [poolTwo release];
+        });
+        
+        [pool release];
     });
 }
 

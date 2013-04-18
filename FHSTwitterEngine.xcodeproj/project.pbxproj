@@ -12,7 +12,7 @@
 		9B2A1BC615E805D1007E66E0 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9B2A1B9C15E805D1007E66E0 /* ViewController.xib */; };
 		9B2A1BC915E805D1007E66E0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BA215E805D1007E66E0 /* main.m */; };
 		9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BC315E805D1007E66E0 /* ViewController.m */; };
-		9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */; };
+		9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C2B15E807D9007E66E0 /* NSString+URLEncoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0F15E807D9007E66E0 /* NSString+URLEncoding.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C2F15E807D9007E66E0 /* OAConsumer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1815E807D9007E66E0 /* OAConsumer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9B2A1C3115E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C1C15E807D9007E66E0 /* OAHMAC_SHA1SignatureProvider.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };

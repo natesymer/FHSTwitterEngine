@@ -71,6 +71,12 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 
 - Cleaned up the OAuth login controller and the base64 encoding methods.
 
+**Version 1.6**
+
+- MOVE AWAY FROM ARC
+- Fix bug with parsing nil JSON data
+
+
 OAuthConsumer
 ===
 *Version numbers below are for **\_my\_** version of OAuthConsumer*

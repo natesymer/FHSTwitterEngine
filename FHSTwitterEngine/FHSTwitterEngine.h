@@ -25,7 +25,7 @@
 
 //
 //
-// //// FHSTwitterEngine Version 1.5.2 ////
+// //// FHSTwitterEngine Version 1.6 ////
 //    Modified OAuthConsumer Version 1.2.1
 //
 //
