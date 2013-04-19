@@ -359,16 +359,16 @@ extern NSString * const FHSProfileDescriptionKey;
 @property (nonatomic, assign) BOOL includeEntities;
 
 // Logged in user's username
-@property (nonatomic, strong) NSString *loggedInUsername;
+@property (nonatomic, retain) NSString *loggedInUsername;
 
 // Logged in user's Twitter ID
-@property (nonatomic, strong) NSString *loggedInID;
+@property (nonatomic, retain) NSString *loggedInID;
 
 // Will be called to store the accesstoken
-@property (nonatomic, strong) id<FHSTwitterEngineAccessTokenDelegate> delegate;
+@property (nonatomic, assign) id<FHSTwitterEngineAccessTokenDelegate> delegate;
 
 // Access Token
-@property (nonatomic, strong) OAToken *accessToken;
+@property (nonatomic, retain) OAToken *accessToken;
 
 @end
 

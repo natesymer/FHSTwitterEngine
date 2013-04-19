@@ -25,12 +25,15 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
 - Uses a fixed version of OAuthConsumer (mine)
 - **Less crufty**
 
+Why `FHSTwitterEngine` is better than `STTwitter`:
+
+
 
 **Setup**
 
 1. Add the folder "FHSTwitterEngine" to your project and `#import "FHSTwitterEngine.h"` (I recommend `Prefix.pch`)
 2. Link against `SystemConfiguration.framework`
-3. In **Compile Sources** in the **Build Phases** tab of your target (e.g. MyCoolApp.app with the target icon next to it), add the `-fno-objc-arc` compiler flag to all files starting with `OA` (In other words, the `OAuthConsumer` library, *nothing* else)
+3. If your project is using ARC, you must disable ARC for any `OA` prefixed files and `FHSTwitterEngine.{h,m}`.
 4. Profit!!!!
 
 **Usage:**
@@ -51,7 +54,7 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
         if (success) {
             NSLog(@"L0L success");
         } else {
-            NSLog(@"O noes!!! Loggen faylur!!!");
+            NSLog(@"O noes!!! Logen falyur!!!");
         }
        
     }];
@@ -75,10 +78,9 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
 	// your keys will be cleared after the next request is prepared, before it is sent.
 	[engine temporarilySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
 	
-	// if you are really paranoid, use this
+	// if you're really paranoid, use this to clear the keys
 	[engine clearConsumer];
 	
-    
 --> Reload a saved access_token:
 
     [engine loadAccessToken];
@@ -110,7 +112,7 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
     		id twitterData = [engine twitterAPIMethod];
-    		// Handle twitterData (see "About GET REquests")
+    		// Handle twitterData (see "About GET Requests")
     		dispatch_sync(GCDMainThread, ^{
     			@autoreleasepool {
         			// Update UI
@@ -155,14 +157,15 @@ Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 **IMPORTANT**
 
 `FHSTwitterEngine` contains an overhauled version of OAuthConsumer. The changes are:
-- Removed `OADataFetcher`
-- `OAAsynchronousDataFetcher` now contains one method that takes arguments of a request and a block.
+
+- Removed `OADataFetcher` and `OAAsynchronousDataFetcher`
+- Added `+[OAMutableURLRequest fetchDataForRequest:withCompletionHandler:]` to manually send requests.
 - Fixed string comparisons
 - Fixed memory leaks
 - Fixed bugs
 - Added compatibility with alternative versions of OAuthConsumer
 
-**I'm from New Jersey, so pardon my sarcastic comments, mkay?**
+**I'm from New Jersey, so pardon my sarcastic comments, capisce?**
 
 **Fixes for some common problems** (and best practices)
 

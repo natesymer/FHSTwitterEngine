@@ -47,7 +47,7 @@ NSString * const FHSProfileDescriptionKey = @"description";
 
 static NSString * const errorFourhundred = @"Bad Request: The request you are trying to make has missing or bad parameters.";
 
-static NSString * const authBlockKey = nil;
+static NSString * const authBlockKey = @"FHSTwitterEngineOAuthCompletion";
 
 id removeNull(id rootObject) {
     if ([rootObject isKindOfClass:[NSDictionary class]]) {
@@ -107,23 +107,23 @@ NSError * getNilReturnLengthError() {
 
 @end
 
-@interface FHSTwitterEngine ()
+@interface FHSTwitterEngine()
 
 // id list generator - returns an array of id/username list strings
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array;
 
 // Login stuff
 - (NSString *)getRequestTokenString;
-- (NSString *)extractUserIDFromHTTPBody:(NSString *)body;
-- (NSString *)extractUsernameFromHTTPBody:(NSString *)body;
+//- (NSString *)extractUserIDFromHTTPBody:(NSString *)body;
+//- (NSString *)extractUsernameFromHTTPBody:(NSString *)body;
 
 // General Get request sender
 - (id)sendRequest:(NSURLRequest *)request;
 
 // These are here to obfuscate them from prying eyes
-@property (strong, nonatomic) OAConsumer *consumer;
+@property (retain, nonatomic) OAConsumer *consumer;
 @property (assign, nonatomic) BOOL shouldClearConsumer;
-@property (strong, nonatomic) NSDateFormatter *dateFormatter;
+@property (retain, nonatomic) NSDateFormatter *dateFormatter;
 
 @end
 
@@ -271,7 +271,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     OARequestParameter *result_typeP = [OARequestParameter requestParameterWithName:@"result_type" value:nil];
     OARequestParameter *qP = [OARequestParameter requestParameterWithName:@"q" value:q];
     
-    NSDateFormatter *formatter = [[NSDateFormatter alloc]init];
+    NSDateFormatter *formatter = [[[NSDateFormatter alloc]init]autorelease];
     formatter.dateFormat = @"YYYY-MM-DD";
     NSString *untilString = [formatter stringFromDate:untilDate];
     untilP.value = untilString;
@@ -1506,14 +1506,14 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     self = [super init];
     if (self) {
         // Twitter API datestamps are UTC
-        self.dateFormatter = [[NSDateFormatter alloc]init];
-        NSLocale *usLocale = [[NSLocale alloc]initWithLocaleIdentifier:@"en_US"];
+        self.dateFormatter = [[[NSDateFormatter alloc]init]autorelease];
+        NSLocale *usLocale = [[[NSLocale alloc]initWithLocaleIdentifier:@"en_US"]autorelease];
         [self.dateFormatter setLocale:usLocale];
         [self.dateFormatter setDateStyle:NSDateFormatterLongStyle];
         [self.dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
         
         // according to some chinese programmer, this is wrong.
-        //[self.dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss +0000 yyyy"];
+        // [self.dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss +0000 yyyy"];
         
         [self.dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss ZZZZ yyyy"];
     }
@@ -1597,7 +1597,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         return ret;
     }
     
-    NSString *httpBody = [[NSString alloc]initWithData:(NSData *)ret encoding:NSUTF8StringEncoding];
+    NSString *httpBody = [[[NSString alloc]initWithData:(NSData *)ret encoding:NSUTF8StringEncoding]autorelease];
     
     if (httpBody.length > 0) {
         [self storeAccessToken:httpBody];
@@ -1735,15 +1735,9 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 }
 
 
-
 //
 // OAuth
 //
-
-/*
- This section of code is pretty crufty. I know. It works well enough 
- and is not accessed by the user. Move along. You didn't see anything.
- */
 
 - (NSString *)getRequestTokenString {
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"];
@@ -1756,11 +1750,11 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     id retobj = [self sendRequest:request];
     
-    if ([retobj isKindOfClass:[NSError class]]) {
-        return nil;
+    if ([retobj isKindOfClass:[NSString class]]) {
+        return [[[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding]autorelease];
     }
     
-    return [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
+    return nil;
 }
 
 - (BOOL)finishAuthWithRequestToken:(OAToken *)reqToken {
@@ -1785,7 +1779,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         return NO;
     }
     
-    NSString *response = [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
+    NSString *response = [[[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding]autorelease];
     
     if (response.length == 0) {
         return NO;
@@ -1811,14 +1805,14 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     }
     
     self.accessToken = [OAToken tokenWithHTTPResponseBody:savedHttpBody];
-    self.loggedInUsername = [self extractUsernameFromHTTPBody:savedHttpBody];
-    self.loggedInID = [self extractUserIDFromHTTPBody:savedHttpBody];
+    self.loggedInUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:savedHttpBody];
+    self.loggedInID = [self extractValueForKey:@"user_id" fromHTTPBody:savedHttpBody];
 }
 
 - (void)storeAccessToken:(NSString *)accessTokenZ {
     self.accessToken = [OAToken tokenWithHTTPResponseBody:accessTokenZ];
-    self.loggedInUsername = [self extractUsernameFromHTTPBody:accessTokenZ];
-    self.loggedInID = [self extractUserIDFromHTTPBody:accessTokenZ];
+    self.loggedInUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:accessTokenZ];
+    self.loggedInID = [self extractValueForKey:@"user_id" fromHTTPBody:accessTokenZ];
     
     if ([self.delegate respondsToSelector:@selector(storeAccessToken:)]) {
         [self.delegate storeAccessToken:accessTokenZ];
@@ -1827,8 +1821,12 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     }
 }
 
-- (NSString *)extractUsernameFromHTTPBody:(NSString *)body {
-	if (!body) {
+- (NSString *)extractValueForKey:(NSString *)target fromHTTPBody:(NSString *)body {
+    if (body.length == 0) {
+        return nil;
+    }
+    
+    if (target.length == 0) {
         return nil;
     }
 	
@@ -1844,7 +1842,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 			NSString *key = [keyValueArray objectAtIndex:0];
 			NSString *value = [keyValueArray objectAtIndex:1];
 			
-			if ([key isEqualToString:@"screen_name"]) {
+			if ([key isEqualToString:target]) {
                 return value;
             }
 		}
@@ -1873,32 +1871,6 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     self.loggedInUsername = nil;
 }
 
-- (NSString *)extractUserIDFromHTTPBody:(NSString *)body {
-    if (!body) {
-        return nil;
-    }
-	
-	NSArray *tuples = [body componentsSeparatedByString:@"&"];
-	if (tuples.count < 1) {
-        return nil;
-    }
-	
-	for (NSString *tuple in tuples) {
-		NSArray *keyValueArray = [tuple componentsSeparatedByString:@"="];
-		
-		if (keyValueArray.count == 2) {
-			NSString *key = [keyValueArray objectAtIndex: 0];
-			NSString *value = [keyValueArray objectAtIndex: 1];
-			
-			if ([key isEqualToString:@"user_id"]) {
-                return value;
-            }
-		}
-	}
-	
-	return nil;
-}
-
 - (NSDate *)getDateFromTwitterCreatedAt:(NSString *)twitterDate {
     return [self.dateFormatter dateFromString:twitterDate];
 }
@@ -1917,9 +1889,9 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 }
 
 - (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender withCompletion:(void(^)(BOOL success))block {
-    FHSTwitterEngineController *vc = [[FHSTwitterEngineController alloc]initWithEngine:self];
+    FHSTwitterEngineController *vc = [[[FHSTwitterEngineController alloc]initWithEngine:self]autorelease];
     vc.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
-    objc_setAssociatedObject(self, "FHSTwitterEngineOAuthCompletion", block, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(authBlockKey, "FHSTwitterEngineOAuthCompletion", block, OBJC_ASSOCIATION_COPY_NONATOMIC);
     [sender presentModalViewController:vc animated:YES];
 }
 
@@ -1959,6 +1931,16 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         
     }
     return NO;
+}
+
+- (void)dealloc {
+    [self setConsumer:nil];
+    [self setDateFormatter:nil];
+    [self setLoggedInUsername:nil];
+    [self setLoggedInID:nil];
+    [self setDelegate:nil];
+    [self setAccessToken:nil];
+    [super dealloc];
 }
 
 @end
@@ -2006,7 +1988,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     self.pinCopyBar = [[[UIToolbar alloc]initWithFrame:CGRectMake(0, 44, self.view.bounds.size.width, 44)]autorelease];
     self.pinCopyBar.barStyle = UIBarStyleBlackTranslucent;
     self.pinCopyBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
-    self.pinCopyBar.items = [NSArray arrayWithObjects:[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], [[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil], [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], nil];
+    self.pinCopyBar.items = [NSArray arrayWithObjects:[[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil]autorelease], [[[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil]autorelease], [[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil]autorelease], nil];
 	
 	UILabel	*label = [[UILabel alloc]initWithFrame:CGRectMake(0, 5, blockerView.bounds.size.width, 15)];
 	label.text = @"Please Wait...";
@@ -2024,10 +2006,9 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 	[spinner startAnimating];
     [spinner release];
 	
-	UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"Twitter Login"];
-	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
+	UINavigationItem *navItem = [[[UINavigationItem alloc]initWithTitle:@"Twitter Login"]autorelease];
+	navItem.leftBarButtonItem = [[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)]autorelease];
 	[self.navBar pushNavigationItem:navItem animated:NO];
-    [navItem release];
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
@@ -2059,7 +2040,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     
     BOOL ret = [self.engine finishAuthWithRequestToken:self.requestToken];
     
-    void(^block)(BOOL success) = objc_getAssociatedObject(self.engine, "FHSTwitterEngineOAuthCompletion");
+    void(^block)(BOOL success) = objc_getAssociatedObject(authBlockKey, "FHSTwitterEngineOAuthCompletion");
     
     if (block) {
         block(ret);
@@ -2114,7 +2095,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     }
 	
 	[UIView beginAnimations:nil context:nil];
-	blockerView.hidden = YES;
+	self.blockerView.hidden = YES;
 	[UIView commitAnimations];
 	
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
@@ -2169,8 +2150,18 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 - (void)dismissModalViewControllerAnimated:(BOOL)animated {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     [[NSNotificationCenter defaultCenter]removeObserver:self];
-    [theWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@""]]];
+    [self.theWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@""]]];
     [super dismissModalViewControllerAnimated:animated];
+}
+
+- (void)dealloc {
+    [self setNavBar:nil];
+    [self setBlockerView:nil];
+    [self setPinCopyBar:nil];
+    [self setEngine:nil];
+    [self setTheWebView:nil];
+    [self setRequestToken:nil];
+    [super dealloc];
 }
 
 @end
@@ -2185,7 +2176,7 @@ static char encodingTable[64] = {
 @implementation NSData (Base64)
 
 + (NSData *)dataWithBase64EncodedString:(NSString *) string {
-	return [[NSData alloc]initWithBase64EncodedString:string];
+	return [[[NSData alloc]initWithBase64EncodedString:string]autorelease];
 }
 
 - (id)initWithBase64EncodedString:(NSString *)string {
