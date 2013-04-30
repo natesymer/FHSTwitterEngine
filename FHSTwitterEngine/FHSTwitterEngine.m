@@ -1750,7 +1750,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     id retobj = [self sendRequest:request];
     
-    if ([retobj isKindOfClass:[NSString class]]) {
+    if ([retobj isKindOfClass:[NSData class]]) {
         return [[[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding]autorelease];
     }
     
