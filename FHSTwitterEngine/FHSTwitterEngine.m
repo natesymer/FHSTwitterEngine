@@ -2196,10 +2196,7 @@ static char encodingTable[64] = {
 		mutableData = [NSMutableData dataWithCapacity:base64Data.length];
 		unsigned long lentext = [base64Data length];
         
-		while (YES) {
-			if (ixtext >= lentext) {
-                break;
-            }
+        while (!(ixtext >= lentext)) {
             
 			ch = base64Bytes[ixtext++];
 			flignore = NO;
@@ -2266,7 +2263,6 @@ static char encodingTable[64] = {
 - (NSString *)base64EncodingWithLineLength:(unsigned int)lineLength {
     
 	const unsigned char	*bytes = [self bytes];
-	NSMutableString *result = [NSMutableString stringWithCapacity:[self length]];
 	unsigned long ixtext = 0;
 	unsigned long lentext = [self length];
 	long ctremaining = 0;
@@ -2277,6 +2273,8 @@ static char encodingTable[64] = {
     short ctcopy = 0;
 	unsigned long ix = 0;
     
+    NSMutableString *result = [NSMutableString stringWithCapacity:lentext];
+    
 	while (YES) {
 		ctremaining = lentext-ixtext;
         
@@ -2286,18 +2284,13 @@ static char encodingTable[64] = {
         
 		for (int i = 0; i < 3; i++) {
 			ix = ixtext + i;
-			if (ix < lentext) {
-                inbuf[i] = bytes[ix];
-            } else {
-                inbuf[i] = 0;
-            }
+            inbuf[i] = (ix < lentext)?bytes[ix]:0;
 		}
         
 		outbuf[0] = (inbuf[0] & 0xFC) >> 2;
 		outbuf[1] = ((inbuf[0] & 0x03) << 4) | ((inbuf[1] & 0xF0) >> 4);
 		outbuf[2] = ((inbuf[1] & 0x0F) << 2) | ((inbuf[2] & 0xC0) >> 6);
 		outbuf[3] = inbuf[2] & 0x3F;
-		ctcopy = 4;
         
 		switch (ctremaining) {
             case 1:
@@ -2306,6 +2299,9 @@ static char encodingTable[64] = {
             case 2:
                 ctcopy = 3;
                 break;
+            default:
+                ctcopy = 4;
+                break;
 		}
         
 		for (int i = 0; i < ctcopy; i++) {
@@ -2313,7 +2309,7 @@ static char encodingTable[64] = {
         }
         
 		for (int i = ctcopy; i < 4; i++) {
-			[result appendFormat:@"%c",'='];
+            [result appendString:@"="];
         }
         
 		ixtext += 3;
