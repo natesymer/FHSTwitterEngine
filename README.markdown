@@ -27,7 +27,11 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
 
 Why `FHSTwitterEngine` is better than `STTwitter`:
 
+- FHSTwitterEngine's dumb easy to implement
+- **Less crufty**
+- Need I say any more?
 
+Notice a common theme?
 
 **Setup**
 

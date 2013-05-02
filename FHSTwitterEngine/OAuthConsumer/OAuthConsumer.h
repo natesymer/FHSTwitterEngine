@@ -25,7 +25,7 @@
 
 
 //
-//  FHSTwitterEngine OAuthConsumer Version 1.2.1
+//  FHSTwitterEngine OAuthConsumer Version 1.2.2
 //  As modified by Nate Symer (@natesymer)
 //
 

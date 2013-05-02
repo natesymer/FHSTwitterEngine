@@ -26,7 +26,6 @@
 #import "OAConsumer.h"
 
 @implementation OAConsumer
-@synthesize key, secret;
 
 + (OAConsumer *)consumerWithKey:(NSString *)aKey secret:(NSString *)aSecret {
     return [[[[self class]alloc]initWithKey:aKey secret:aSecret]autorelease];

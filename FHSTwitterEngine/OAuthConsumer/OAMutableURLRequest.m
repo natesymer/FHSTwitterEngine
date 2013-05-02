@@ -59,8 +59,6 @@
 @end
 
 @implementation OAMutableURLRequest
-@synthesize signature, nonce, timestamp;
-@synthesize consumer, token, realm, signatureProvider, extraOAuthParameters;
 
 + (void)fetchDataForRequest:(OAMutableURLRequest *)request withCompletionHandler:(void(^)(OAServiceTicket *, NSData *, NSError *))block {
     [request prepare];
@@ -81,7 +79,7 @@
 
 - (id)initWithURL:(NSURL *)aUrl consumer:(OAConsumer *)aConsumer token:(OAToken *)aToken realm:(NSString *)aRealm signatureProvider:(id<OASignatureProviding, NSObject>)aProvider {
     
-    self = [super initWithURL:aUrl cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:10.0];
+    self = [super initWithURL:aUrl cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:25];
     
     if (self) {
         [self setConsumer:aConsumer];
@@ -180,7 +178,7 @@
 	NSMutableString *extraParameters = [NSMutableString string];
 	
 	// Adding the optional parameters in sorted order isn't required by the OAuth spec, but it makes it possible to hard-code expected values in the unit tests.
-	for (NSString *parameterName in [[extraOAuthParameters allKeys]sortedArrayUsingSelector:@selector(compare:)]) {
+	for (NSString *parameterName in [[self.extraOAuthParameters allKeys]sortedArrayUsingSelector:@selector(compare:)]) {
 		[extraParameters appendFormat:@", %@=\"%@\"",[parameterName URLEncodedString],[[self.extraOAuthParameters objectForKey:parameterName]URLEncodedString]];
 	}	
     

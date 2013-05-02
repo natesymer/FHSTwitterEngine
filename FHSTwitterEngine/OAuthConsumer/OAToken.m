@@ -28,8 +28,6 @@
 
 @implementation OAToken
 
-@synthesize key, secret, verifier;
-
 + (OAToken *)token {
     return [[[[self class]alloc]init]autorelease];
 }
@@ -101,10 +99,10 @@
 		NSString *theKey = [[NSUserDefaults standardUserDefaults]stringForKey:[NSString stringWithFormat:@"OAUTH_%@_%@_KEY", prefix, provider]];
 		NSString *theSecret = [[NSUserDefaults standardUserDefaults]stringForKey:[NSString stringWithFormat:@"OAUTH_%@_%@_SECRET", prefix, provider]];
         
-        BOOL keyIsEmpty = ((theKey == nil) || (theKey.length == 0));
-        BOOL secretIsEmpty = ((theSecret == nil) || (theSecret.length == 0));
+        BOOL nokey = (theKey.length == 0);
+        BOOL nosecret = (theSecret.length == 0);
         
-        if ((keyIsEmpty && secretIsEmpty) || (keyIsEmpty || secretIsEmpty)) {
+        if ((nokey && nosecret) || (nokey || nosecret)) {
             return nil;
         }
         

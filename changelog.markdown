@@ -76,6 +76,13 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - MOVE AWAY FROM ARC
 - Fix bug with parsing nil JSON data
 
+**Version 1.6.1**
+
+- Sorry I forgot about the changelog!
+- Fixed a bunch of bugs... You should be good to go.
+- More optimization and reengineering
+
+
 
 OAuthConsumer
 ===
@@ -104,4 +111,7 @@ OAuthConsumer
 - Add convenience init methods to `OAMutableURLRequest`, `OAToken`, and `OAConsumer`
 - Moved `fetchDataForRequest:` to OAMutableURLRequest.m, removed `OAAsynchronousDataFetcher`
 
+**Version 1.2.2**
+
+- Just restructure and remove @synthesizes
 

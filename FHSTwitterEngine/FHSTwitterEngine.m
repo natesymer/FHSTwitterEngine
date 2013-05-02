@@ -114,8 +114,6 @@ NSError * getNilReturnLengthError() {
 
 // Login stuff
 - (NSString *)getRequestTokenString;
-//- (NSString *)extractUserIDFromHTTPBody:(NSString *)body;
-//- (NSString *)extractUsernameFromHTTPBody:(NSString *)body;
 
 // General Get request sender
 - (id)sendRequest:(NSURLRequest *)request;
@@ -265,15 +263,14 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
     OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
     OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
-    OARequestParameter *sinceIDP = [OARequestParameter requestParameterWithName:@"since_id" value:sinceID];
-    OARequestParameter *maxIDP = [OARequestParameter requestParameterWithName:@"max_id" value:maxID];
     OARequestParameter *untilP = [OARequestParameter requestParameterWithName:@"until" value:nil];
     OARequestParameter *result_typeP = [OARequestParameter requestParameterWithName:@"result_type" value:nil];
     OARequestParameter *qP = [OARequestParameter requestParameterWithName:@"q" value:q];
     
-    NSDateFormatter *formatter = [[[NSDateFormatter alloc]init]autorelease];
-    formatter.dateFormat = @"YYYY-MM-DD";
-    NSString *untilString = [formatter stringFromDate:untilDate];
+    [self.dateFormatter setDateFormat:@"YYYY-MM-DD"];
+    NSString *untilString = [self.dateFormatter stringFromDate:untilDate];
+    [self.dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss ZZZZ yyyy"];
+    
     untilP.value = untilString;
 
     if (resultType == FHSTwitterEngineResultTypeMixed) {
@@ -284,19 +281,15 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         result_typeP.value = @"popular";
     }
     
-    NSMutableArray *params = [NSMutableArray array];
+    NSMutableArray *params = [NSMutableArray arrayWithObjects:countP, include_entitiesP, qP, nil];
     
     if (maxID.length > 0) {
-        [params addObject:maxIDP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"max_id" value:maxID]];
     }
     
     if (sinceID.length > 0) {
-        [params addObject:sinceIDP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
     }
-    
-    [params addObject:countP];
-    [params addObject:include_entitiesP];
-    [params addObject:qP];
     
     return [self sendGETRequest:request withParameters:params];
 }
@@ -310,13 +303,12 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     NSURL *baseURL = [NSURL URLWithString:url_lists_create];
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
     OARequestParameter *nameP = [OARequestParameter requestParameterWithName:@"name" value:name];
-    OARequestParameter *descriptionP = [OARequestParameter requestParameterWithName:@"description" value:description];
     OARequestParameter *isPrivateP = [OARequestParameter requestParameterWithName:@"mode" value:isPrivate?@"private":@"public"];
     
     NSMutableArray *params = [NSMutableArray arrayWithObjects:nameP, isPrivateP, nil];
     
-    if (description != nil) {
-        [params addObject:descriptionP];
+    if (description.length > 0) {
+        [params addObject:[OARequestParameter requestParameterWithName:@"description" value:description]];
     }
     
     return [self sendPOSTRequest:request withParameters:params];
@@ -465,13 +457,11 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     NSMutableArray *params = [NSMutableArray arrayWithObjects:countP, excludeRepliesP, includeRTsP, listIDP, nil];
     
     if (sinceID.length > 0) {
-        OARequestParameter *sinceIDP = [OARequestParameter requestParameterWithName:@"since_id" value:sinceID];
-        [params addObject:sinceIDP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
     }
     
     if (maxID.length > 0) {
-        OARequestParameter *maxIDP = [OARequestParameter requestParameterWithName:@"max_id" value:maxID];
-        [params addObject:maxIDP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"max_id" value:maxID]];
     }
     
     return [self sendGETRequest:request withParameters:params];
@@ -527,13 +517,11 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     [params addObject:includeRTsP];
     
     if (sinceID.length > 0) {
-        OARequestParameter *sinceIDP = [OARequestParameter requestParameterWithName:@"since_id" value:sinceID];
-        [params addObject:sinceIDP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
     }
     
     if (maxID.length > 0) {
-        OARequestParameter *maxIDP = [OARequestParameter requestParameterWithName:@"max_id" value:maxID];
-        [params addObject:maxIDP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"max_id" value:maxID]];
     }
     
     return [self sendGETRequest:request withParameters:params];
@@ -561,13 +549,11 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     [params addObject:includeRTsP];
     
     if (sinceID.length > 0) {
-        OARequestParameter *sinceIDP = [OARequestParameter requestParameterWithName:@"since_id" value:sinceID];
-        [params addObject:sinceIDP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
     }
     
     if (maxID.length > 0) {
-        OARequestParameter *maxIDP = [OARequestParameter requestParameterWithName:@"max_id" value:maxID];
-        [params addObject:maxIDP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"max_id" value:maxID]];
     }
     
     return [self sendGETRequest:request withParameters:params];
@@ -583,7 +569,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         return getBadRequestError();
     }
     
-    if (theData == nil) {
+    if (theData.length == 0) {
         return getBadRequestError();
     }
     
@@ -591,14 +577,11 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
     OARequestParameter *statusP = [OARequestParameter requestParameterWithName:@"status" value:tweetString];
     OARequestParameter *mediaP = [OARequestParameter requestParameterWithName:@"media_data[]" value:[theData base64EncodingWithLineLength:0]];
-    OARequestParameter *inReplyToP = [OARequestParameter requestParameterWithName:@"in_reply_to_status_id" value:irt];
     
-    NSMutableArray *params = [NSMutableArray array];
-    [params addObject:statusP];
-    [params addObject:mediaP];
+    NSMutableArray *params = [NSMutableArray arrayWithObjects:statusP, mediaP, nil];
     
     if (irt.length > 0) {
-        [params addObject:inReplyToP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"in_reply_to_status_id" value:irt]];
     }
     
     return [self sendPOSTRequest:request withParameters:params];
@@ -686,13 +669,11 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     [params addObject:includeRTsP];
     
     if (sinceID.length > 0) {
-        OARequestParameter *sinceIDP = [OARequestParameter requestParameterWithName:@"since_id" value:sinceID];
-        [params addObject:sinceIDP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
     }
     
     if (maxID.length > 0) {
-        OARequestParameter *maxIDP = [OARequestParameter requestParameterWithName:@"max_id" value:maxID];
-        [params addObject:maxIDP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"max_id" value:maxID]];
     }
     
     return [self sendGETRequest:request withParameters:params];
@@ -715,23 +696,17 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     if ([userShowReturn isKindOfClass:[NSError class]]) {
         return [NSError errorWithDomain:[(NSError *)userShowReturn domain] code:[(NSError *)userShowReturn code] userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
     } else if ([userShowReturn isKindOfClass:[NSDictionary class]]) {
-        NSString *finalURL = nil;
-        NSString *rawProfileURL = [userShowReturn objectForKey:@"profile_image_url"];
-            
+        NSString *url = [userShowReturn objectForKey:@"profile_image_url"]; // normal
+        
         if (size == 0) { // mini
-            NSString *ext = [rawProfileURL pathExtension];
-            finalURL = [[[[rawProfileURL stringByDeletingPathExtension]stringByReplacingOccurrencesOfString:@"_normal" withString:@""] stringByAppendingString:@"_mini."]stringByAppendingString:ext];
-        } else if (size == 1) { // normal
-            finalURL = rawProfileURL;
+            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@"_mini"];
         } else if (size == 2) { // bigger
-            NSString *ext = [rawProfileURL pathExtension];
-            finalURL = [[[[rawProfileURL stringByDeletingPathExtension]stringByReplacingOccurrencesOfString:@"_normal" withString:@""] stringByAppendingString:@"_bigger."]stringByAppendingString:ext];
+            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@"_bigger"];
         } else if (size == 3) { // original
-            finalURL = [[rawProfileURL stringByDeletingPathExtension]stringByReplacingOccurrencesOfString:@"_normal" withString:@""];
+            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@""];
         }
-            
-        NSURLRequest *imageRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:finalURL]];
-        id ret = [self sendRequest:imageRequest];
+        
+        id ret = [self sendRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
         
         if ([ret isKindOfClass:[NSData class]]) {
             return [UIImage imageWithData:(NSData *)ret];
@@ -756,10 +731,8 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     id obj = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:skipstatusP, userP, nil]];
     
-    if (!obj) {
-        return [NSError errorWithDomain:[(NSError *)obj domain] code:[(NSError *)obj code] userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
-    } else if ([obj isKindOfClass:[NSError class]]) {
-        return [NSError errorWithDomain:[(NSError *)obj domain] code:[(NSError *)obj code] userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+    if ([obj isKindOfClass:[NSError class]]) {
+        return obj;
     } else if ([obj isKindOfClass:[NSDictionary class]]) {
         if ([[obj objectForKey:@"error"]isEqualToString:@"You are not blocking this user."]) {
             return @"NO";
@@ -768,7 +741,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         }
     }
     
-    return [NSError errorWithDomain:@"Bad Request: the request you attempted to make messed up royally." code:400 userInfo:nil];
+    return getBadRequestError();
 }
 
 - (id)listBlockedUsers {
@@ -786,12 +759,8 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     id object = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:stringifyIDsP, nil]];
     
     if ([object isKindOfClass:[NSDictionary class]]) {
-        NSDictionary *dict = (NSDictionary *)object;
-        if ([dict.allKeys containsObject:@"ids"]) {
-            return [dict objectForKey:@"ids"];
-        }
+        return [(NSDictionary *)object objectForKey:@"ids"];
     }
-    
     return object;
 }
 
@@ -1043,17 +1012,15 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
     OARequestParameter *userP = [OARequestParameter requestParameterWithName:isID?@"user_id":@"screen_name" value:user];
     OARequestParameter *includeEntitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
-    OARequestParameter *since_id = [OARequestParameter requestParameterWithName:@"since_id" value:sinceID];
-    OARequestParameter *max_id = [OARequestParameter requestParameterWithName:@"max_id" value:maxID];
     
     NSMutableArray *params = [NSMutableArray arrayWithObjects:countP, userP, includeEntitiesP, nil];
     
     if (sinceID.length > 0) {
-        [params addObject:since_id];
+        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
     }
     
     if (maxID.length > 0) {
-        [params addObject:max_id];
+        [params addObject:[OARequestParameter requestParameterWithName:@"max_id" value:maxID]];
     }
     
     return [self sendGETRequest:request withParameters:params];
@@ -1107,33 +1074,28 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_colors];
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *profile_background_colorP = [OARequestParameter requestParameterWithName:@"profile_background_color" value:profile_background_color];
-    OARequestParameter *profile_link_colorP = [OARequestParameter requestParameterWithName:@"profile_link_color" value:profile_link_color];
-    OARequestParameter *profile_sidebar_border_colorP = [OARequestParameter requestParameterWithName:@"profile_sidebar_border_color" value:profile_sidebar_border_color];
-    OARequestParameter *profile_sidebar_fill_colorP = [OARequestParameter requestParameterWithName:@"profile_sidebar_fill_color" value:profile_sidebar_fill_color];
-    OARequestParameter *profile_text_colorP = [OARequestParameter requestParameterWithName:@"profile_text_color" value:profile_text_color];
     OARequestParameter *skipStatus = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
     
     NSMutableArray *params = [NSMutableArray arrayWithObjects:skipStatus, nil];
     
     if (profile_background_color.length > 0) {
-        [params addObject:profile_background_colorP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"profile_background_color" value:profile_background_color]];
     }
     
     if (profile_link_color.length > 0) {
-        [params addObject:profile_link_colorP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"profile_link_color" value:profile_link_color]];
     }
     
     if (profile_sidebar_border_color.length > 0) {
-        [params addObject:profile_sidebar_border_colorP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"profile_sidebar_border_color" value:profile_sidebar_border_color]];
     }
     
     if (profile_sidebar_fill_color.length > 0) {
-        [params addObject:profile_sidebar_fill_colorP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"profile_sidebar_fill_color" value:profile_sidebar_fill_color]];
     }
     
     if (profile_text_color.length > 0) {
-        [params addObject:profile_text_colorP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"profile_text_color" value:profile_text_color]];
     }
     
     return [self sendPOSTRequest:request withParameters:params];
@@ -1216,28 +1178,24 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile];
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *nameP = [OARequestParameter requestParameterWithName:@"name" value:name];
-    OARequestParameter *urlP = [OARequestParameter requestParameterWithName:@"url" value:url];
-    OARequestParameter *locationP = [OARequestParameter requestParameterWithName:@"location" value:location];
-    OARequestParameter *descriptionP = [OARequestParameter requestParameterWithName:@"description" value:description];
     OARequestParameter *skipStatus = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
     
     NSMutableArray *params = [NSMutableArray arrayWithObjects:skipStatus, nil];
     
     if (name.length > 0) {
-        [params addObject:nameP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"name" value:name]];
     }
     
     if (url.length > 0) {
-        [params addObject:urlP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"url" value:url]];
     }
     
     if (location.length > 0) {
-        [params addObject:locationP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"location" value:location]];
     }
     
     if (description.length > 0) {
-        [params addObject:descriptionP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"description" value:description]];
     }
     
     return [self sendPOSTRequest:request withParameters:params];
@@ -1265,32 +1223,27 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     NSURL *baseURL = [NSURL URLWithString:url_account_settings];
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *sleep_time_enabledP = [OARequestParameter requestParameterWithName:@"sleep_time_enabled" value:sleep_time_enabled];
-    OARequestParameter *start_sleep_timeP = [OARequestParameter requestParameterWithName:@"start_sleep_time" value:start_sleep_time];
-    OARequestParameter *end_sleep_timeP = [OARequestParameter requestParameterWithName:@"end_sleep_time" value:end_sleep_time];
-    OARequestParameter *time_zoneP = [OARequestParameter requestParameterWithName:@"time_zone" value:time_zone];
-    OARequestParameter *langP = [OARequestParameter requestParameterWithName:@"lang" value:lang];
     
     NSMutableArray *params = [NSMutableArray array];
     
     if (sleep_time_enabled.length > 0) {
-        [params addObject:sleep_time_enabledP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"sleep_time_enabled" value:sleep_time_enabled]];
     }
     
     if (start_sleep_time.length > 0) {
-        [params addObject:start_sleep_timeP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"start_sleep_time" value:start_sleep_time]];
     }
     
     if (end_sleep_time.length > 0) {
-        [params addObject:end_sleep_timeP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"end_sleep_time" value:end_sleep_time]];
     }
     
     if (time_zone.length > 0) {
-        [params addObject:time_zoneP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"time_zone" value:time_zone]];
     }
     
     if (lang.length > 0) {
-        [params addObject:langP];
+        [params addObject:[OARequestParameter requestParameterWithName:@"lang" value:lang]];
     }
     
     return [self sendPOSTRequest:request withParameters:params];
@@ -1352,7 +1305,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         return retValue;
     }
     
-    return [NSError errorWithDomain:@"Bad Request: The request you attempted to make messed up royally." code:400 userInfo:nil];
+    return getBadRequestError();
 }
 
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count {
@@ -1363,13 +1316,12 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     NSURL *baseURL = [NSURL URLWithString:url_statuses_home_timeline];
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *since_id = [OARequestParameter requestParameterWithName:@"since_id" value:sinceID];
     OARequestParameter *countParam = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d", count]];
     
     NSMutableArray *params = [NSMutableArray arrayWithObjects:countParam, nil];
     
     if (sinceID.length > 0) {
-        [params addObject:since_id];
+        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
     }
     
     return [self sendGETRequest:request withParameters:params];
@@ -1383,15 +1335,12 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     
     NSURL *baseURL = [NSURL URLWithString:url_statuses_update];
     OARequestParameter *status = [OARequestParameter requestParameterWithName:@"status" value:[tweetString fhs_trimForTwitter]];
-    OARequestParameter *inReplyToID = [OARequestParameter requestParameterWithName:@"in_reply_to_status_id" value:inReplyToString];
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
     
-    NSMutableArray *params = [NSMutableArray array];
-    
-    [params addObject:status];
+    NSMutableArray *params = [NSMutableArray arrayWithObjects:status, nil];
     
     if (inReplyToString.length > 0) {
-        [params addObject:inReplyToID];
+        [params addObject:[OARequestParameter requestParameterWithName:@"in_reply_to_status_id" value:inReplyToString]];
     }
     
     return [self sendPOSTRequest:request withParameters:params];
@@ -1529,17 +1478,16 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 }
 
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array {
-    int count = array.count;
-    int remainder = fmod(count, 99);
-    int numberOfStrings = (count-remainder)/99;
-    
+
     NSString *initialString = [array componentsJoinedByString:@","];
     
-    if (count <= 99) {
+    if (array.count <= 99) {
         return [NSArray arrayWithObjects:initialString, nil];
     }
     
     int offset = 0;
+    int remainder = fmod(array.count, 99);
+    int numberOfStrings = (array.count-remainder)/99;
     
     NSMutableArray *reqStrs = [NSMutableArray array];
     
@@ -1580,8 +1528,6 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     OARequestParameter *x_auth_username = [OARequestParameter requestParameterWithName:@"x_auth_username" value:username];
     OARequestParameter *x_auth_password = [OARequestParameter requestParameterWithName:@"x_auth_password" value:password];
 	[request setHTTPMethod:@"POST"];
-    [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
-    [request setTimeoutInterval:25];
     
 	[request setParameters:[NSArray arrayWithObjects:x_auth_mode, x_auth_username, x_auth_password, nil]];
     [request prepare];
@@ -1645,8 +1591,6 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         return [NSError errorWithDomain:@"You are not authorized via OAuth" code:401 userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
     }
     
-    [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
-    [request setTimeoutInterval:25];
     [request setHTTPMethod:@"POST"];
     [request setParameters:params];
     [request prepare];
@@ -1655,7 +1599,6 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         self.shouldClearConsumer = NO;
         self.consumer = nil;
     }
-    
     
     id retobj = [self sendRequest:request];
     
@@ -1693,8 +1636,6 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
         return [NSError errorWithDomain:@"You are not authorized with Twitter. Please sign in." code:401 userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
     }
     
-    [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
-    [request setTimeoutInterval:25];
     [request setHTTPMethod:@"GET"];
     [request setParameters:params];
     [request prepare];
@@ -1742,10 +1683,7 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
 - (NSString *)getRequestTokenString {
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"];
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:url consumer:self.consumer token:nil];
-    [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
-    [request setTimeoutInterval:25];
     [request setHTTPMethod:@"POST"];
-    
     [request prepare];
     
     id retobj = [self sendRequest:request];
@@ -1762,8 +1700,6 @@ static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
     
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:url consumer:self.consumer token:reqToken];
-    [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
-    [request setTimeoutInterval:25];
     [request setHTTPMethod:@"POST"];
     
     [request prepare];
@@ -2019,6 +1955,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
         
         if (reqString.length == 0) {
             [self dismissModalViewControllerAnimated:YES];
+            [pool release];
             return;
         }
         
@@ -2052,7 +1989,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 - (void)pasteboardChanged:(NSNotification *)note {
 	UIPasteboard *pb = [UIPasteboard generalPasteboard];
 	
-	if ([note.userInfo objectForKey:UIPasteboardChangedTypesAddedKey] == nil) {
+	if (![note.userInfo objectForKey:UIPasteboardChangedTypesAddedKey]) {
         return;
     }
 	
@@ -2167,7 +2104,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 @end
 
 
-static char encodingTable[64] = {
+static char const encodingTable[64] = {
     'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
     'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
     'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
@@ -2226,7 +2163,7 @@ static char encodingTable[64] = {
                         break;
                     }
                     
-					if ((ixinbuf == 1) || (ixinbuf == 2)) {
+					if (ixinbuf == 1 || ixinbuf == 2) {
                         ctcharsinbuf = 1;
                     } else {
                         ctcharsinbuf = 2;
@@ -2236,7 +2173,7 @@ static char encodingTable[64] = {
 					flbreak = YES;
 				}
                 
-				inbuf [ixinbuf++] = ch;
+				inbuf[ixinbuf++] = ch;
                 
 				if (ixinbuf == 4) {
 					ixinbuf = 0;
@@ -2305,7 +2242,7 @@ static char encodingTable[64] = {
 		}
         
 		for (int i = 0; i < ctcopy; i++) {
-			[result appendFormat:@"%c", encodingTable[outbuf[i]]];
+			[result appendFormat:@"%c",encodingTable[outbuf[i]]];
         }
         
 		for (int i = ctcopy; i < 4; i++) {

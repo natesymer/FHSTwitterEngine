@@ -20,8 +20,6 @@
 
 @implementation ViewController
 
-@synthesize engine, tweetField, loggedInUserLabel;
-
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if (buttonIndex == 1) {
         NSString *username = [alertView textFieldAtIndex:0].text;
@@ -46,9 +44,9 @@
                             message = @"You have successfully logged in via XAuth";
                             NSString *username = self.engine.loggedInUsername;
                             if (username.length > 0) {
-                                loggedInUserLabel.text = [NSString stringWithFormat:@"Logged in as %@.",username];
+                                self.loggedInUserLabel.text = [NSString stringWithFormat:@"Logged in as %@.",username];
                             } else {
-                                loggedInUserLabel.text = @"You are not logged in.";
+                                self.loggedInUserLabel.text = @"You are not logged in.";
                             }
                         }
                         UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
@@ -81,9 +79,9 @@
 }
 
 - (IBAction)logout:(id)sender {
-    [tweetField resignFirstResponder];
+    [self.tweetField resignFirstResponder];
     [self.engine clearAccessToken];
-    loggedInUserLabel.text = @"You are not logged in.";
+    self.loggedInUserLabel.text = @"You are not logged in.";
 }
 
 - (IBAction)loginXAuth:(id)sender {
@@ -95,15 +93,12 @@
 }
 
 - (IBAction)listFriends:(id)sender {
-    [tweetField resignFirstResponder];
+    [self.tweetField resignFirstResponder];
     dispatch_async(GCDBackgroundThread, ^{
         @autoreleasepool {
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            
-         //   NSLog(@"%@",[self.engine lookupUsers:[NSArray arrayWithObjects:@"natesymer", @"twitter", nil] areIDs:NO]);
-            NSLog(@"followers:\n%@",[self.engine getFollowers]);
-            
-            //NSLog(@"%@",[self.engine showDirectMessage:@"261995031622201344"]);
+
+            NSLog(@"followers:\n%@",[self.engine getFriends]);
             
             dispatch_sync(GCDMainThread, ^{
                 @autoreleasepool {
@@ -118,13 +113,13 @@
 
 - (IBAction)postTweet:(id)sender {
 
-    [tweetField resignFirstResponder];
+    [self.tweetField resignFirstResponder];
     
     dispatch_async(GCDBackgroundThread, ^{
         @autoreleasepool {
             
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            NSError *returnCode = [self.engine postTweet:tweetField.text];
+            NSError *returnCode = [self.engine postTweet:self.tweetField.text];
             [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
             
             NSString *title = nil;
@@ -135,12 +130,14 @@
                 message = returnCode.domain;
             } else {
                 title = @"Tweet Posted";
-                message = tweetField.text;
+                message = self.tweetField.text;
             }
             
             dispatch_sync(GCDMainThread, ^{
-                UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-                [av show];
+                @autoreleasepool {
+                    UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                    [av show];
+                }
             });
         }
     });
@@ -148,24 +145,17 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    NSMutableArray *array = [NSMutableArray array];
-    
-    for (int i = 0; i < 1000; ++i) {
-        [array addObject:[NSString stringWithFormat:@"shit%d",i]];
-    }
-    
     self.engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"iD3JmMTXZ36MlISkfmkFvg" andSecret:@"B7HLYGJpwnyZr8fJeUGidW129i3cpgI2WsyGsHM2s"];
-    [tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
+    [self.tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [self.engine loadAccessToken];
     NSString *username = self.engine.loggedInUsername;
     if (username.length > 0) {
-        loggedInUserLabel.text = [NSString stringWithFormat:@"Logged in as %@",username];
+        self.loggedInUserLabel.text = [NSString stringWithFormat:@"Logged in as %@",username];
     } else {
-        loggedInUserLabel.text = @"You are not logged in.";
+        self.loggedInUserLabel.text = @"You are not logged in.";
     }
 }
 
