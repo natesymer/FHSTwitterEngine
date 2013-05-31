@@ -419,7 +419,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
         return getBadRequestError();
     }
     
-    if (users.count >= 99) {
+    if (users.count > 100) {
         return getBadRequestError();
     }
     
@@ -439,7 +439,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
         return getBadRequestError();
     }
     
-    if (users.count >= 99) {
+    if (users.count > 100) {
         return getBadRequestError();
     }
     
@@ -1283,7 +1283,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
         return nil;
     }
     
-    if (users.count > 99) {
+    if (users.count > 100) {
         return getBadRequestError();
     }
     
@@ -1424,18 +1424,18 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 
     NSString *initialString = [array componentsJoinedByString:@","];
     
-    if (array.count <= 99) {
+    if (array.count <= 100) {
         return [NSArray arrayWithObjects:initialString, nil];
     }
     
     int offset = 0;
-    int remainder = fmod(array.count, 99);
-    int numberOfStrings = (array.count-remainder)/99;
+    int remainder = fmod(array.count, 100);
+    int numberOfStrings = (array.count-remainder)/100;
     
     NSMutableArray *reqStrs = [NSMutableArray array];
     
     for (int i = 1; i <= numberOfStrings; ++i) {
-        NSString *ninetyNinththItem = (NSString *)[array objectAtIndex:i*99];
+        NSString *ninetyNinththItem = (NSString *)[array objectAtIndex:i*100];
         NSRange range = [initialString rangeOfString:ninetyNinththItem];
         int endOffset = range.location+range.length;
         NSRange rangeOfAString = NSMakeRange(offset, endOffset-offset);

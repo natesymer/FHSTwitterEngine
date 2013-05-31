@@ -89,9 +89,13 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Exposed -generateRequestStringsFromArray:
 
 **Version 1.6.3.1**
+
 - Found an issue with the mass listing method - cursors
 - Adapted code for cursors, no more -getFriends and -getFollowers. You'll just have to pass your logged in username… Boo hoo.
 
+**Version 1.6.4**
+
+- Moved all batch lookup methods to use 100 instead of 99
 
 
 
