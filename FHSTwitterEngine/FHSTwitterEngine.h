@@ -299,15 +299,13 @@ extern NSString * const FHSProfileDescriptionKey;
 - (id)getFollowersIDs;
 
 // followers/list
-- (id)getFollowers;
-- (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID;
+- (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
 
 // friends/ids
 - (id)getFriendsIDs;
 
 // friends/list
-- (id)getFriends;
-- (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID;
+- (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
 
 //
 // Login and Auth

@@ -221,15 +221,7 @@ static NSString * const url_followers_list = @"https://api.twitter.com/1.1/follo
 static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/ids.json";
 static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends/list.json";
 
-- (id)getFriends {
-    return [self listFriendsForUser:self.loggedInUsername isID:NO];
-}
-
-- (id)getFollowers {
-    return [self listFollowersForUser:self.loggedInUsername isID:NO];
-}
-
-- (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID {
+- (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor {
     
     if (user.length == 0) {
         return getBadRequestError();
@@ -240,10 +232,11 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     OARequestParameter *skipstatusP = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
     OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
     OARequestParameter *screen_nameP = [OARequestParameter requestParameterWithName:isID?@"user_id":@"screen_name" value:user];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, skipstatusP, screen_nameP, nil]];
+    OARequestParameter *cursorP = [OARequestParameter requestParameterWithName:@"cursor" value:cursor];
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, skipstatusP, screen_nameP, cursorP, nil]];
 }
 
-- (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID {
+- (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor {
     
     if (user.length == 0) {
         return getBadRequestError();
@@ -254,7 +247,8 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     OARequestParameter *skipstatusP = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
     OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
     OARequestParameter *screen_nameP = [OARequestParameter requestParameterWithName:isID?@"user_id":@"screen_name" value:user];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, skipstatusP, screen_nameP, nil]];
+    OARequestParameter *cursorP = [OARequestParameter requestParameterWithName:@"cursor" value:cursor];
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, skipstatusP, screen_nameP, cursorP, nil]];
 }
 
 - (id)searchUsersWithQuery:(NSString *)q andCount:(int)count {
