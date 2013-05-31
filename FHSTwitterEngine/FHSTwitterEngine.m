@@ -109,9 +109,6 @@ NSError * getNilReturnLengthError() {
 
 @interface FHSTwitterEngine()
 
-// id list generator - returns an array of id/username list strings
-- (NSArray *)generateRequestStringsFromArray:(NSArray *)array;
-
 // Login stuff
 - (NSString *)getRequestTokenString;
 
@@ -219,9 +216,46 @@ static NSString * const url_favorites_destroy = @"https://api.twitter.com/1.1/fa
 static NSString * const url_application_rate_limit_status = @"https://api.twitter.com/1.1/application/rate_limit_status.json";
 
 static NSString * const url_followers_ids = @"https://api.twitter.com/1.1/followers/ids.json";
+static NSString * const url_followers_list = @"https://api.twitter.com/1.1/followers/list.json";
 
 static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/ids.json";
+static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends/list.json";
 
+- (id)getFriends {
+    return [self listFriendsForUser:self.loggedInUsername isID:NO];
+}
+
+- (id)getFollowers {
+    return [self listFollowersForUser:self.loggedInUsername isID:NO];
+}
+
+- (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID {
+    
+    if (user.length == 0) {
+        return getBadRequestError();
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_friends_list];
+    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
+    OARequestParameter *skipstatusP = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
+    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
+    OARequestParameter *screen_nameP = [OARequestParameter requestParameterWithName:isID?@"user_id":@"screen_name" value:user];
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, skipstatusP, screen_nameP, nil]];
+}
+
+- (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID {
+    
+    if (user.length == 0) {
+        return getBadRequestError();
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_friends_list];
+    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
+    OARequestParameter *skipstatusP = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
+    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
+    OARequestParameter *screen_nameP = [OARequestParameter requestParameterWithName:isID?@"user_id":@"screen_name" value:user];
+    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, skipstatusP, screen_nameP, nil]];
+}
 
 - (id)searchUsersWithQuery:(NSString *)q andCount:(int)count {
     

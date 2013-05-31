@@ -82,11 +82,17 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Fixed a bunch of bugs... You should be good to go.
 - More optimization and reengineering
 
+**Version 1.6.3**
+
+- Added followers/list and friends/list
+- Replaced -getFriends and -getFollowers with the methods for the above
+- Exposed -generateRequestStringsFromArray:
+
 
 
 OAuthConsumer
 ===
-*Version numbers below are for **\_my\_** version of OAuthConsumer*
+*Version numbers below are for **\_my\_** version of OAuthConsumer. I modified OAuthConsumer almost beyond recognition...*
 
 **Pre-1.0 Versions**
 
