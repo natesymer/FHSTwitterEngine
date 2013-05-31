@@ -1421,7 +1421,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 }
 
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array {
-
+    
     NSString *initialString = [array componentsJoinedByString:@","];
     
     if (array.count <= 100) {
@@ -1435,7 +1435,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     NSMutableArray *reqStrs = [NSMutableArray array];
     
     for (int i = 1; i <= numberOfStrings; ++i) {
-        NSString *ninetyNinththItem = (NSString *)[array objectAtIndex:i*100];
+        NSString *ninetyNinththItem = (NSString *)[array objectAtIndex:(i*100)-1];
         NSRange range = [initialString rangeOfString:ninetyNinththItem];
         int endOffset = range.location+range.length;
         NSRange rangeOfAString = NSMakeRange(offset, endOffset-offset);
@@ -1448,6 +1448,15 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
         
         [reqStrs addObject:endResult];
     }
+    
+    NSString *remainderString = [initialString stringByReplacingOccurrencesOfString:[reqStrs componentsJoinedByString:@","] withString:@""];
+    
+    if ([[remainderString substringToIndex:1]isEqualToString:@","]) {
+        remainderString = [remainderString substringFromIndex:1];
+    }
+    
+    [reqStrs addObject:remainderString];
+    
     return reqStrs;
 }
 

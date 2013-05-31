@@ -97,6 +97,9 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 
 - Moved all batch lookup methods to use 100 instead of 99
 
+**Version 1.6.5**
+
+- Fixed issue in -generateRequestStringsFromArray method where some ids were ignored (the remainder of a modulo division operation)
 
 
 OAuthConsumer
