@@ -101,6 +101,12 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 
 - Fixed issue in -generateRequestStringsFromArray method where some ids were ignored (the remainder of a modulo division operation)
 
+**Version 1.7**
+
+- FHSTwitterEngine now uses the singleton pattern
+- Cleaned up the -isAuthorized check in `-sendGETRequest:` and `-sendPOSTRequest:` to attempt to load saved access tokens if unauthorized.
+- Cleaned up login controller
+- Updated Demo app
 
 OAuthConsumer
 ===

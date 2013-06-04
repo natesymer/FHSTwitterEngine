@@ -49,6 +49,8 @@ static NSString * const errorFourhundred = @"Bad Request: The request you are tr
 
 static NSString * const authBlockKey = @"FHSTwitterEngineOAuthCompletion";
 
+static FHSTwitterEngine *sharedInstance = nil;
+
 id removeNull(id rootObject) {
     if ([rootObject isKindOfClass:[NSDictionary class]]) {
         NSMutableDictionary *sanitizedDictionary = [NSMutableDictionary dictionaryWithDictionary:rootObject];
@@ -97,11 +99,11 @@ NSError * getNilReturnLengthError() {
 @property (nonatomic, retain) UIView *blockerView;
 @property (nonatomic, retain) UIToolbar *pinCopyBar;
 
-@property (nonatomic, retain) FHSTwitterEngine *engine;
+//@property (nonatomic, retain) FHSTwitterEngine *engine;
 @property (nonatomic, retain) UIWebView *theWebView;
 @property (nonatomic, retain) OAToken *requestToken;
 
-- (id)initWithEngine:(FHSTwitterEngine *)theEngine;
+//- (id)initWithEngine:(FHSTwitterEngine *)theEngine;
 - (NSString *)locatePin;
 - (void)showPinCopyPrompt;
 
@@ -147,8 +149,6 @@ NSError * getNilReturnLengthError() {
 @end
 
 @implementation FHSTwitterEngine
-
-@synthesize consumer, accessToken, loggedInUsername, loggedInID, delegate, includeEntities, dateFormatter;
 
 static NSString * const url_search_tweets = @"https://api.twitter.com/1.1/search/tweets.json";
 
@@ -1398,26 +1398,51 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     self = [super init];
     if (self) {
         // Twitter API datestamps are UTC
+        // Don't question this code.
         self.dateFormatter = [[[NSDateFormatter alloc]init]autorelease];
-        NSLocale *usLocale = [[[NSLocale alloc]initWithLocaleIdentifier:@"en_US"]autorelease];
-        [self.dateFormatter setLocale:usLocale];
-        [self.dateFormatter setDateStyle:NSDateFormatterLongStyle];
-        [self.dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-        
-        // according to some chinese programmer, this is wrong.
-        // [self.dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss +0000 yyyy"];
-        
-        [self.dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss ZZZZ yyyy"];
+        _dateFormatter.locale = [[[NSLocale alloc]initWithLocaleIdentifier:@"en_US"]autorelease];
+        _dateFormatter.dateStyle = NSDateFormatterLongStyle;
+        _dateFormatter.formatterBehavior = NSDateFormatterBehavior10_4;
+        _dateFormatter.dateFormat = @"EEE MMM dd HH:mm:ss ZZZZ yyyy";
     }
     return self;
 }
 
-- (id)initWithConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret {
-    self = [self init];
-    if (self) {
-        self.consumer = [OAConsumer consumerWithKey:consumerKey secret:consumerSecret];
+// The shared* class method
++ (FHSTwitterEngine *)sharedEngine {
+    @synchronized (self) {
+        if (sharedInstance == nil) {
+            [[self alloc]init];
+        }
     }
+    return sharedInstance;
+}
+
+// Override stuff to make sure that the singleton is never dealloc'd. Fun.
++ (id)allocWithZone:(NSZone *)zone {
+    @synchronized(self) {
+        if (sharedInstance == nil) {
+            sharedInstance = [super allocWithZone:zone];
+            return sharedInstance;
+        }
+    }
+    return nil;
+}
+
+- (id)retain {
     return self;
+}
+
+- (oneway void)release {
+    // Do nothing
+}
+
+- (id)autorelease {
+    return self;
+}
+
+- (NSUInteger)retainCount {
+    return NSUIntegerMax;
 }
 
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array {
@@ -1540,14 +1565,17 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 - (NSError *)sendPOSTRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params {
     
     if (![self isAuthorized]) {
-        return [NSError errorWithDomain:@"You are not authorized via OAuth" code:401 userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+        [self loadAccessToken];
+        if (![self isAuthorized]) {
+            return [NSError errorWithDomain:@"You are not authorized via OAuth" code:401 userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+        }
     }
     
     [request setHTTPMethod:@"POST"];
     [request setParameters:params];
     [request prepare];
     
-    if (self.shouldClearConsumer) {
+    if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
         self.consumer = nil;
     }
@@ -1585,14 +1613,17 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 - (id)sendGETRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params {
     
     if (![self isAuthorized]) {
-        return [NSError errorWithDomain:@"You are not authorized with Twitter. Please sign in." code:401 userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+        [self loadAccessToken];
+        if (![self isAuthorized]) {
+            return [NSError errorWithDomain:@"You are not authorized via OAuth" code:401 userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+        }
     }
     
     [request setHTTPMethod:@"GET"];
     [request setParameters:params];
     [request prepare];
     
-    if (self.shouldClearConsumer) {
+    if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
         self.consumer = nil;
     }
@@ -1653,10 +1684,9 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:url consumer:self.consumer token:reqToken];
     [request setHTTPMethod:@"POST"];
-    
     [request prepare];
     
-    if (self.shouldClearConsumer) {
+    if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
         self.consumer = nil;
     }
@@ -1767,6 +1797,11 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     self.consumer = nil;
 }
 
+- (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret {
+    self.shouldClearConsumer = NO;
+    self.consumer = [OAConsumer consumerWithKey:consumerKey secret:consumerSecret];
+}
+
 - (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret {
     self.shouldClearConsumer = YES;
     self.consumer = [OAConsumer consumerWithKey:consumerKey secret:consumerSecret];
@@ -1777,7 +1812,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 }
 
 - (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender withCompletion:(void(^)(BOOL success))block {
-    FHSTwitterEngineController *vc = [[[FHSTwitterEngineController alloc]initWithEngine:self]autorelease];
+    FHSTwitterEngineController *vc = [[[FHSTwitterEngineController alloc]init]autorelease];
     vc.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
     objc_setAssociatedObject(authBlockKey, "FHSTwitterEngineOAuthCompletion", block, OBJC_ASSOCIATION_COPY_NONATOMIC);
     [sender presentModalViewController:vc animated:YES];
@@ -1838,15 +1873,6 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 static NSString * const newPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
 static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";
 
-@synthesize theWebView, requestToken, engine, navBar, blockerView, pinCopyBar;
-
-- (id)initWithEngine:(FHSTwitterEngine *)theEngine {
-    if (self = [super init]) {
-        self.engine = theEngine;
-    }
-    return self;
-}   
-
 - (void)loadView {
     [super loadView];
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(pasteboardChanged:) name:UIPasteboardChangedNotification object:nil];
@@ -1856,54 +1882,55 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     self.theWebView = [[[UIWebView alloc]initWithFrame:CGRectMake(0, 44, 320, 416)]autorelease];
-    self.theWebView.hidden = YES;
-    self.theWebView.delegate = self;
-    self.theWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.theWebView.dataDetectorTypes = UIDataDetectorTypeNone;
+    _theWebView.hidden = YES;
+    _theWebView.delegate = self;
+    _theWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _theWebView.dataDetectorTypes = UIDataDetectorTypeNone;
+    _theWebView.backgroundColor = [UIColor darkGrayColor];
     
     self.navBar = [[[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, 320, 44)]autorelease];
-    self.navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
 	
-	[self.view addSubview:self.theWebView];
-	[self.view addSubview:self.navBar];
+	[self.view addSubview:_theWebView];
+	[self.view addSubview:_navBar];
     
 	self.blockerView = [[[UIView alloc]initWithFrame:CGRectMake(0, 0, 200, 60)]autorelease];
-	self.blockerView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.8];
-	self.blockerView.center = CGPointMake(self.view.bounds.size.width/2, self.view.bounds.size.height/2);
-	self.blockerView.clipsToBounds = YES;
-    self.blockerView.layer.cornerRadius = 10;
+	_blockerView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.8];
+	_blockerView.center = CGPointMake(self.view.bounds.size.width/2, self.view.bounds.size.height/2);
+	_blockerView.clipsToBounds = YES;
+    _blockerView.layer.cornerRadius = 10;
     
     self.pinCopyBar = [[[UIToolbar alloc]initWithFrame:CGRectMake(0, 44, self.view.bounds.size.width, 44)]autorelease];
-    self.pinCopyBar.barStyle = UIBarStyleBlackTranslucent;
-    self.pinCopyBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
-    self.pinCopyBar.items = [NSArray arrayWithObjects:[[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil]autorelease], [[[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil]autorelease], [[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil]autorelease], nil];
+    _pinCopyBar.barStyle = UIBarStyleBlackTranslucent;
+    _pinCopyBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    _pinCopyBar.items = [NSArray arrayWithObjects:[[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil]autorelease], [[[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil]autorelease], [[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil]autorelease], nil];
 	
-	UILabel	*label = [[UILabel alloc]initWithFrame:CGRectMake(0, 5, blockerView.bounds.size.width, 15)];
+	UILabel	*label = [[UILabel alloc]initWithFrame:CGRectMake(0, 5, _blockerView.bounds.size.width, 15)];
 	label.text = @"Please Wait...";
 	label.backgroundColor = [UIColor clearColor];
 	label.textColor = [UIColor whiteColor];
 	label.textAlignment = UITextAlignmentCenter;
 	label.font = [UIFont boldSystemFontOfSize:15];
-	[self.blockerView addSubview:label];
+	[_blockerView addSubview:label];
     [label release];
 	
 	UIActivityIndicatorView	*spinner = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
-	spinner.center = CGPointMake(self.blockerView.bounds.size.width/2, (self.blockerView.bounds.size.height/2)+10);
-	[self.blockerView addSubview:spinner];
-	[self.view addSubview:self.blockerView];
+	spinner.center = CGPointMake(_blockerView.bounds.size.width/2, (_blockerView.bounds.size.height/2)+10);
+	[_blockerView addSubview:spinner];
+	[self.view addSubview:_blockerView];
 	[spinner startAnimating];
     [spinner release];
 	
 	UINavigationItem *navItem = [[[UINavigationItem alloc]initWithTitle:@"Twitter Login"]autorelease];
 	navItem.leftBarButtonItem = [[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)]autorelease];
-	[self.navBar pushNavigationItem:navItem animated:NO];
+	[_navBar pushNavigationItem:navItem animated:NO];
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
     dispatch_async(GCDBackgroundThread, ^{
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc]init];
         
-        NSString *reqString = [self.engine getRequestTokenString];
+        NSString *reqString = [[FHSTwitterEngine sharedEngine]getRequestTokenString];
         
         if (reqString.length == 0) {
             [self dismissModalViewControllerAnimated:YES];
@@ -1912,11 +1939,11 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
         }
         
         self.requestToken = [OAToken tokenWithHTTPResponseBody:reqString];
-        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",self.requestToken.key]]];
+        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",_requestToken.key]]];
         
         dispatch_sync(GCDMainThread, ^{
             NSAutoreleasePool *poolTwo = [[NSAutoreleasePool alloc]init];
-            [self.theWebView loadRequest:request];
+            [_theWebView loadRequest:request];
             [poolTwo release];
         });
         
@@ -1925,11 +1952,11 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 }
 
 - (void)gotPin:(NSString *)pin {
-    [self.requestToken setVerifier:pin];
-    
-    BOOL ret = [self.engine finishAuthWithRequestToken:self.requestToken];
+    _requestToken.verifier = pin;
+    BOOL ret = [[FHSTwitterEngine sharedEngine]finishAuthWithRequestToken:_requestToken];
     
     void(^block)(BOOL success) = objc_getAssociatedObject(authBlockKey, "FHSTwitterEngineOAuthCompletion");
+    objc_removeAssociatedObjects(authBlockKey);
     
     if (block) {
         block(ret);
@@ -1939,26 +1966,27 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 }
 
 - (void)pasteboardChanged:(NSNotification *)note {
-	UIPasteboard *pb = [UIPasteboard generalPasteboard];
 	
 	if (![note.userInfo objectForKey:UIPasteboardChangedTypesAddedKey]) {
         return;
     }
+    
+    NSString *string = [[UIPasteboard generalPasteboard]string];
 	
-	if (pb.string.length != 7 || !pb.string.fhs_isNumeric) {
+	if (string.length != 7 || !string.fhs_isNumeric) {
         return;
     }
 	
-	[self gotPin:pb.string];
+	[self gotPin:string];
 }
 
 - (NSString *)locatePin {
-	NSString *pin = [[self.theWebView stringByEvaluatingJavaScriptFromString:newPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	NSString *pin = [[_theWebView stringByEvaluatingJavaScriptFromString:newPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	
 	if (pin.length == 7) {
 		return pin;
 	} else {
-		pin = [[self.theWebView stringByEvaluatingJavaScriptFromString:oldPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+		pin = [[_theWebView stringByEvaluatingJavaScriptFromString:oldPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 		
 		if (pin.length == 7) {
 			return pin;
@@ -1969,10 +1997,10 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
-    self.theWebView.userInteractionEnabled = YES;
+    _theWebView.userInteractionEnabled = YES;
     NSString *authPin = [self locatePin];
     
-    if (authPin.length) {
+    if (authPin.length > 0) {
         [self gotPin:authPin];
         return;
     }
@@ -1984,34 +2012,32 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     }
 	
 	[UIView beginAnimations:nil context:nil];
-	self.blockerView.hidden = YES;
+	_blockerView.hidden = YES;
 	[UIView commitAnimations];
 	
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     
-    self.theWebView.hidden = NO;
+    _theWebView.hidden = NO;
 }
 
 - (void)showPinCopyPrompt {
-	if (self.pinCopyBar.superview) {
+	if (_pinCopyBar.superview) {
         return;
     }
     
-	self.pinCopyBar.center = CGPointMake(self.pinCopyBar.bounds.size.width/2, self.pinCopyBar.bounds.size.height/2);
-	[self.view insertSubview:self.pinCopyBar belowSubview:self.navBar];
+	_pinCopyBar.center = CGPointMake(_pinCopyBar.bounds.size.width/2, _pinCopyBar.bounds.size.height/2);
+	[self.view insertSubview:_pinCopyBar belowSubview:_navBar];
 	
 	[UIView beginAnimations:nil context:nil];
-    self.pinCopyBar.center = CGPointMake(self.pinCopyBar.bounds.size.width/2, self.navBar.bounds.size.height+self.pinCopyBar.bounds.size.height/2);
+    _pinCopyBar.center = CGPointMake(_pinCopyBar.bounds.size.width/2, _navBar.bounds.size.height+_pinCopyBar.bounds.size.height/2);
 	[UIView commitAnimations];
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
-    self.theWebView.userInteractionEnabled = NO;
+    _theWebView.userInteractionEnabled = NO;
+    [_theWebView setHidden:YES];
+    [_blockerView setHidden:NO];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-	[UIView beginAnimations:nil context:nil];
-	[self.blockerView setHidden:NO];
-    [self.theWebView setHidden:YES];
-	[UIView commitAnimations];
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
@@ -2039,7 +2065,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 - (void)dismissModalViewControllerAnimated:(BOOL)animated {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     [[NSNotificationCenter defaultCenter]removeObserver:self];
-    [self.theWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@""]]];
+    [_theWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@""]]];
     [super dismissModalViewControllerAnimated:animated];
 }
 
@@ -2047,7 +2073,6 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     [self setNavBar:nil];
     [self setBlockerView:nil];
     [self setPinCopyBar:nil];
-    [self setEngine:nil];
     [self setTheWebView:nil];
     [self setRequestToken:nil];
     [super dealloc];
@@ -2064,7 +2089,7 @@ static char const encodingTable[64] = {
 
 @implementation NSData (Base64)
 
-+ (NSData *)dataWithBase64EncodedString:(NSString *) string {
++ (NSData *)dataWithBase64EncodedString:(NSString *)string {
 	return [[[NSData alloc]initWithBase64EncodedString:string]autorelease];
 }
 

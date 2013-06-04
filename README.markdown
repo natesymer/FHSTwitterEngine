@@ -12,7 +12,7 @@ Feel free to <a href="http://natesymer.com/donate/" alt="Buy me a coffee or grap
 
 - Login through xAuth.
 - Login through oAuth. Login UI based on [SA_OAuthTwitterEngineController](https://github.com/bengottlieb/Twitter-OAuth-iPhone)
-- Make a request to every available API endpoints. Yes, even the legal ones.
+- Make a request to most available API endpoints. Yes, even the stupid ones.
 
 
 Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
@@ -27,10 +27,11 @@ Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
 
 Why `FHSTwitterEngine` is better than `STTwitter`:
 
-- FHSTwitterEngine's dumb easy to implement
-- FHSTwitterEngine avoids block nesting hell
-- **Less crufty**
-- Need I say any more?
+- FHSTwitterEngine uses the singleton pattern
+- FHSTwitterEngine avoids nested blocks
+- FHSTwitterEngine is **less crufty**
+- FHSTwitterEngine is dead easy to add to your project
+- FHSTwitterEngine is simple
 
 Notice a common theme?
 
@@ -43,32 +44,32 @@ Notice a common theme?
 
 **Usage:**
 
---> Create `FHSTwitterEngine` object:
+--> Set up `FHSTwitterEngine`:
 
-    FHSTwitterEngine *engine = [[FHSTwitterEngine alloc]initWithConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
+    [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
     
-    // or 
+    // Or, if you want to assign your consumer key on a per-use basis:
+    [[FHSTwitterEngine sharedEngine]temporarilySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
     
-    // If you plan to set your keys on a per-request basis
-    FHSTwitterEngine *engine = [[FHSTwitterEngine alloc]init]; 
+    // Then set the delegate. It is used for access token management, and is not required.
+    // If a delegate is not provided, FHSTwitterEngine will save ONE access token in NSUserDefaults.
+    [[FHSTwitterEngine sharedEngine]setDelegate:myDelegate]; 
     
 --> Login via OAuth:
     
-    [self.engine showOAuthLoginControllerFromViewController:self withCompletion:^(BOOL success) {
-        
+    [[FHSTwitterEngine sharedEngine]showOAuthLoginControllerFromViewController:self withCompletion:^(BOOL success) {
         if (success) {
             NSLog(@"L0L success");
         } else {
             NSLog(@"O noes!!! Logen falyur!!!");
         }
-       
     }];
     
 --> Login via XAuth:
     
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		NSError *error = [engine getXAuthAccessTokenForUsername:@"<username>" password:@"<password>"];
+    		NSError *error = [[FHSTwitterEngine sharedEngine] getXAuthAccessTokenForUsername:@"<username>" password:@"<password>"];
         	// Handle error
         	dispatch_sync(GCDMainThread, ^{
     			@autoreleasepool {
@@ -81,28 +82,28 @@ Notice a common theme?
 --> Set up your consumer manually and temorarily
 	
 	// your keys will be cleared after the next request is prepared, before it is sent.
-	[engine temporarilySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
+	[[FHSTwitterEngine sharedEngine]temporarilySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
 	
 	// if you're really paranoid, use this to clear the keys
-	[engine clearConsumer];
+	[[FHSTwitterEngine sharedEngine]clearConsumer];
 	
 --> Reload a saved access_token:
 
-    [engine loadAccessToken];
+    [[FHSTwitterEngine sharedEngine]loadAccessToken];
 
 --> End a session:
 
-    [engine clearAccessToken];
+    [[FHSTwitterEngine sharedEngine]clearAccessToken];
 
 --> Check if a session is valid:
 
-    [engine isAuthorized];
+    [[FHSTwitterEngine sharedEngine]isAuthorized];
     
 --> Do an API call (POST):
 
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		NSError *error = [engine twitterAPIMethod]; 
+    		NSError *error = [[FHSTwitterEngine sharedEngine]twitterAPIMethod]; 
     		// Handle error
     		dispatch_sync(GCDMainThread, ^{
     			@autoreleasepool {
@@ -116,7 +117,7 @@ Notice a common theme?
 
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
-    		id twitterData = [engine twitterAPIMethod];
+    		id twitterData = [[FHSTwitterEngine sharedEngine]twitterAPIMethod];
     		// Handle twitterData (see "About GET Requests")
     		dispatch_sync(GCDMainThread, ^{
     			@autoreleasepool {
@@ -125,26 +126,30 @@ Notice a common theme?
        		});
     	}
     });
+    
+    
+**The "singleton" pattern**
+The singleton pattern allows the programmer to drop all of the object management code, and allow faster and easier access to FHSTwitterEngine. The singleton pattern works by holding an FHSTwitterEngine in memory for the lifetime of the app by overriding the methods that would take it out of memory. Don't worry, it's not a leak and when the app is killed, the singleton instance will also be killed. It's really not that much different from what FHSTwitterEngine was before.
 
 **Grand Central Dispatch**
 
 So what are those `GCDBackgroundThread` and `GCDMainThread` defines?<br />
-They are macros for `dispatch_async()` and `dispatch_sync()`, respectively. They make using GCD much easier. Yes, GCD is the best way to make FHSTwitterEngine asynchonous. GCD allows for FHSTwitterEngine to remain procedural, but you knew that.
+The defines are macros for `dispatch_async()` and `dispatch_sync()`, respectively. Instead of writing out a sometimes lengthy dispatch* call, you can punch in an easy macro. Plus, they help make your code more readable. By using GCD, the programmer can use FHSTwitterEngine procedurally.
 
 **General Comments**
 
-`FHSTwitterEngine` will attempt to preëmtively detect errors in your requests. This is designed to prevent flawed requests from being needlessly sent.
+`FHSTwitterEngine` will attempt to preëmtively detect errors in your requests, before they are actually sent. This includes missing parameters, and a lack of authorization. If FHSTwitterEngine detects that a user is not logged in, it will attempt to load an access token using its delegate. This process is designed to prevent bad requests from being needlessly sent.
 
 **About POST Requests**
 
-All methods that send POST requests, including the xAuth login method, return `NSError`. If there is no error, they should return `nil`.
+All methods that send POST requests, including the xAuth login method, return `NSError`. If there is no error, they should return `nil`. The `NSError` is either an HTTP error or an error returned by the Twitter API.
 
 **About GET requests**
 
-GET methods return id. There returned object can be a member of one of the following classes:
+GET methods return `id`. There returned object class can be one of the following:
 
-- `NSDictionary`
-- `NSArray`
+- `NSMutableDictionary`
+- `NSMutableArray`
 - `UIImage`
 - `NSString`
 - `NSError`
@@ -156,12 +161,12 @@ In the case of `authenticatedUserIsBlocking:isID:` and `testService`, an NSStrin
 
 Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 
-- Mac support
+- Mac support (Whomever wants to do this for me, **go ahead**)
 - Add custom objects for profile settings
 
 **IMPORTANT**
 
-`FHSTwitterEngine` contains an overhauled version of OAuthConsumer. The changes are:
+`FHSTwitterEngine` contains an overhauled version of `OAuthConsumer`. The changes are:
 
 - Removed `OADataFetcher` and `OAAsynchronousDataFetcher`
 - Added `+[OAMutableURLRequest fetchDataForRequest:withCompletionHandler:]` to manually send requests.
@@ -174,7 +179,9 @@ Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 
 **Fixes for some common problems** (and best practices)
 
-- If you have any errors concerning multiple declarations for any class, check to make sure that any class is not importing another class which is importing the first class (aka `#import` loop - A imports B which imports A which imports B...)
+The first thing you should do is spend an hour trying to fix the problem yourself. Don't go wild and try to change everything, just trace back your steps, and look closely at details.
+
+A common issue seems to be an `#import` loop. This is usually solved by, you guessed it, tracing back your steps. The `#import` loop happens when file A imports file B which imports file A. The loop is given away by a compile error, multiple declarations of class X.
 
 kthxbye
 

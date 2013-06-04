@@ -342,12 +342,15 @@ extern NSString * const FHSProfileDescriptionKey;
 
 // Temporaryily set keys
 // if you don't want your keys in memory, simply use
-// this method. You will have to use it before logging in.
-// Use the standard -[FHSTwitterEngine init] method.
+// this method. You will have to use it before
+// making any API calls.
 - (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
 
-// init method
-- (id)initWithConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
+// Use to set the consumer key when using the singleton
+- (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
+
+// Singleton, NEVER use the -init method. Ever.
++ (FHSTwitterEngine *)sharedEngine;
 
 // Determines your internet status
 + (BOOL)isConnectedToInternet;
