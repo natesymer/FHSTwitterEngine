@@ -598,21 +598,52 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     }
     
     if (theData.length == 0) {
-        return getBadRequestError();
+        if (irt.length == 0) {
+            return [self postTweet:tweetString];
+        } else {
+            return [self postTweet:tweetString inReplyTo:irt];
+        }
     }
-    
+
     NSURL *baseURL = [NSURL URLWithString:url_statuses_update_with_media];
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *statusP = [OARequestParameter requestParameterWithName:@"status" value:tweetString];
-    OARequestParameter *mediaP = [OARequestParameter requestParameterWithName:@"media_data[]" value:[theData base64EncodingWithLineLength:0]];
+
+    CFUUIDRef theUUID = CFUUIDCreate(nil);
+    CFStringRef string = CFUUIDCreateString(nil, theUUID);
+    CFRelease(theUUID);
+    NSString *boundary = [NSString stringWithString:(NSString *)string];
+    CFRelease(string);
     
-    NSMutableArray *params = [NSMutableArray arrayWithObjects:statusP, mediaP, nil];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPShouldHandleCookies:NO];
+    
+    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
+    [request setValue:contentType forHTTPHeaderField:@"content-type"];
+    
+    NSMutableData *body = [NSMutableData dataWithLength:0];
+    [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"Content-Disposition: form-data; name=\"media[]\"; filename=\"upload.png\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"Content-Type: application/octet-stream\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:theData];
+    [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"Content-Disposition: form-data; name=\"status\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithFormat:@"%@\r\n",tweetString]dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithFormat:@"--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
     
     if (irt.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"in_reply_to_status_id" value:irt]];
+        [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[@"Content-Disposition: form-data; name=\"in_reply_to_status_id\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"%@\r\n",irt]dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
     }
     
-    return [self sendPOSTRequest:request withParameters:params];
+    [request prepare];
+    [request setHTTPBody:body];
+    
+    return [self manuallySendPOSTRequest:request];
 }
 
 - (NSError *)destroyTweet:(NSString *)identifier {
@@ -1537,6 +1568,11 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 
 - (id)sendRequest:(NSURLRequest *)request {
     
+    if (_shouldClearConsumer) {
+        self.shouldClearConsumer = NO;
+        self.consumer = nil;
+    }
+    
     NSHTTPURLResponse *response = nil;
     NSError *error = nil;
     
@@ -1561,25 +1597,8 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     return data;
 }
 
-
-- (NSError *)sendPOSTRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params {
-    
-    if (![self isAuthorized]) {
-        [self loadAccessToken];
-        if (![self isAuthorized]) {
-            return [NSError errorWithDomain:@"You are not authorized via OAuth" code:401 userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
-        }
-    }
-    
-    [request setHTTPMethod:@"POST"];
-    [request setParameters:params];
-    [request prepare];
-    
-    if (_shouldClearConsumer) {
-        self.shouldClearConsumer = NO;
-        self.consumer = nil;
-    }
-    
+// for sending those requests manually, when OAConsumer fails to be useful...
+- (NSError *)manuallySendPOSTRequest:(OAMutableURLRequest *)request {
     id retobj = [self sendRequest:request];
     
     if (retobj == nil) {
@@ -1610,6 +1629,22 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     return nil;
 }
 
+- (NSError *)sendPOSTRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params {
+    
+    if (![self isAuthorized]) {
+        [self loadAccessToken];
+        if (![self isAuthorized]) {
+            return [NSError errorWithDomain:@"You are not authorized via OAuth" code:401 userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+        }
+    }
+    
+    [request setHTTPMethod:@"POST"];
+    [request setParameters:params];
+    [request prepare];
+    
+    return [self manuallySendPOSTRequest:request];
+}
+
 - (id)sendGETRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params {
     
     if (![self isAuthorized]) {
@@ -1622,12 +1657,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     [request setHTTPMethod:@"GET"];
     [request setParameters:params];
     [request prepare];
-    
-    if (_shouldClearConsumer) {
-        self.shouldClearConsumer = NO;
-        self.consumer = nil;
-    }
-    
+
     id retobj = [self sendRequest:request];
     
     if (retobj == nil) {

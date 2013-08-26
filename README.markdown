@@ -163,6 +163,7 @@ Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
 
 - Mac support (Whomever wants to do this for me, **go ahead**)
 - Add custom objects for profile settings
+- Replace OAuthConsumer with my own HTTP OAuth code
 
 **IMPORTANT**
 

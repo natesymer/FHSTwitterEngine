@@ -90,6 +90,8 @@
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
             
             NSLog(@"Friends' IDs: %@",[[FHSTwitterEngine sharedEngine]getFriendsIDs]);
+            
+            NSData *data = [NSData dataWithContentsOfFile:[[NSBundle mainBundle]pathForResource:@"Default-568h@2x" ofType:@"png"]];
 
             dispatch_sync(GCDMainThread, ^{
                 @autoreleasepool {
