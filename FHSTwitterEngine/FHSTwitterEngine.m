@@ -1815,7 +1815,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     FHSTwitterEngineController *vc = [[[FHSTwitterEngineController alloc]init]autorelease];
     vc.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
     objc_setAssociatedObject(authBlockKey, "FHSTwitterEngineOAuthCompletion", block, OBJC_ASSOCIATION_COPY_NONATOMIC);
-    [sender presentModalViewController:vc animated:YES];
+    [sender presentViewController:vc animated:YES completion:nil];
 }
 
 + (BOOL)isConnectedToInternet {
@@ -1909,7 +1909,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 	label.text = @"Please Wait...";
 	label.backgroundColor = [UIColor clearColor];
 	label.textColor = [UIColor whiteColor];
-	label.textAlignment = UITextAlignmentCenter;
+	label.textAlignment = NSTextAlignmentCenter;
 	label.font = [UIFont boldSystemFontOfSize:15];
 	[_blockerView addSubview:label];
     [label release];
@@ -1933,7 +1933,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
         NSString *reqString = [[FHSTwitterEngine sharedEngine]getRequestTokenString];
         
         if (reqString.length == 0) {
-            [self dismissModalViewControllerAnimated:YES];
+            [self dismissViewControllerAnimated:YES completion:nil];
             [pool release];
             return;
         }
@@ -1962,7 +1962,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
         block(ret);
     }
     
-    [self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)pasteboardChanged:(NSNotification *)note {
@@ -2043,7 +2043,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
     
     if (strstr([request.URL.absoluteString UTF8String], "denied=")) {
-        [self dismissModalViewControllerAnimated:YES];
+		[self dismissViewControllerAnimated:YES completion:nil];
         return NO;
     }
     
@@ -2051,7 +2051,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 	char *raw = data?(char *)[data bytes]:"";
 	
 	if (raw && (strstr(raw, "cancel=") || strstr(raw, "deny="))) {
-		[self dismissModalViewControllerAnimated:YES];
+		[self dismissViewControllerAnimated:YES completion:nil];
 		return NO;
 	}
     
@@ -2059,7 +2059,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 }
 
 - (void)close {
-    [self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)dismissModalViewControllerAnimated:(BOOL)animated {
