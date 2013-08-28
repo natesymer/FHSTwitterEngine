@@ -32,6 +32,8 @@
 #import <netinet/in.h>
 #import <ifaddrs.h>
 #import <objc/runtime.h>
+#import <CommonCrypto/CommonHMAC.h>
+#include "Base64TranscoderFHS.h"
 
 NSString * const FHSProfileBackgroundColorKey = @"profile_background_color";
 NSString * const FHSProfileLinkColorKey = @"profile_link_color";
@@ -50,6 +52,28 @@ static NSString * const errorFourhundred = @"Bad Request: The request you are tr
 static NSString * const authBlockKey = @"FHSTwitterEngineOAuthCompletion";
 
 static FHSTwitterEngine *sharedInstance = nil;
+
+NSString * fhs_gen_uuid() {
+    if ([[[UIDevice currentDevice]systemVersion]floatValue] >= 6.0f) {
+        return [[NSUUID UUID]UUIDString];
+    } else {
+        CFUUIDRef theUUID = CFUUIDCreate(nil);
+        CFStringRef string = CFUUIDCreateString(nil, theUUID);
+        CFRelease(theUUID);
+        NSString *uuid = [NSString stringWithString:(NSString *)string];
+        CFRelease(string);
+        return uuid;
+    }
+}
+
+NSString * fhs_url_remove_params(NSURL *url) {
+    if (url.absoluteString.length == 0) {
+        return nil;
+    }
+    
+    NSArray *parts = [url.absoluteString componentsSeparatedByString:@"?"];
+    return (parts.count == 0)?nil:parts[0];
+}
 
 id removeNull(id rootObject) {
     if ([rootObject isKindOfClass:[NSDictionary class]]) {
@@ -591,6 +615,11 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     return [self postTweet:tweetString withImageData:theData inReplyTo:nil];
 }
 
+- (NSError *)testPostTweet:(NSString *)tweetString {
+    NSURL *baseURL = [NSURL URLWithString:url_statuses_update];
+    return [self sendPOSTRequestForURL:baseURL andParams:@{ @"status": tweetString }];
+}
+
 - (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt {
     
     if (tweetString.length == 0) {
@@ -608,11 +637,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     NSURL *baseURL = [NSURL URLWithString:url_statuses_update_with_media];
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
 
-    CFUUIDRef theUUID = CFUUIDCreate(nil);
-    CFStringRef string = CFUUIDCreateString(nil, theUUID);
-    CFRelease(theUUID);
-    NSString *boundary = [NSString stringWithString:(NSString *)string];
-    CFRelease(string);
+    NSString *boundary = fhs_gen_uuid();
     
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
@@ -1597,8 +1622,201 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     return data;
 }
 
-// for sending those requests manually, when OAConsumer fails to be useful...
-- (NSError *)manuallySendPOSTRequest:(OAMutableURLRequest *)request {
+- (void)signRequest:(NSMutableURLRequest *)request {
+    [self signRequest:request withToken:_accessToken.key tokenSecret:_accessToken.secret verifier:nil];
+}
+
+- (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString {
+    
+    NSString *consumerKey = [_consumer.key URLEncodedString];
+    NSString *signatureProvider = [@"HMAC-SHA1" URLEncodedString];
+    NSString *nonce = fhs_gen_uuid();
+    NSString *timestamp = [NSString stringWithFormat:@"%ld",time(nil)];
+    
+    // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
+    // build a sorted array of both request parameters and OAuth header parameters
+    NSMutableDictionary *mutableParams = [NSMutableDictionary dictionary];
+    
+    mutableParams[@"oauth_consumer_key"] = consumerKey;
+    mutableParams[@"oauth_signature_method"] = signatureProvider;
+    mutableParams[@"oauth_timestamp"] = timestamp;
+    mutableParams[@"oauth_nonce"] = nonce;
+    mutableParams[@"oauth_version"] = @"1.0";
+    
+    if (tokenString.length > 0) {
+        mutableParams[@"oauth_token"] = [tokenString URLEncodedString];
+        if (verifierString.length > 0) {
+            mutableParams[@"oauth_verifier"] = [verifierString URLEncodedString];
+        }
+    } else {
+        mutableParams[@"oauth_callback"] = @"oob";
+    }
+    
+    NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:mutableParams.count];
+    
+    for (NSString *key in mutableParams.allKeys) {
+        [paramPairs addObject:[NSString stringWithFormat:@"%@=%@",[key URLEncodedString],[mutableParams[key] URLEncodedString]]];
+    }
+    
+    [paramPairs sortUsingSelector:@selector(compare:)];
+    
+    NSString *normalizedRequestParameters = [[paramPairs componentsJoinedByString:@"&"]URLEncodedString];
+    
+    // OAuth Spec, Section 9.1.2 "Concatenate Request Elements"
+    
+    NSString *justRoute = [fhs_url_remove_params(request.URL) URLEncodedString];
+    
+    NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",request.HTTPMethod,justRoute,normalizedRequestParameters];
+    
+    NSString *tokenSecretSantized = (tokenSecretString.length > 0)?[tokenSecretString URLEncodedString]:@"";
+    
+    NSString *secret = [NSString stringWithFormat:@"%@&%@",[_consumer.secret URLEncodedString],tokenSecretSantized];
+    
+    NSData *secretData = [secret dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
+    unsigned char result[20];
+	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
+    char base64Result[32];
+    size_t theResultLength = 32;
+    Base64EncodeDataFHS(result, 20, base64Result, &theResultLength);
+    NSData *theData = [NSData dataWithBytes:base64Result length:theResultLength];
+    
+    NSString *signature = [[[[NSString alloc]initWithData:theData encoding:NSUTF8StringEncoding]autorelease]URLEncodedString];
+    
+	NSString *oauthToken = (tokenString.length > 0)?[NSString stringWithFormat:@"oauth_token=\"%@\", ",[tokenString URLEncodedString]]:@"oauth_callback=\"oob\", ";
+    NSString *oauthVerifier = (verifierString.length > 0)?[NSString stringWithFormat:@"oauth_verifier=\"%@\", ",verifierString]:@"";
+
+    NSString *oauthHeader = [NSString stringWithFormat:@"OAuth oauth_consumer_key=\"%@\", %@%@oauth_signature_method=\"%@\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"",consumerKey,oauthToken,oauthVerifier,signatureProvider,signature,timestamp,nonce];
+    
+    NSLog(@"%@",oauthHeader);
+	
+    [request setValue:oauthHeader forHTTPHeaderField:@"Authorization"];
+}
+
+- (NSError *)sendPOSTRequestForURL:(NSURL *)url andParams:(NSDictionary *)params {
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPShouldHandleCookies:NO];
+    
+    NSString *boundary = fhs_gen_uuid();
+    
+    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
+    [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
+    
+    [self signRequest:request];
+    
+    NSMutableData *body = [NSMutableData dataWithLength:0];
+
+    for (NSString *key in params.allKeys) {
+        id obj = params[key];
+
+        [body appendData:[[NSString stringWithFormat:@"--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        
+        NSData *data = nil;
+        
+        if ([obj isKindOfClass:[NSData class]]) {
+            [body appendData:[@"Content-Type: application/octet-stream\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+            data = (NSData *)obj;
+        } else if ([obj isKindOfClass:[NSString class]]) {
+            data = [[NSString stringWithFormat:@"%@\r\n",(NSString *)obj]dataUsingEncoding:NSUTF8StringEncoding];
+        }
+        
+        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n",key] dataUsingEncoding:NSUTF8StringEncoding]];
+        
+        [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:data];
+    }
+    
+    [body appendData:[[NSString stringWithFormat:@"--%@--\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    [request setValue:@(body.length).stringValue forHTTPHeaderField:@"Content-Length"];
+    request.HTTPBody = body;
+    
+    id retobj = [self sendRequest:request];
+    
+    if (retobj == nil) {
+        return getNilReturnLengthError();
+    }
+    
+    if ([retobj isKindOfClass:[NSError class]]) {
+        return retobj;
+    }
+    
+    id parsedJSONResponse = removeNull([NSJSONSerialization JSONObjectWithData:(NSData *)retobj options:NSJSONReadingMutableContainers error:nil]);
+
+    if ([parsedJSONResponse isKindOfClass:[NSDictionary class]]) {
+        NSString *errorMessage = [parsedJSONResponse objectForKey:@"error"];
+        NSArray *errorArray = [parsedJSONResponse objectForKey:@"errors"];
+        if (errorMessage.length > 0) {
+            return [NSError errorWithDomain:errorMessage code:[[parsedJSONResponse objectForKey:@"code"]intValue] userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+        } else if (errorArray.count > 0) {
+            if (errorArray.count > 1) {
+                return [NSError errorWithDomain:@"Multiple Errors" code:1337 userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+            } else {
+                NSDictionary *theError = [errorArray objectAtIndex:0];
+                return [NSError errorWithDomain:[theError objectForKey:@"message"] code:[[theError objectForKey:@"code"]integerValue] userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+            }
+        }
+    }
+    
+    return nil;
+}
+
+- (id)sendGETRequestForURL:(NSURL *)url andParams:(NSDictionary *)params {
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
+    [request setHTTPMethod:@"GET"];
+    [request setHTTPShouldHandleCookies:NO];
+    [self signRequest:request];
+    
+    // add params
+    
+    NSMutableString *encodedParameterPairs = [NSMutableString stringWithCapacity:256];
+    
+    int position = 0;
+    for (NSString *key in params) {
+        position++;
+        [encodedParameterPairs appendFormat:@"%@=%@",[key URLEncodedString],[(NSString *)params[key] URLEncodedString]];
+        if (position < params.count) {
+            [encodedParameterPairs appendString:@"&"];
+        }
+    }
+    
+    [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@?%@",fhs_url_remove_params(request.URL), encodedParameterPairs]]];
+    
+    id retobj = [self sendRequest:request];
+    
+    if (retobj == nil) {
+        return getNilReturnLengthError();
+    }
+    
+    if ([retobj isKindOfClass:[NSError class]]) {
+        return retobj;
+    }
+    
+    id parsedJSONResponse = removeNull([NSJSONSerialization JSONObjectWithData:(NSData *)retobj options:NSJSONReadingMutableContainers error:nil]);
+    
+    if ([parsedJSONResponse isKindOfClass:[NSDictionary class]]) {
+        NSString *errorMessage = [parsedJSONResponse objectForKey:@"error"];
+        NSArray *errorArray = [parsedJSONResponse objectForKey:@"errors"];
+        if (errorMessage.length > 0) {
+            return [NSError errorWithDomain:errorMessage code:[[parsedJSONResponse objectForKey:@"code"]intValue] userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+        } else if (errorArray.count > 0) {
+            if (errorArray.count > 1) {
+                return [NSError errorWithDomain:@"Multiple Errors" code:1337 userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+            } else {
+                NSDictionary *theError = [errorArray objectAtIndex:0];
+                return [NSError errorWithDomain:[theError objectForKey:@"message"] code:[[theError objectForKey:@"code"]integerValue] userInfo:[NSDictionary dictionaryWithObject:request forKey:@"request"]];
+            }
+        }
+    }
+    
+    return parsedJSONResponse;
+}
+/*
+// for sending those requests manually, when OAuthConsumer fails to be useful...
+- (NSError *)manuallySendPOSTRequest:(NSMutableURLRequest *)request {
     id retobj = [self sendRequest:request];
     
     if (retobj == nil) {
@@ -1687,19 +1905,25 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     
     return parsedJSONResponse;
 }
-
+*/
 
 //
 // OAuth
 //
 
 - (NSString *)getRequestTokenString {
+    
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:url consumer:self.consumer token:nil];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
-    [request prepare];
+    [request setHTTPShouldHandleCookies:NO];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil];
+    
+    NSLog(@"Headers: %@",request.allHTTPHeaderFields);
     
     id retobj = [self sendRequest:request];
+    
+    NSLog(@"%@",retobj);
     
     if ([retobj isKindOfClass:[NSData class]]) {
         return [[[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding]autorelease];
@@ -1711,10 +1935,10 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 - (BOOL)finishAuthWithRequestToken:(OAToken *)reqToken {
 
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
-    
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:url consumer:self.consumer token:reqToken];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
-    [request prepare];
+    [request setHTTPShouldHandleCookies:NO];
+    [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier];
     
     if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
@@ -1762,7 +1986,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     self.loggedInUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:accessTokenZ];
     self.loggedInID = [self extractValueForKey:@"user_id" fromHTTPBody:accessTokenZ];
     
-    if ([self.delegate respondsToSelector:@selector(storeAccessToken:)]) {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(storeAccessToken:)]) {
         [self.delegate storeAccessToken:accessTokenZ];
     } else {
         [[NSUserDefaults standardUserDefaults]setObject:accessTokenZ forKey:@"SavedAccessHTTPBody"];
@@ -1962,21 +2186,25 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
         
         NSString *reqString = [[FHSTwitterEngine sharedEngine]getRequestTokenString];
         
+        NSLog(@"Reqstring: %@",reqString);
+        
         if (reqString.length == 0) {
-            [self dismissViewControllerAnimated:YES completion:nil];
-            [pool release];
-            return;
+            dispatch_sync(GCDMainThread, ^{
+                NSAutoreleasePool *poolTwo = [[NSAutoreleasePool alloc]init];
+               // [self dismissViewControllerAnimated:YES completion:nil];
+                [poolTwo release];
+            });
+        } else {
+            self.requestToken = [OAToken tokenWithHTTPResponseBody:reqString];
+            NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",_requestToken.key]]];
+            
+            dispatch_sync(GCDMainThread, ^{
+                NSAutoreleasePool *poolTwo = [[NSAutoreleasePool alloc]init];
+                [_theWebView loadRequest:request];
+                [poolTwo release];
+            });
         }
-        
-        self.requestToken = [OAToken tokenWithHTTPResponseBody:reqString];
-        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",_requestToken.key]]];
-        
-        dispatch_sync(GCDMainThread, ^{
-            NSAutoreleasePool *poolTwo = [[NSAutoreleasePool alloc]init];
-            [_theWebView loadRequest:request];
-            [poolTwo release];
-        });
-        
+
         [pool release];
     });
 }

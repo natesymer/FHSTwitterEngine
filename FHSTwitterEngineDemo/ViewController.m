@@ -73,6 +73,7 @@
 - (IBAction)logout:(id)sender {
     [_tweetField resignFirstResponder];
     _loggedInUserLabel.text = @"You are not logged in.";
+    [[FHSTwitterEngine sharedEngine]clearAccessToken];
 }
 
 - (IBAction)loginXAuth:(id)sender {
@@ -91,8 +92,6 @@
             
             NSLog(@"Friends' IDs: %@",[[FHSTwitterEngine sharedEngine]getFriendsIDs]);
             
-            NSData *data = [NSData dataWithContentsOfFile:[[NSBundle mainBundle]pathForResource:@"Default-568h@2x" ofType:@"png"]];
-
             dispatch_sync(GCDMainThread, ^{
                 @autoreleasepool {
                     UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"Complete!" message:@"Your list of followers has been fetched" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
@@ -112,7 +111,8 @@
         @autoreleasepool {
             
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            NSError *returnCode = [[FHSTwitterEngine sharedEngine]postTweet:self.tweetField.text];
+            NSError *returnCode = [[FHSTwitterEngine sharedEngine]testPostTweet:self.tweetField.text];
+            NSLog(@"returnCode: %@",returnCode);
             [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
             
             NSString *title = nil;

@@ -83,6 +83,9 @@ typedef enum {
 // Credit for this function goes to Conrad Kramer
 id removeNull(id rootObject);
 
+// Safely generates UUID
+NSString * fhs_gen_uuid();
+
 extern NSString * const FHSProfileBackgroundColorKey;
 extern NSString * const FHSProfileLinkColorKey;
 extern NSString * const FHSProfileSidebarBorderColorKey;
@@ -106,6 +109,8 @@ extern NSString * const FHSProfileDescriptionKey;
 @class OAMutableURLRequest;
 
 @interface FHSTwitterEngine : NSObject <UIWebViewDelegate>
+
+- (NSError *)testPostTweet:(NSString *)tweetString;
 
 //
 // REST API
