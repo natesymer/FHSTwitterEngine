@@ -111,8 +111,7 @@
         @autoreleasepool {
             
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            NSError *returnCode = [[FHSTwitterEngine sharedEngine]testPostTweet:self.tweetField.text];
-            NSLog(@"returnCode: %@",returnCode);
+            NSError *returnCode = [[FHSTwitterEngine sharedEngine]postTweet:self.tweetField.text];
             [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
             
             NSString *title = nil;
@@ -120,7 +119,7 @@
             
             if (returnCode) {
                 title = [NSString stringWithFormat:@"Error %d",returnCode.code];
-                message = returnCode.domain;
+                message = returnCode.localizedDescription;
             } else {
                 title = @"Tweet Posted";
                 message = _tweetField.text;

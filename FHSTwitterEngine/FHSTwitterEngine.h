@@ -110,8 +110,6 @@ extern NSString * const FHSProfileDescriptionKey;
 
 @interface FHSTwitterEngine : NSObject <UIWebViewDelegate>
 
-- (NSError *)testPostTweet:(NSString *)tweetString;
-
 //
 // REST API
 //
@@ -287,9 +285,10 @@ extern NSString * const FHSProfileDescriptionKey;
 - (id)listUsersInListWithID:(NSString *)listID;
 
 // lists/update
-- (NSError *)setModeOfListWithID:(NSString *)listID toPrivate:(BOOL)isPrivate;
-- (NSError *)changeNameOfListWithID:(NSString *)listID toName:(NSString *)newName;
-- (NSError *)changeDescriptionOfListWithID:(NSString *)listID toDescription:(NSString *)newName;
+- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name;
+- (NSError *)updateListWithID:(NSString *)listID description:(NSString *)description;
+- (NSError *)updateListWithID:(NSString *)listID mode:(BOOL)isPrivate;
+- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name description:(NSString *)description mode:(BOOL)isPrivate;
 
 // lists/show
 - (id)getListWithID:(NSString *)listID;
@@ -332,8 +331,8 @@ extern NSString * const FHSProfileDescriptionKey;
 - (void)clearConsumer;
 
 // sendRequest methods, use these for every request
-- (NSError *)sendPOSTRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
-- (id)sendGETRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
+//- (NSError *)sendPOSTRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
+//- (id)sendGETRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
 
 //
 // Misc Methods
