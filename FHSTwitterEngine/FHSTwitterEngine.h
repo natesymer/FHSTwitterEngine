@@ -23,27 +23,13 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-//
-//
-//  //// FHSTwitterEngine Version 1.6.1 ////
-//    Modified OAuthConsumer Version 1.2.2
-//
-//
 
+//// FHSTwitterEngine Version 2 ////
 
 //
 // FHSTwitterEngine
 // The synchronous Twitter engine that doesn’t suck!!
 //
-
-// FHSTwitterEngine is Synchronous
-// That means you will have to thread. Boo Hoo.
-
-// Setup
-// Just add the FHSTwitterEngine folder to you project.
-
-// USAGE
-// See README.markdown
 
 //
 // NOTE TO CONTRIBUTORS
@@ -83,9 +69,6 @@ typedef enum {
 // Credit for this function goes to Conrad Kramer
 id removeNull(id rootObject);
 
-// Safely generates UUID
-NSString * fhs_gen_uuid();
-
 extern NSString * const FHSProfileBackgroundColorKey;
 extern NSString * const FHSProfileLinkColorKey;
 extern NSString * const FHSProfileSidebarBorderColorKey;
@@ -97,6 +80,8 @@ extern NSString * const FHSProfileURLKey;
 extern NSString * const FHSProfileLocationKey;
 extern NSString * const FHSProfileDescriptionKey;
 
+extern NSString * const FHSErrorDomain;
+
 @protocol FHSTwitterEngineAccessTokenDelegate <NSObject>
 
 - (void)storeAccessToken:(NSString *)accessToken;
@@ -106,9 +91,8 @@ extern NSString * const FHSProfileDescriptionKey;
 
 @class OAToken;
 @class OAConsumer;
-@class OAMutableURLRequest;
 
-@interface FHSTwitterEngine : NSObject <UIWebViewDelegate>
+@interface FHSTwitterEngine : NSObject
 
 //
 // REST API
@@ -159,7 +143,7 @@ extern NSString * const FHSProfileDescriptionKey;
 // If the dictionary is nil, FHSTwitterEngine resets the values
 - (NSError *)updateProfileColorsWithDictionary:(NSDictionary *)dictionary;
 
-// account/rate_limit_status
+// application/rate_limit_status
 - (id)getRateLimitStatus;
 
 // favorites/create, favorites/destroy
@@ -311,6 +295,7 @@ extern NSString * const FHSProfileDescriptionKey;
 // friends/list
 - (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
 
+
 //
 // Login and Auth
 //
@@ -330,21 +315,15 @@ extern NSString * const FHSProfileDescriptionKey;
 // Clear Keys
 - (void)clearConsumer;
 
-// sendRequest methods, use these for every request
-//- (NSError *)sendPOSTRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
-//- (id)sendGETRequest:(OAMutableURLRequest *)request withParameters:(NSArray *)params;
 
 //
 // Misc Methods
 //
 
-// Date parser
-- (NSDate *)getDateFromTwitterCreatedAt:(NSString *)twitterDate;
-
 // id list generator - returns an array of id/username list strings
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array;
 
-// Temporaryily set keys
+// Temporarily set keys
 // if you don't want your keys in memory, simply use
 // this method. You will have to use it before
 // making any API calls.
@@ -353,10 +332,9 @@ extern NSString * const FHSProfileDescriptionKey;
 // Use to set the consumer key when using the singleton
 - (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
 
-// Singleton, NEVER use the -init method. Ever.
+// Singleton, NEVER use -[FHSTwitterEngine init] directly. Ever.
 + (FHSTwitterEngine *)sharedEngine;
 
-// Determines your internet status
 + (BOOL)isConnectedToInternet;
 
 // Determines if entities should be included
@@ -387,4 +365,12 @@ extern NSString * const FHSProfileDescriptionKey;
 - (NSString *)fhs_stringWithRange:(NSRange)range;
 + (NSString *)fhs_UUID;
 - (BOOL)fhs_isNumeric;
+@end
+
+@interface NSError (FHSTwitterEngine)
+
++ (NSError *)badRequestError;
++ (NSError *)noDataError;
++ (NSError *)imageTooLargeError;
+
 @end
