@@ -53,19 +53,6 @@ static NSString * const authBlockKey = @"FHSTwitterEngineOAuthCompletion";
 
 static FHSTwitterEngine *sharedInstance = nil;
 
-NSString * fhs_gen_uuid() {
-    if ([[[UIDevice currentDevice]systemVersion]floatValue] >= 6.0f) {
-        return [[NSUUID UUID]UUIDString];
-    } else {
-        CFUUIDRef theUUID = CFUUIDCreate(nil);
-        CFStringRef string = CFUUIDCreateString(nil, theUUID);
-        CFRelease(theUUID);
-        NSString *uuid = [NSString stringWithString:(NSString *)string];
-        CFRelease(string);
-        return uuid;
-    }
-}
-
 NSString * fhs_url_remove_params(NSURL *url) {
     if (url.absoluteString.length == 0) {
         return nil;
@@ -123,17 +110,15 @@ NSError * getNilReturnLengthError() {
 @property (nonatomic, retain) UIView *blockerView;
 @property (nonatomic, retain) UIToolbar *pinCopyBar;
 
-//@property (nonatomic, retain) FHSTwitterEngine *engine;
 @property (nonatomic, retain) UIWebView *theWebView;
 @property (nonatomic, retain) OAToken *requestToken;
 
-//- (id)initWithEngine:(FHSTwitterEngine *)theEngine;
 - (NSString *)locatePin;
 - (void)showPinCopyPrompt;
 
 @end
 
-@interface FHSTwitterEngine()
+@interface FHSTwitterEngine ()
 
 // Login stuff
 - (NSString *)getRequestTokenString;
@@ -150,6 +135,11 @@ NSError * getNilReturnLengthError() {
 
 @implementation NSString (FHSTwitterEngine)
 
+- (NSString *)fhs_URLEncode {
+    CFStringRef url = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)self, NULL, CFSTR("!*'();:@&=+$,/?%#[]"), kCFStringEncodingUTF8);
+	return [(NSString *)url autorelease];
+}
+
 - (NSString *)fhs_trimForTwitter {
     NSString *string = [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     return (string.length > 140)?[string substringToIndex:140]:string;
@@ -157,6 +147,19 @@ NSError * getNilReturnLengthError() {
 
 - (NSString *)fhs_stringWithRange:(NSRange)range {
     return [[self substringFromIndex:range.location]substringToIndex:range.length];
+}
+
++ (NSString *)fhs_UUID {
+    if ([[[UIDevice currentDevice]systemVersion]floatValue] >= 6.0f) {
+        return [[NSUUID UUID]UUIDString];
+    } else {
+        CFUUIDRef theUUID = CFUUIDCreate(kCFAllocatorDefault);
+        CFStringRef string = CFUUIDCreateString(kCFAllocatorDefault, theUUID);
+        CFRelease(theUUID);
+        NSString *uuid = [NSString stringWithString:(NSString *)string];
+        CFRelease(string);
+        return uuid;
+    }
 }
 
 - (BOOL)fhs_isNumeric {
@@ -1112,7 +1115,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 
 - (NSError *)setUseProfileBackgroundImage:(BOOL)shouldUseBGImg {
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_background_image];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status": @"true", @"profile_use_background_image": (shouldUseBGImg?@"true":@"false")}];
+    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status": @"true", @"use": (shouldUseBGImg?@"true":@"false")}];
 }
 
 - (NSError *)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled {
@@ -1125,12 +1128,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_background_image];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *tiled = [OARequestParameter requestParameterWithName:@"tiled" value:isTiled?@"true":@"false"];
-    OARequestParameter *skipStatus = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
-    OARequestParameter *useImage = [OARequestParameter requestParameterWithName:@"profile_use_background_image" value:@"true"];
-    OARequestParameter *image = [OARequestParameter requestParameterWithName:@"image" value:[data base64EncodingWithLineLength:0]];
-    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:tiled, skipStatus, useImage, image, nil]];
+    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"use":@"true", @"include_entities":_includeEntities?@"true":@"false", @"tiled":(isTiled?@"true":@"false"), @"image":[data base64EncodingWithLineLength:0]}];
 }
 
 - (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled {
@@ -1147,10 +1145,8 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_image];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *skipStatus = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
-    OARequestParameter *image = [OARequestParameter requestParameterWithName:@"image" value:[data base64EncodingWithLineLength:0]];
-    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:image, skipStatus, nil]];
+    
+    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"include_entities":(_includeEntities?@"true":@"false"), @"image":[data base64EncodingWithLineLength:0]}];
 }
 
 - (NSError *)setProfileImageWithImageAtPath:(NSString *)file {
@@ -1169,13 +1165,12 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
         return getBadRequestError();
     }
     
-    // all of the values are just non-normalized strings. They appear:
-    
-    //   setting   - length in characters
-    // name        -        20
-    // url         -        100
-    // location    -        30
-    // description -        160
+    // all of the values are just strings.
+    //   parameter    length in characters
+    // name                 20
+    // url                  100
+    // location             30
+    // description          160
     
     NSString *name = [settings objectForKey:FHSProfileNameKey];
     NSString *url = [settings objectForKey:FHSProfileURLKey];
@@ -1183,28 +1178,28 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     NSString *description = [settings objectForKey:FHSProfileDescriptionKey];
     
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *skipStatus = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
     
-    NSMutableArray *params = [NSMutableArray arrayWithObjects:skipStatus, nil];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:6];
+    params[@"skip_status"] = @"true";
+    params[@"include_entities"] = (_includeEntities?@"true":@"false");
     
     if (name.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"name" value:name]];
+        params[@"name"] = name;
     }
     
     if (url.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"url" value:url]];
+        params[@"url"] = url;
     }
     
     if (location.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"location" value:location]];
+        params[@"location"] = location;
     }
     
     if (description.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"description" value:description]];
+        params[@"description"] = description;
     }
     
-    return [self sendPOSTRequest:request withParameters:params];
+    return [self sendPOSTRequestForURL:baseURL andParams:params];
 }
 
 - (NSError *)updateSettingsWithDictionary:(NSDictionary *)settings {
@@ -1228,31 +1223,29 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     NSString *lang = [settings objectForKey:@"lang"];
     
     NSURL *baseURL = [NSURL URLWithString:url_account_settings];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    
-    NSMutableArray *params = [NSMutableArray array];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:5];
     
     if (sleep_time_enabled.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"sleep_time_enabled" value:sleep_time_enabled]];
+        params[@"sleep_time_enabled"] = sleep_time_enabled;
     }
     
     if (start_sleep_time.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"start_sleep_time" value:start_sleep_time]];
+        params[@"start_sleep_time"] = start_sleep_time;
     }
     
     if (end_sleep_time.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"end_sleep_time" value:end_sleep_time]];
+        params[@"end_sleep_time"] = end_sleep_time;
     }
     
     if (time_zone.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"time_zone" value:time_zone]];
+        params[@"time_zone"] = time_zone;
     }
     
     if (lang.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"lang" value:lang]];
+        params[@"lang"] = lang;
     }
     
-    return [self sendPOSTRequest:request withParameters:params];
+    return [self sendPOSTRequestForURL:baseURL andParams:params];
 }
 
 - (id)lookupUsers:(NSArray *)users areIDs:(BOOL)areIDs {
@@ -1272,15 +1265,12 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 }
 
 - (NSError *)unblock:(NSString *)username {
-
     if (username.length == 0) {
         return getBadRequestError();
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_blocks_destroy];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *usernameP = [OARequestParameter requestParameterWithName:@"screen_name" value:username];
-    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:usernameP, nil]];
+    return [self sendPOSTRequestForURL:baseURL andParams:@{@"screen_name":username}];
 }
 
 - (NSError *)block:(NSString *)username {
@@ -1290,9 +1280,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_blocks_create];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *usernameP = [OARequestParameter requestParameterWithName:@"screen_name" value:username];
-    return [self sendPOSTRequest:request withParameters:[NSArray arrayWithObjects:usernameP, nil]];
+    return [self sendPOSTRequestForURL:baseURL andParams:@{@"screen_name":username}];
 }
 
 - (id)testService {
@@ -1334,22 +1322,20 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 }
 
 - (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString {
-    
     if (tweetString.length == 0) {
         return getBadRequestError();
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_statuses_update];
-    OARequestParameter *status = [OARequestParameter requestParameterWithName:@"status" value:[tweetString fhs_trimForTwitter]];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
     
-    NSMutableArray *params = [NSMutableArray arrayWithObjects:status, nil];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:2];
+    params[@"status"] = tweetString;
     
     if (inReplyToString.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"in_reply_to_status_id" value:inReplyToString]];
+        params[@"in_reply_to_status_id"] = inReplyToString;
     }
-    
-    return [self sendPOSTRequest:request withParameters:params];
+
+    return [self sendPOSTRequestForURL:baseURL andParams:params];
 }
 
 - (NSError *)postTweet:(NSString *)tweetString {
@@ -1372,7 +1358,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:param, stringify_ids, nil]];
 }
 
-- (id)init {
+- (instancetype)init {
     self = [super init];
     if (self) {
         // Twitter API datestamps are UTC
@@ -1504,26 +1490,25 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
 
 - (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString {
     
-    NSString *consumerKey = [_consumer.key URLEncodedString];
-    NSString *signatureProvider = [@"HMAC-SHA1" URLEncodedString];
-    NSString *nonce = fhs_gen_uuid();
+    NSString *consumerKey = [_consumer.key fhs_URLEncode];
+    NSString *nonce = [NSString fhs_UUID];
     NSString *timestamp = [NSString stringWithFormat:@"%ld",time(nil)];
-    NSString *urlWithoutParams = [fhs_url_remove_params(request.URL) URLEncodedString];
+    NSString *urlWithoutParams = [fhs_url_remove_params(request.URL) fhs_URLEncode];
     
     // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
     // build a sorted array of both request parameters and OAuth header parameters
     NSMutableDictionary *mutableParams = [NSMutableDictionary dictionary];
     
     mutableParams[@"oauth_consumer_key"] = consumerKey;
-    mutableParams[@"oauth_signature_method"] = signatureProvider;
+    mutableParams[@"oauth_signature_method"] = @"HMAC-SHA1";
     mutableParams[@"oauth_timestamp"] = timestamp;
     mutableParams[@"oauth_nonce"] = nonce;
     mutableParams[@"oauth_version"] = @"1.0";
     
     if (tokenString.length > 0) {
-        mutableParams[@"oauth_token"] = [tokenString URLEncodedString];
+        mutableParams[@"oauth_token"] = [tokenString fhs_URLEncode];
         if (verifierString.length > 0) {
-            mutableParams[@"oauth_verifier"] = [verifierString URLEncodedString];
+            mutableParams[@"oauth_verifier"] = [verifierString fhs_URLEncode];
         }
     } else {
         mutableParams[@"oauth_callback"] = @"oob";
@@ -1532,21 +1517,20 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:mutableParams.count];
     
     for (NSString *key in mutableParams.allKeys) {
-        [paramPairs addObject:[NSString stringWithFormat:@"%@=%@",[key URLEncodedString],[mutableParams[key] URLEncodedString]]];
+        [paramPairs addObject:[NSString stringWithFormat:@"%@=%@",[key fhs_URLEncode],[mutableParams[key] fhs_URLEncode]]];
     }
     
     [paramPairs sortUsingSelector:@selector(compare:)];
     
-    NSString *normalizedRequestParameters = [[paramPairs componentsJoinedByString:@"&"]URLEncodedString];
-    
+    NSString *normalizedRequestParameters = [[paramPairs componentsJoinedByString:@"&"]fhs_URLEncode];
     
     // OAuth Spec, Section 9.1.2 "Concatenate Request Elements"
     // Sign request elements using HMAC-SHA1
     NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",request.HTTPMethod,urlWithoutParams,normalizedRequestParameters];
     
-    NSString *tokenSecretSantized = (tokenSecretString.length > 0)?[tokenSecretString URLEncodedString]:@""; // this way a nil token won't make a bad signature
+    NSString *tokenSecretSantized = (tokenSecretString.length > 0)?[tokenSecretString fhs_URLEncode]:@""; // this way a nil token won't make a bad signature
     
-    NSString *secret = [NSString stringWithFormat:@"%@&%@",[_consumer.secret URLEncodedString],tokenSecretSantized];
+    NSString *secret = [NSString stringWithFormat:@"%@&%@",[_consumer.secret fhs_URLEncode],tokenSecretSantized];
     
     NSData *secretData = [secret dataUsingEncoding:NSUTF8StringEncoding];
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
@@ -1557,12 +1541,12 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     Base64EncodeDataFHS(result, 20, base64Result, &theResultLength);
     NSData *theData = [NSData dataWithBytes:base64Result length:theResultLength];
     
-    NSString *signature = [[[[NSString alloc]initWithData:theData encoding:NSUTF8StringEncoding]autorelease]URLEncodedString];
+    NSString *signature = [[[[NSString alloc]initWithData:theData encoding:NSUTF8StringEncoding]autorelease]fhs_URLEncode];
     
-	NSString *oauthToken = (tokenString.length > 0)?[NSString stringWithFormat:@"oauth_token=\"%@\", ",[tokenString URLEncodedString]]:@"oauth_callback=\"oob\", ";
+	NSString *oauthToken = (tokenString.length > 0)?[NSString stringWithFormat:@"oauth_token=\"%@\", ",[tokenString fhs_URLEncode]]:@"oauth_callback=\"oob\", ";
     NSString *oauthVerifier = (verifierString.length > 0)?[NSString stringWithFormat:@"oauth_verifier=\"%@\", ",verifierString]:@"";
 
-    NSString *oauthHeader = [NSString stringWithFormat:@"OAuth oauth_consumer_key=\"%@\", %@%@oauth_signature_method=\"%@\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"",consumerKey,oauthToken,oauthVerifier,signatureProvider,signature,timestamp,nonce];
+    NSString *oauthHeader = [NSString stringWithFormat:@"OAuth oauth_consumer_key=\"%@\", %@%@oauth_signature_method=\"HMAC-SHA1\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"",consumerKey,oauthToken,oauthVerifier,signature,timestamp,nonce];
 	
     [request setValue:oauthHeader forHTTPHeaderField:@"Authorization"];
 }
@@ -1580,7 +1564,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
     
-    NSString *boundary = fhs_gen_uuid();
+    NSString *boundary = [NSString fhs_UUID];
     
     NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
     [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
@@ -1665,7 +1649,7 @@ static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends
     int position = 0;
     for (NSString *key in params) {
         position++;
-        [encodedParameterPairs appendFormat:@"%@=%@",[key URLEncodedString],[(NSString *)params[key] URLEncodedString]];
+        [encodedParameterPairs appendFormat:@"%@=%@",[key fhs_URLEncode],[params[key] fhs_URLEncode]];
         if (position < params.count) {
             [encodedParameterPairs appendString:@"&"];
         }
@@ -2050,11 +2034,12 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     BOOL ret = [[FHSTwitterEngine sharedEngine]finishAuthWithRequestToken:_requestToken];
     
     void(^block)(BOOL success) = objc_getAssociatedObject(authBlockKey, "FHSTwitterEngineOAuthCompletion");
-    objc_removeAssociatedObjects(authBlockKey);
     
     if (block) {
         block(ret);
     }
+    
+    objc_setAssociatedObject(authBlockKey, "FHSTwitterEngineOAuthCompletion", nil, OBJC_ASSOCIATION_COPY_NONATOMIC);
     
     [self dismissViewControllerAnimated:YES completion:nil];
 }

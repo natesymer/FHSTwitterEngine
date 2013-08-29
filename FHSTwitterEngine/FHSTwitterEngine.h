@@ -385,5 +385,6 @@ extern NSString * const FHSProfileDescriptionKey;
 @interface NSString (FHSTwitterEngine)
 - (NSString *)fhs_trimForTwitter;
 - (NSString *)fhs_stringWithRange:(NSRange)range;
++ (NSString *)fhs_UUID;
 - (BOOL)fhs_isNumeric;
 @end
