@@ -89,8 +89,8 @@
     dispatch_async(GCDBackgroundThread, ^{
         @autoreleasepool {
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            
-            NSLog(@"Friends' IDs: %@",[[FHSTwitterEngine sharedEngine]getFriendsIDs]);
+            //NSLog(@"Friends' IDs: %@",[[FHSTwitterEngine sharedEngine]getFriendsIDs]);
+            NSLog(@"%@",[[FHSTwitterEngine sharedEngine]getFavoritesForUser:@"episod" isID:NO andCount:20]);
             
             dispatch_sync(GCDMainThread, ^{
                 @autoreleasepool {

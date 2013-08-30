@@ -1033,22 +1033,21 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_favorites_list];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
-    OARequestParameter *userP = [OARequestParameter requestParameterWithName:isID?@"user_id":@"screen_name" value:user];
-    OARequestParameter *includeEntitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
     
-    NSMutableArray *params = [NSMutableArray arrayWithObjects:countP, userP, includeEntitiesP, nil];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:5];
+    params[@"count"] = [NSString stringWithFormat:@"%d",count];
+    params[(isID?@"user_id":@"screen_name")] = user;
+    params[@"include_entities"] = _includeEntities?@"true":@"false";
     
     if (sinceID.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
+        params[@"since_id"] = sinceID;
     }
     
     if (maxID.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"max_id" value:maxID]];
+        params[@"max_id"] = maxID;
     }
     
-    return [self sendGETRequest:request withParameters:params];
+    return [self sendGETRequestForURL:baseURL andParams:params];
 }
 
 - (NSError *)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag {
@@ -1063,8 +1062,7 @@ id removeNull(id rootObject) {
 
 - (id)getRateLimitStatus {
     NSURL *baseURL = [NSURL URLWithString:url_application_rate_limit_status];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    return [self sendGETRequest:request withParameters:nil];
+    return [self sendGETRequestForURL:baseURL andParams:nil];
 }
 
 - (NSError *)updateProfileColorsWithDictionary:(NSDictionary *)dictionary {
@@ -1139,7 +1137,6 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_image];
-    
     return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"include_entities":(_includeEntities?@"true":@"false"), @"image":[data base64EncodingWithLineLength:0]}];
 }
 
@@ -1149,8 +1146,7 @@ id removeNull(id rootObject) {
 
 - (id)getUserSettings {
     NSURL *baseURL = [NSURL URLWithString:url_account_settings];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    return [self sendGETRequest:request withParameters:nil];
+    return [self sendGETRequestForURL:baseURL andParams:nil];
 }
 
 - (NSError *)updateUserProfileWithDictionary:(NSDictionary *)settings {
@@ -1514,6 +1510,19 @@ id removeNull(id rootObject) {
         [paramPairs addObject:[NSString stringWithFormat:@"%@=%@",[key fhs_URLEncode],[mutableParams[key] fhs_URLEncode]]];
     }
     
+    if ([request.HTTPMethod isEqualToString:@"GET"]) {
+        
+        NSArray *halves = [request.URL.absoluteString componentsSeparatedByString:@"?"];
+        
+        if (halves.count > 1) {
+            NSArray *parameters = [halves[1] componentsSeparatedByString:@"&"];
+            
+            if (parameters.count > 0) {
+                [paramPairs addObjectsFromArray:parameters];
+            }
+        }
+    }
+    
     [paramPairs sortUsingSelector:@selector(compare:)];
     
     NSString *normalizedRequestParameters = [[paramPairs componentsJoinedByString:@"&"]fhs_URLEncode];
@@ -1541,6 +1550,8 @@ id removeNull(id rootObject) {
     NSString *oauthVerifier = (verifierString.length > 0)?[NSString stringWithFormat:@"oauth_verifier=\"%@\", ",verifierString]:@"";
 
     NSString *oauthHeader = [NSString stringWithFormat:@"OAuth oauth_consumer_key=\"%@\", %@%@oauth_signature_method=\"HMAC-SHA1\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"",consumerKey,oauthToken,oauthVerifier,signature,timestamp,nonce];
+    
+    NSLog(@"OAuth header: %@",oauthHeader);
 	
     [request setValue:oauthHeader forHTTPHeaderField:@"Authorization"];
 }
@@ -1562,8 +1573,6 @@ id removeNull(id rootObject) {
     
     NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
     [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
-    
-    [self signRequest:request];
     
     NSMutableData *body = [NSMutableData dataWithLength:0];
 
@@ -1591,6 +1600,8 @@ id removeNull(id rootObject) {
     
     [request setValue:@(body.length).stringValue forHTTPHeaderField:@"Content-Length"];
     request.HTTPBody = body;
+    
+    [self signRequest:request];
     
     id retobj = [self sendRequest:request];
     
@@ -1631,26 +1642,22 @@ id removeNull(id rootObject) {
         }
     }
     
+    if (params.count > 0) {
+        NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:params.count];
+        
+        for (NSString *key in params) {
+            NSString *paramPair = [NSString stringWithFormat:@"%@=%@",[key fhs_URLEncode],[params[key] fhs_URLEncode]];
+            [paramPairs addObject:paramPair];
+        }
+        
+        url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?%@",fhs_url_remove_params(url), [paramPairs componentsJoinedByString:@"&"]]];
+    }
+    
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"GET"];
     [request setHTTPShouldHandleCookies:NO];
     [self signRequest:request];
-    
-    // add params
-    
-    NSMutableString *encodedParameterPairs = [NSMutableString stringWithCapacity:256];
-    
-    int position = 0;
-    for (NSString *key in params) {
-        position++;
-        [encodedParameterPairs appendFormat:@"%@=%@",[key fhs_URLEncode],[params[key] fhs_URLEncode]];
-        if (position < params.count) {
-            [encodedParameterPairs appendString:@"&"];
-        }
-    }
-    
-    [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@?%@",fhs_url_remove_params(request.URL), encodedParameterPairs]]];
-    
+
     id retobj = [self sendRequest:request];
     
     if (retobj == nil) {
