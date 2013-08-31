@@ -1574,6 +1574,8 @@ id removeNull(id rootObject) {
     NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
     [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
     
+    [self signRequest:request];
+    
     NSMutableData *body = [NSMutableData dataWithLength:0];
 
     for (NSString *key in params.allKeys) {
@@ -1600,8 +1602,6 @@ id removeNull(id rootObject) {
     
     [request setValue:@(body.length).stringValue forHTTPHeaderField:@"Content-Length"];
     request.HTTPBody = body;
-    
-    [self signRequest:request];
     
     id retobj = [self sendRequest:request];
     

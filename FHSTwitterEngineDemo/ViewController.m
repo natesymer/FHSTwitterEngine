@@ -89,13 +89,11 @@
     dispatch_async(GCDBackgroundThread, ^{
         @autoreleasepool {
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            //NSLog(@"Friends' IDs: %@",[[FHSTwitterEngine sharedEngine]getFriendsIDs]);
-            NSLog(@"%@",[[FHSTwitterEngine sharedEngine]getFavoritesForUser:@"episod" isID:NO andCount:20]);
+            NSLog(@"Friends' IDs: %@",[[FHSTwitterEngine sharedEngine]getFriendsIDs]);
             
             dispatch_sync(GCDMainThread, ^{
                 @autoreleasepool {
-                    UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"Complete!" message:@"Your list of followers has been fetched" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-                    [av show];
+                    [[[UIAlertView alloc]initWithTitle:@"Complete" message:@"Your list of followers has been fetched..." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]show];
                     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
                 }
             });
