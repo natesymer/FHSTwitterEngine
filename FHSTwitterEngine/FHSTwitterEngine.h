@@ -23,19 +23,10 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-
-//// FHSTwitterEngine Version 2 ////
-
 //
 // FHSTwitterEngine
 // The synchronous Twitter engine that doesn’t suck!!
 //
-
-//
-// NOTE TO CONTRIBUTORS
-// Use NSJSONSerialization with removeNull(). Life is easy that way.
-//
-
 
 #import <Foundation/Foundation.h>
 
@@ -84,13 +75,12 @@ extern NSString * const FHSErrorDomain;
 
 @protocol FHSTwitterEngineAccessTokenDelegate <NSObject>
 
-- (void)storeAccessToken:(NSString *)accessToken;
 - (NSString *)loadAccessToken;
+- (void)storeAccessToken:(NSString *)accessToken;
 
 @end
 
 @class OAToken;
-@class OAConsumer;
 
 @interface FHSTwitterEngine : NSObject
 
@@ -312,45 +302,27 @@ extern NSString * const FHSErrorDomain;
 - (void)loadAccessToken;
 - (BOOL)isAuthorized;
 
-// Clear Keys
+// API Key management
 - (void)clearConsumer;
+- (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret; // key pair is used for one request
+- (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret; // key pair is used indefinitely
 
-
-//
-// Misc Methods
-//
-
-// id list generator - returns an array of id/username list strings
+// id/username concatenator - returns an array of concatenated id/username lists
+// 100 ids/usernames per concatenated string
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array;
 
-// Temporarily set keys
-// if you don't want your keys in memory, simply use
-// this method. You will have to use it before
-// making any API calls.
-- (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
-
-// Use to set the consumer key when using the singleton
-- (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
-
-// Singleton, NEVER use -[FHSTwitterEngine init] directly. Ever.
-+ (FHSTwitterEngine *)sharedEngine;
+// never call -[FHSTwitterEngine init] directly
++ (FHSTwitterEngine *)sharedEngine; 
 
 + (BOOL)isConnectedToInternet;
 
-// Determines if entities should be included
 @property (nonatomic, assign) BOOL includeEntities;
-
-// Logged in user's username
 @property (nonatomic, retain) NSString *loggedInUsername;
-
-// Logged in user's Twitter ID
 @property (nonatomic, retain) NSString *loggedInID;
-
-// Will be called to store the accesstoken
-@property (nonatomic, assign) id<FHSTwitterEngineAccessTokenDelegate> delegate;
-
-// Access Token
 @property (nonatomic, retain) OAToken *accessToken;
+
+// called to retrieve or save access tokens
+@property (nonatomic, assign) id<FHSTwitterEngineAccessTokenDelegate> delegate;
 
 @end
 

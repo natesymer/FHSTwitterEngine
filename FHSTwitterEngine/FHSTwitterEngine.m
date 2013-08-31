@@ -168,6 +168,53 @@ id removeNull(id rootObject) {
     }
 }
 
+@interface FHSToken : NSObject
+
+@property (nonatomic, strong) NSString *key;
+@property (nonatomic, strong) NSString *secret;
+@property (nonatomic, strong) NSString *verifier;
+
++ (FHSToken *)tokenWithHTTPResponseBody:(NSString *)body;
+- (id)initWithHTTPResponseBody:(NSString *)body;
+
+@end
+
+@implementation FHSToken
+
++ (FHSToken *)tokenWithHTTPResponseBody:(NSString *)body {
+    return [[[self class]alloc]initWithHTTPResponseBody:body];
+}
+
+- (id)initWithHTTPResponseBody:(NSString *)body {
+    self = [super init];
+	if (self) {
+        
+        if (body.length > 0) {
+            NSArray *pairs = [body componentsSeparatedByString:@"&"];
+            
+            for (NSString *pair in pairs) {
+                
+                NSArray *elements = [pair componentsSeparatedByString:@"="];
+                
+                if (elements.count > 1) {
+                    NSString *field = elements[0];
+                    NSString *value = elements[1];
+                    
+                    if ([field isEqualToString:@"oauth_token"]) {
+                        self.key = [value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                    } else if ([field isEqualToString:@"oauth_token_secret"]) {
+                        self.secret = [value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                    }
+                }
+            }
+        }
+	}
+    
+    return self;
+}
+
+@end
+
 @interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate> 
 
 @property (nonatomic, retain) UINavigationBar *navBar;
@@ -923,9 +970,7 @@ id removeNull(id rootObject) {
 
 - (id)getNoRetweetIDs {
     NSURL *baseURL = [NSURL URLWithString:url_friendships_no_retweets_ids];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *stringifyIDsP = [OARequestParameter requestParameterWithName:@"stringify_ids" value:@"true"];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:stringifyIDsP, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"stringify_ids":@"true" }];
 }
 
 - (NSError *)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID {
@@ -979,12 +1024,10 @@ id removeNull(id rootObject) {
     NSArray *reqStrings = [self generateRequestStringsFromArray:users];
     
     NSURL *baseURL = [NSURL URLWithString:url_friendships_lookup];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
     
     for (NSString *reqString in reqStrings) {
-        OARequestParameter *userP = [OARequestParameter requestParameterWithName:areIDs?@"user_id":@"screen_name" value:reqString];
         
-        id retObj = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:userP, nil]];
+        id retObj = [self sendGETRequestForURL:baseURL andParams:@{ (areIDs?@"user_id":@"screen_name"):reqString }];
         
         if ([retObj isKindOfClass:[NSArray class]]) {
             [returnedDictionaries addObjectsFromArray:(NSArray *)retObj];
@@ -992,6 +1035,7 @@ id removeNull(id rootObject) {
             return retObj;
         }
     }
+    
     return returnedDictionaries;
 }
 
@@ -1015,8 +1059,7 @@ id removeNull(id rootObject) {
 
 - (id)verifyCredentials {
     NSURL *baseURL = [NSURL URLWithString:url_account_verify_credentials];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    return [self sendGETRequest:request withParameters:nil];
+    return [self sendGETRequestForURL:baseURL andParams:nil];
 }
 
 - (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count {
@@ -1206,11 +1249,11 @@ id removeNull(id rootObject) {
     // time_zone - Europe/Copenhagen, Pacific/Tongatapu
     // lang - en, it, es
     
-    NSString *sleep_time_enabled = [settings objectForKey:@"sleep_time_enabled"];
-    NSString *start_sleep_time = [settings objectForKey:@"start_sleep_time"];
-    NSString *end_sleep_time = [settings objectForKey:@"end_sleep_time"];
-    NSString *time_zone = [settings objectForKey:@"time_zone"];
-    NSString *lang = [settings objectForKey:@"lang"];
+    NSString *sleep_time_enabled = settings[@"sleep_time_enabled"];
+    NSString *start_sleep_time = settings[@"start_sleep_time"];
+    NSString *end_sleep_time = settings[@"end_sleep_time"];
+    NSString *time_zone = settings[@"time_zone"];
+    NSString *lang = settings[@"lang"];
     
     NSURL *baseURL = [NSURL URLWithString:url_account_settings];
     NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:5];
@@ -1249,9 +1292,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_users_lookup];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *usernames = [OARequestParameter requestParameterWithName:areIDs?@"user_id":@"screen_name" value:[users componentsJoinedByString:@","]];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:usernames, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ (areIDs?@"user_id":@"screen_name"):[users componentsJoinedByString:@","] }];
 }
 
 - (NSError *)unblock:(NSString *)username {
@@ -1275,9 +1316,8 @@ id removeNull(id rootObject) {
 
 - (id)testService {
     NSURL *baseURL = [NSURL URLWithString:url_help_test];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    
-    id retValue = [self sendGETRequest:request withParameters:nil];
+
+    id retValue = [self sendGETRequestForURL:baseURL andParams:nil];
     
     if ([retValue isKindOfClass:[NSString class]]) {
         if ([(NSString *)retValue isEqualToString:@"ok"]) {
@@ -1299,16 +1339,15 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_statuses_home_timeline];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *countParam = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d", count]];
     
-    NSMutableArray *params = [NSMutableArray arrayWithObjects:countParam, nil];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:2];
+    params[@"count"] = [NSString stringWithFormat:@"%d",count];
     
     if (sinceID.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
+        params[@"since_id"] = sinceID;
     }
     
-    return [self sendGETRequest:request withParameters:params];
+    return [self sendGETRequestForURL:baseURL andParams:params];
 }
 
 - (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString {
@@ -1334,18 +1373,12 @@ id removeNull(id rootObject) {
 
 - (id)getFollowersIDs {
     NSURL *baseURL = [NSURL URLWithString:url_followers_ids];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *param = [OARequestParameter requestParameterWithName:@"screen_name" value:self.loggedInUsername];
-    OARequestParameter *stringify_ids = [OARequestParameter requestParameterWithName:@"stringify_ids" value:@"true"];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:param, stringify_ids, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _loggedInUsername, @"stringify_ids":@"true"}];
 }
 
 - (id)getFriendsIDs {
     NSURL *baseURL = [NSURL URLWithString:url_friends_ids];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *param = [OARequestParameter requestParameterWithName:@"screen_name" value:self.loggedInUsername];
-    OARequestParameter *stringify_ids = [OARequestParameter requestParameterWithName:@"stringify_ids" value:@"true"];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:param, stringify_ids, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _loggedInUsername, @"stringify_ids":@"true"}];
 }
 
 - (instancetype)init {

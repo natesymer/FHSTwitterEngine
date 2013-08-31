@@ -5,42 +5,35 @@ FHSTwitterEngine
 
 Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](http://twitter.com/natesymer) 
 
-Feel free to <a href="http://natesymer.com/donate/" alt="Buy me a coffee or graphics card">buy me a coffee</a> (donation).
+Feel free to <a href="http://natesymer.com/donate/" alt="Buy me a coffee or graphics card">buy me a coffee</a> if you like my work.
 
 
 `FHSTwitterEngine` can:
 
-- Login through xAuth.
-- Login through oAuth. Login UI based on [SA_OAuthTwitterEngineController](https://github.com/bengottlieb/Twitter-OAuth-iPhone)
-- Make a request to most available API endpoints. Yes, even the stupid ones.
+- Login through OAuth and xAuth. 
+- Login with OAuth. (Login UI based on [SA_OAuthTwitterEngineController](https://github.com/bengottlieb/Twitter-OAuth-iPhone))
+- Make a request to just about every API endpoint.
 
+Why you should use `FHSTwitterEngine`:
 
-Why `FHSTwitterEngine` is better than `MGTwitterEngine`:
+- Single header/implementation pair
+- No dependencies
+- Shared instance
+- Clean, high level API
 
-- Lack of annoying delegates
-- Does not send you to Dependency Hell over a JSON parser
-- Less setup
-- Synchronous allowing for easier implementation (see Usage)
-- More implemented API endpoints
-- Uses a fixed version of OAuthConsumer (mine)
-- **Less crufty**
+Where did OAuthConsumer go? A separate repository. There were a number of issues with it:
 
-Why `FHSTwitterEngine` is better than `STTwitter`:
-
-- FHSTwitterEngine uses the singleton pattern
-- FHSTwitterEngine avoids nested blocks
-- FHSTwitterEngine is **less crufty**
-- FHSTwitterEngine is dead easy to add to your project
-- FHSTwitterEngine is simple
-
-Notice a common theme?
+1. It had features beyond the scope of the Twitter API
+2. It concatenated and signed POST parameters
+3. It could not take raw data as parameters (see #2)
+4. It duplicated functionality I already implemented.
 
 **Setup**
 
-1. Add the folder "FHSTwitterEngine" to your project and `#import "FHSTwitterEngine.h"` (I recommend `Prefix.pch`)
-2. Link against `SystemConfiguration.framework`
-3. If your project is using ARC, you must disable ARC for any `OA` prefixed files and `FHSTwitterEngine.{h,m}`.
-4. Profit!!!!
+1. Add `FHSTwitterEngine.h` and `FHSTwitterEngine.m` to your project
+2. `#import "FHSTwitterEngine.h"` where necessary
+3. Link against `SystemConfiguration.framework`
+4. Enable ARC for both files if applicable
 
 **Usage:**
 
