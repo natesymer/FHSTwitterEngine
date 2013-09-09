@@ -34,14 +34,6 @@
 #define GCDBackgroundThread dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
 #define GCDMainThread dispatch_get_main_queue()
 
-// oEmbed align modes
-typedef enum {
-    FHSTwitterEngineAlignModeLeft,
-    FHSTwitterEngineAlignModeRight,
-    FHSTwitterEngineAlignModeCenter,
-    FHSTwitterEngineAlignModeNone
-} FHSTwitterEngineAlignMode;
-
 // Image sizes
 typedef enum {
     FHSTwitterEngineImageSizeMini, // 24px by 24px
@@ -215,9 +207,6 @@ extern NSString * const FHSErrorDomain;
 
 // statuses/retweet
 - (NSError *)retweet:(NSString *)identifier;
-
-// statuses/oembed
-- (id)oembedTweet:(NSString *)identifier maxWidth:(float)maxWidth alignmentMode:(FHSTwitterEngineAlignMode)alignmentMode;
 
 // statuses/show
 - (id)getDetailsForTweet:(NSString *)identifier;
