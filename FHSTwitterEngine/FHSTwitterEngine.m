@@ -49,7 +49,6 @@ NSString * const FHSProfileDescriptionKey = @"description";
 
 NSString * const FHSErrorDomain = @"FHSErrorDomain";
 
-static FHSTwitterEngine *sharedInstance = nil;
 static NSString * const authBlockKey = @"FHSTwitterEngineOAuthCompletion";
 
 static NSString * const url_search_tweets = @"https://api.twitter.com/1.1/search/tweets.json";
@@ -168,8 +167,8 @@ id removeNull(id rootObject) {
 
 @interface FHSConsumer : NSObject
 
-@property (nonatomic, retain) NSString *key;
-@property (nonatomic, retain) NSString *secret;
+@property (nonatomic, strong) NSString *key;
+@property (nonatomic, strong) NSString *secret;
 
 + (FHSConsumer *)consumerWithKey:(NSString *)key secret:(NSString *)secret;
 
@@ -230,12 +229,12 @@ id removeNull(id rootObject) {
 
 @interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate> 
 
-@property (nonatomic, retain) UINavigationBar *navBar;
-@property (nonatomic, retain) UIView *blockerView;
-@property (nonatomic, retain) UIToolbar *pinCopyBar;
+@property (nonatomic, strong) UINavigationBar *navBar;
+@property (nonatomic, strong) UIView *blockerView;
+@property (nonatomic, strong) UIToolbar *pinCopyBar;
 
-@property (nonatomic, retain) UIWebView *theWebView;
-@property (nonatomic, retain) FHSToken *requestToken;
+@property (nonatomic, strong) UIWebView *theWebView;
+@property (nonatomic, strong) FHSToken *requestToken;
 
 - (NSString *)locatePin;
 - (void)showPinCopyPrompt;
@@ -251,9 +250,9 @@ id removeNull(id rootObject) {
 - (id)sendRequest:(NSURLRequest *)request;
 
 // These are here to obfuscate them from prying eyes
-@property (retain, nonatomic) FHSConsumer *consumer;
+@property (strong, nonatomic) FHSConsumer *consumer;
 @property (assign, nonatomic) BOOL shouldClearConsumer;
-@property (retain, nonatomic) NSDateFormatter *dateFormatter;
+@property (strong, nonatomic) NSDateFormatter *dateFormatter;
 
 @end
 
@@ -277,7 +276,7 @@ id removeNull(id rootObject) {
 
 - (NSString *)fhs_URLEncode {
     CFStringRef url = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)self, NULL, CFSTR("!*'();:@&=+$,/?%#[]"), kCFStringEncodingUTF8);
-	return [(NSString *)url autorelease];
+	return (__bridge NSString *)url;
 }
 
 - (NSString *)fhs_trimForTwitter {
@@ -296,7 +295,7 @@ id removeNull(id rootObject) {
         CFUUIDRef theUUID = CFUUIDCreate(kCFAllocatorDefault);
         CFStringRef string = CFUUIDCreateString(kCFAllocatorDefault, theUUID);
         CFRelease(theUUID);
-        NSString *uuid = [NSString stringWithString:(NSString *)string];
+        NSString *uuid = [NSString stringWithString:(__bridge NSString *)string];
         CFRelease(string);
         return uuid;
     }
@@ -1232,8 +1231,8 @@ id removeNull(id rootObject) {
     if (self) {
         // Twitter API datestamps are UTC
         // Don't question this code.
-        self.dateFormatter = [[[NSDateFormatter alloc]init]autorelease];
-        _dateFormatter.locale = [[[NSLocale alloc]initWithLocaleIdentifier:@"en_US"]autorelease];
+        self.dateFormatter = [[NSDateFormatter alloc]init];
+        _dateFormatter.locale = [[NSLocale alloc]initWithLocaleIdentifier:@"en_US"];
         _dateFormatter.dateStyle = NSDateFormatterLongStyle;
         _dateFormatter.formatterBehavior = NSDateFormatterBehavior10_4;
         _dateFormatter.dateFormat = @"EEE MMM dd HH:mm:ss ZZZZ yyyy";
@@ -1241,41 +1240,13 @@ id removeNull(id rootObject) {
     return self;
 }
 
-// The shared* class method
 + (FHSTwitterEngine *)sharedEngine {
-    @synchronized (self) {
-        if (sharedInstance == nil) {
-            [[self alloc]init];
-        }
-    }
+    static FHSTwitterEngine *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[[self class]alloc]init];
+    });
     return sharedInstance;
-}
-
-// Override stuff to make sure that the singleton is never dealloc'd. Fun.
-+ (id)allocWithZone:(NSZone *)zone {
-    @synchronized(self) {
-        if (sharedInstance == nil) {
-            sharedInstance = [super allocWithZone:zone];
-            return sharedInstance;
-        }
-    }
-    return nil;
-}
-
-- (id)retain {
-    return self;
-}
-
-- (oneway void)release {
-    // Do nothing
-}
-
-- (id)autorelease {
-    return self;
-}
-
-- (NSUInteger)retainCount {
-    return NSUIntegerMax;
 }
 
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array {
@@ -1420,7 +1391,7 @@ id removeNull(id rootObject) {
 	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
     NSData *theData = [[[NSData dataWithBytes:result length:20]base64Encode]dataUsingEncoding:NSUTF8StringEncoding];
 
-    NSString *signature = [[[[NSString alloc]initWithData:theData encoding:NSUTF8StringEncoding]autorelease]fhs_URLEncode];
+    NSString *signature = [[[NSString alloc]initWithData:theData encoding:NSUTF8StringEncoding]fhs_URLEncode];
     
 	NSString *oauthToken = (tokenString.length > 0)?[NSString stringWithFormat:@"oauth_token=\"%@\", ",[tokenString fhs_URLEncode]]:@"oauth_callback=\"oob\", ";
     NSString *oauthVerifier = (verifierString.length > 0)?[NSString stringWithFormat:@"oauth_verifier=\"%@\", ",verifierString]:@"";
@@ -1577,7 +1548,7 @@ id removeNull(id rootObject) {
     id retobj = [self sendRequest:request];
     
     if ([retobj isKindOfClass:[NSData class]]) {
-        return [[[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding]autorelease];
+        return [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
     }
     
     return nil;
@@ -1602,7 +1573,7 @@ id removeNull(id rootObject) {
         return NO;
     }
     
-    NSString *response = [[[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding]autorelease];
+    NSString *response = [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
     
     if (response.length == 0) {
         return NO;
@@ -1646,7 +1617,7 @@ id removeNull(id rootObject) {
     if ([ret isKindOfClass:[NSError class]]) {
         return ret;
     } else if ([ret isKindOfClass:[NSData class]]) {
-        NSString *httpBody = [[[NSString alloc]initWithData:(NSData *)ret encoding:NSUTF8StringEncoding]autorelease];
+        NSString *httpBody = [[NSString alloc]initWithData:(NSData *)ret encoding:NSUTF8StringEncoding];
         
         if (httpBody.length > 0) {
             [self storeAccessToken:httpBody];
@@ -1667,8 +1638,8 @@ id removeNull(id rootObject) {
     
     NSString *savedHttpBody = nil;
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(loadAccessToken)]) {
-        savedHttpBody = [self.delegate loadAccessToken];
+    if (_delegate && [_delegate respondsToSelector:@selector(loadAccessToken)]) {
+        savedHttpBody = [_delegate loadAccessToken];
     } else {
         savedHttpBody = [[NSUserDefaults standardUserDefaults]objectForKey:@"SavedAccessHTTPBody"];
     }
@@ -1683,8 +1654,8 @@ id removeNull(id rootObject) {
     self.loggedInUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:accessTokenZ];
     self.loggedInID = [self extractValueForKey:@"user_id" fromHTTPBody:accessTokenZ];
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(storeAccessToken:)]) {
-        [self.delegate storeAccessToken:accessTokenZ];
+    if (_delegate && [_delegate respondsToSelector:@selector(storeAccessToken:)]) {
+        [_delegate storeAccessToken:accessTokenZ];
     } else {
         [[NSUserDefaults standardUserDefaults]setObject:accessTokenZ forKey:@"SavedAccessHTTPBody"];
     }
@@ -1759,7 +1730,7 @@ id removeNull(id rootObject) {
 }
 
 - (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender withCompletion:(void(^)(BOOL success))block {
-    FHSTwitterEngineController *vc = [[[FHSTwitterEngineController alloc]init]autorelease];
+    FHSTwitterEngineController *vc = [[FHSTwitterEngineController alloc]init];
     vc.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
     objc_setAssociatedObject(vc, "FHSTwitterEngineOAuthCompletion", block, OBJC_ASSOCIATION_COPY_NONATOMIC);
     [sender presentViewController:vc animated:YES completion:nil];
@@ -1804,13 +1775,7 @@ id removeNull(id rootObject) {
 }
 
 - (void)dealloc {
-    [self setConsumer:nil];
-    [self setDateFormatter:nil];
-    [self setLoggedInUsername:nil];
-    [self setLoggedInID:nil];
     [self setDelegate:nil];
-    [self setAccessToken:nil];
-    [super dealloc];
 }
 
 @end
@@ -1821,33 +1786,33 @@ id removeNull(id rootObject) {
     [super loadView];
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(pasteboardChanged:) name:UIPasteboardChangedNotification object:nil];
     
-    self.view = [[[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 460)]autorelease];
+    self.view = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 460)];
     self.view.backgroundColor = [UIColor grayColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    self.theWebView = [[[UIWebView alloc]initWithFrame:CGRectMake(0, 44, 320, 416)]autorelease];
+    self.theWebView = [[UIWebView alloc]initWithFrame:CGRectMake(0, 44, 320, 416)];
     _theWebView.hidden = YES;
     _theWebView.delegate = self;
     _theWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _theWebView.dataDetectorTypes = UIDataDetectorTypeNone;
     _theWebView.backgroundColor = [UIColor darkGrayColor];
     
-    self.navBar = [[[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, 320, 44)]autorelease];
+    self.navBar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, 320, 44)];
     _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
 	
 	[self.view addSubview:_theWebView];
 	[self.view addSubview:_navBar];
     
-	self.blockerView = [[[UIView alloc]initWithFrame:CGRectMake(0, 0, 200, 60)]autorelease];
+	self.blockerView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 200, 60)];
 	_blockerView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.8];
 	_blockerView.center = CGPointMake(self.view.bounds.size.width/2, self.view.bounds.size.height/2);
 	_blockerView.clipsToBounds = YES;
     _blockerView.layer.cornerRadius = 10;
     
-    self.pinCopyBar = [[[UIToolbar alloc]initWithFrame:CGRectMake(0, 44, self.view.bounds.size.width, 44)]autorelease];
+    self.pinCopyBar = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 44, self.view.bounds.size.width, 44)];
     _pinCopyBar.barStyle = UIBarStyleBlackTranslucent;
     _pinCopyBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
-    _pinCopyBar.items = [NSArray arrayWithObjects:[[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil]autorelease], [[[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil]autorelease], [[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil]autorelease], nil];
+    _pinCopyBar.items = [NSArray arrayWithObjects:[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], [[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil], [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], nil];
 	
 	UILabel	*label = [[UILabel alloc]initWithFrame:CGRectMake(0, 5, _blockerView.bounds.size.width, 15)];
 	label.text = @"Please Wait...";
@@ -1856,44 +1821,42 @@ id removeNull(id rootObject) {
 	label.textAlignment = NSTextAlignmentCenter;
 	label.font = [UIFont boldSystemFontOfSize:15];
 	[_blockerView addSubview:label];
-    [label release];
 	
 	UIActivityIndicatorView	*spinner = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
 	spinner.center = CGPointMake(_blockerView.bounds.size.width/2, (_blockerView.bounds.size.height/2)+10);
 	[_blockerView addSubview:spinner];
 	[self.view addSubview:_blockerView];
 	[spinner startAnimating];
-    [spinner release];
 	
-	UINavigationItem *navItem = [[[UINavigationItem alloc]initWithTitle:@"Twitter Login"]autorelease];
-	navItem.leftBarButtonItem = [[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)]autorelease];
+	UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"Twitter Login"];
+	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
 	[_navBar pushNavigationItem:navItem animated:NO];
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
     dispatch_async(GCDBackgroundThread, ^{
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc]init];
+        @autoreleasepool {
         
-        NSString *reqString = [[FHSTwitterEngine sharedEngine]getRequestTokenString];
+            NSString *reqString = [[FHSTwitterEngine sharedEngine]getRequestTokenString];
 
-        if (reqString.length == 0) {
-            dispatch_sync(GCDMainThread, ^{
-                NSAutoreleasePool *poolTwo = [[NSAutoreleasePool alloc]init];
-               // [self dismissViewControllerAnimated:YES completion:nil];
-                [poolTwo release];
-            });
-        } else {
-            self.requestToken = [FHSToken tokenWithHTTPResponseBody:reqString];
-            NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",_requestToken.key]]];
-            
-            dispatch_sync(GCDMainThread, ^{
-                NSAutoreleasePool *poolTwo = [[NSAutoreleasePool alloc]init];
-                [_theWebView loadRequest:request];
-                [poolTwo release];
-            });
+            if (reqString.length == 0) {
+                dispatch_sync(GCDMainThread, ^{
+                    @autoreleasepool {
+                   // [self dismissViewControllerAnimated:YES completion:nil];
+                    }
+                });
+            } else {
+                self.requestToken = [FHSToken tokenWithHTTPResponseBody:reqString];
+                NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",_requestToken.key]]];
+                
+                dispatch_sync(GCDMainThread, ^{
+                    @autoreleasepool {
+                        [_theWebView loadRequest:request];
+                    }
+                });
+            }
+
         }
-
-        [pool release];
     });
 }
 
@@ -2016,14 +1979,6 @@ id removeNull(id rootObject) {
     [super dismissModalViewControllerAnimated:animated];
 }
 
-- (void)dealloc {
-    [self setNavBar:nil];
-    [self setBlockerView:nil];
-    [self setPinCopyBar:nil];
-    [self setTheWebView:nil];
-    [self setRequestToken:nil];
-    [super dealloc];
-}
 
 @end
 

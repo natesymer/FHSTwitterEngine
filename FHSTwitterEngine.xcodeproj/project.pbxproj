@@ -12,7 +12,7 @@
 		9B2A1BC615E805D1007E66E0 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9B2A1B9C15E805D1007E66E0 /* ViewController.xib */; };
 		9B2A1BC915E805D1007E66E0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BA215E805D1007E66E0 /* main.m */; };
 		9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BC315E805D1007E66E0 /* ViewController.m */; };
-		9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */; settings = {COMPILER_FLAGS = ""; }; };
 		9B2A59E41628F053003B4E2E /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B2A59E31628F053003B4E2E /* Default-568h@2x.png */; };
 		9B31B96015E56E34003FC89D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B95F15E56E34003FC89D /* UIKit.framework */; };
 		9B31B96215E56E34003FC89D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96115E56E34003FC89D /* Foundation.framework */; };
@@ -269,6 +269,7 @@
 		9B31B97A15E56E34003FC89D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "FHSTwitterEngineDemo/FHSTwitterEngine-Prefix.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/FHSTwitterEngineDemo/FHSTwitterEngine-Info.plist";
@@ -285,6 +286,7 @@
 		9B31B97B15E56E34003FC89D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "FHSTwitterEngineDemo/FHSTwitterEngine-Prefix.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/FHSTwitterEngineDemo/FHSTwitterEngine-Info.plist";

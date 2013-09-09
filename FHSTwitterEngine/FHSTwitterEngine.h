@@ -314,12 +314,12 @@ extern NSString * const FHSErrorDomain;
 + (BOOL)isConnectedToInternet;
 
 @property (nonatomic, assign) BOOL includeEntities;
-@property (nonatomic, retain) NSString *loggedInUsername;
-@property (nonatomic, retain) NSString *loggedInID;
-@property (nonatomic, retain) FHSToken *accessToken;
+@property (nonatomic, strong) NSString *loggedInUsername;
+@property (nonatomic, strong) NSString *loggedInID;
+@property (nonatomic, strong) FHSToken *accessToken;
 
 // called to retrieve or save access tokens
-@property (nonatomic, assign) id<FHSTwitterEngineAccessTokenDelegate> delegate;
+@property (nonatomic, weak) id<FHSTwitterEngineAccessTokenDelegate> delegate;
 
 @end
 
