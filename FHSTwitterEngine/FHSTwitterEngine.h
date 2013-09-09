@@ -65,14 +65,22 @@ extern NSString * const FHSProfileDescriptionKey;
 
 extern NSString * const FHSErrorDomain;
 
+@interface FHSToken : NSObject
+
+@property (nonatomic, strong) NSString *key;
+@property (nonatomic, strong) NSString *secret;
+@property (nonatomic, strong) NSString *verifier;
+
++ (FHSToken *)tokenWithHTTPResponseBody:(NSString *)body;
+
+@end
+
 @protocol FHSTwitterEngineAccessTokenDelegate <NSObject>
 
 - (NSString *)loadAccessToken;
 - (void)storeAccessToken:(NSString *)accessToken;
 
 @end
-
-@class OAToken;
 
 @interface FHSTwitterEngine : NSObject
 
@@ -308,7 +316,7 @@ extern NSString * const FHSErrorDomain;
 @property (nonatomic, assign) BOOL includeEntities;
 @property (nonatomic, retain) NSString *loggedInUsername;
 @property (nonatomic, retain) NSString *loggedInID;
-@property (nonatomic, retain) OAToken *accessToken;
+@property (nonatomic, retain) FHSToken *accessToken;
 
 // called to retrieve or save access tokens
 @property (nonatomic, assign) id<FHSTwitterEngineAccessTokenDelegate> delegate;

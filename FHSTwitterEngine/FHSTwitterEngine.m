@@ -33,8 +33,6 @@
 #import <netinet/in.h>
 #import <ifaddrs.h>
 
-#import "OAuthConsumer.h"
-
 static NSString * const newPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
 static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";
 
@@ -168,14 +166,29 @@ id removeNull(id rootObject) {
     }
 }
 
-@interface FHSToken : NSObject
+@interface FHSConsumer : NSObject
 
-@property (nonatomic, strong) NSString *key;
-@property (nonatomic, strong) NSString *secret;
-@property (nonatomic, strong) NSString *verifier;
+@property (nonatomic, retain) NSString *key;
+@property (nonatomic, retain) NSString *secret;
 
-+ (FHSToken *)tokenWithHTTPResponseBody:(NSString *)body;
-- (id)initWithHTTPResponseBody:(NSString *)body;
++ (FHSConsumer *)consumerWithKey:(NSString *)key secret:(NSString *)secret;
+
+@end
+
+@implementation FHSConsumer
+
++ (FHSConsumer *)consumerWithKey:(NSString *)key secret:(NSString *)secret {
+    return [[[self class]alloc]initWithKey:key secret:secret];
+}
+
+- (instancetype)initWithKey:(NSString *)key secret:(NSString *)secret {
+    self = [super init];
+    if (self) {
+        self.key = key;
+        self.secret = secret;
+    }
+    return self;
+}
 
 @end
 
@@ -222,7 +235,7 @@ id removeNull(id rootObject) {
 @property (nonatomic, retain) UIToolbar *pinCopyBar;
 
 @property (nonatomic, retain) UIWebView *theWebView;
-@property (nonatomic, retain) OAToken *requestToken;
+@property (nonatomic, retain) FHSToken *requestToken;
 
 - (NSString *)locatePin;
 - (void)showPinCopyPrompt;
@@ -238,7 +251,7 @@ id removeNull(id rootObject) {
 - (id)sendRequest:(NSURLRequest *)request;
 
 // These are here to obfuscate them from prying eyes
-@property (retain, nonatomic) OAConsumer *consumer;
+@property (retain, nonatomic) FHSConsumer *consumer;
 @property (assign, nonatomic) BOOL shouldClearConsumer;
 @property (retain, nonatomic) NSDateFormatter *dateFormatter;
 
@@ -1408,13 +1421,7 @@ id removeNull(id rootObject) {
     
     
     NSData *theData = [[[NSData dataWithBytes:result length:20]base64Encode]dataUsingEncoding:NSUTF8StringEncoding];
-    
-    /*char base64Result[32];
-    size_t theResultLength = 32;
-    Base64EncodeDataFHS(result, 20, base64Result, &theResultLength); // (const void *inInputData, size_t inInputDataSize, char *outOutputData, size_t *ioOutputDataSize)
-    NSData *theData = [NSData dataWithBytes:base64Result length:theResultLength];*/
 
-    
     NSString *signature = [[[[NSString alloc]initWithData:theData encoding:NSUTF8StringEncoding]autorelease]fhs_URLEncode];
     
 	NSString *oauthToken = (tokenString.length > 0)?[NSString stringWithFormat:@"oauth_token=\"%@\", ",[tokenString fhs_URLEncode]]:@"oauth_callback=\"oob\", ";
@@ -1580,7 +1587,7 @@ id removeNull(id rootObject) {
     return nil;
 }
 
-- (BOOL)finishAuthWithRequestToken:(OAToken *)reqToken {
+- (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken {
 
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
@@ -1622,16 +1629,15 @@ id removeNull(id rootObject) {
         return [NSError badRequestError];
     }
     
-    /*
-     
-     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
-     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
-     [request setHTTPMethod:@"POST"];
-     [request setHTTPShouldHandleCookies:NO];
-     [self signRequest:request withToken:nil tokenSecret:nil verifier:nil];
-    */
+    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPShouldHandleCookies:NO];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil];
     
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
+    // generate the POST body...
+    
+   /* NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
     
 	OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:nil];
     OARequestParameter *x_auth_mode = [OARequestParameter requestParameterWithName:@"x_auth_mode" value:@"client_auth"];
@@ -1640,9 +1646,9 @@ id removeNull(id rootObject) {
 	[request setHTTPMethod:@"POST"];
     
 	[request setParameters:@[x_auth_mode, x_auth_username, x_auth_password]];
-    [request prepare];
+    [request prepare];*/
     
-    if (self.shouldClearConsumer) {
+    if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
         self.consumer = nil;
     }
@@ -1679,13 +1685,13 @@ id removeNull(id rootObject) {
         savedHttpBody = [[NSUserDefaults standardUserDefaults]objectForKey:@"SavedAccessHTTPBody"];
     }
     
-    self.accessToken = [OAToken tokenWithHTTPResponseBody:savedHttpBody];
+    self.accessToken = [FHSToken tokenWithHTTPResponseBody:savedHttpBody];
     self.loggedInUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:savedHttpBody];
     self.loggedInID = [self extractValueForKey:@"user_id" fromHTTPBody:savedHttpBody];
 }
 
 - (void)storeAccessToken:(NSString *)accessTokenZ {
-    self.accessToken = [OAToken tokenWithHTTPResponseBody:accessTokenZ];
+    self.accessToken = [FHSToken tokenWithHTTPResponseBody:accessTokenZ];
     self.loggedInUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:accessTokenZ];
     self.loggedInID = [self extractValueForKey:@"user_id" fromHTTPBody:accessTokenZ];
     
@@ -1752,12 +1758,12 @@ id removeNull(id rootObject) {
 
 - (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret {
     self.shouldClearConsumer = NO;
-    self.consumer = [OAConsumer consumerWithKey:consumerKey secret:consumerSecret];
+    self.consumer = [FHSConsumer consumerWithKey:consumerKey secret:consumerSecret];
 }
 
 - (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret {
     self.shouldClearConsumer = YES;
-    self.consumer = [OAConsumer consumerWithKey:consumerKey secret:consumerSecret];
+    self.consumer = [FHSConsumer consumerWithKey:consumerKey secret:consumerSecret];
 }
 
 - (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender {
@@ -1889,7 +1895,7 @@ id removeNull(id rootObject) {
                 [poolTwo release];
             });
         } else {
-            self.requestToken = [OAToken tokenWithHTTPResponseBody:reqString];
+            self.requestToken = [FHSToken tokenWithHTTPResponseBody:reqString];
             NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",_requestToken.key]]];
             
             dispatch_sync(GCDMainThread, ^{
