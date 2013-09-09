@@ -1418,8 +1418,6 @@ id removeNull(id rootObject) {
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
     unsigned char result[20];
 	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
-    
-    
     NSData *theData = [[[NSData dataWithBytes:result length:20]base64Encode]dataUsingEncoding:NSUTF8StringEncoding];
 
     NSString *signature = [[[[NSString alloc]initWithData:theData encoding:NSUTF8StringEncoding]autorelease]fhs_URLEncode];
@@ -1429,8 +1427,6 @@ id removeNull(id rootObject) {
 
     NSString *oauthHeader = [NSString stringWithFormat:@"OAuth oauth_consumer_key=\"%@\", %@%@oauth_signature_method=\"HMAC-SHA1\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"",consumerKey,oauthToken,oauthVerifier,signature,timestamp,nonce];
     
-    NSLog(@"OAuth header: %@",oauthHeader);
-	
     [request setValue:oauthHeader forHTTPHeaderField:@"Authorization"];
 }
 
@@ -1637,16 +1633,8 @@ id removeNull(id rootObject) {
     
     // generate the POST body...
     
-   /* NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
-    
-	OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:nil];
-    OARequestParameter *x_auth_mode = [OARequestParameter requestParameterWithName:@"x_auth_mode" value:@"client_auth"];
-    OARequestParameter *x_auth_username = [OARequestParameter requestParameterWithName:@"x_auth_username" value:username];
-    OARequestParameter *x_auth_password = [OARequestParameter requestParameterWithName:@"x_auth_password" value:password];
-	[request setHTTPMethod:@"POST"];
-    
-	[request setParameters:@[x_auth_mode, x_auth_username, x_auth_password]];
-    [request prepare];*/
+    NSString *bodyString = [NSString stringWithFormat:@"x_auth_mode=client_auth&x_auth_username=%@&x_auth_password=%@",username,password];
+    request.HTTPBody = [bodyString dataUsingEncoding:NSUTF8StringEncoding];
     
     if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
