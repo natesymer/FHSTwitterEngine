@@ -35,7 +35,8 @@
 
 #import "OAuthConsumer.h"
 
-#include "Base64TranscoderFHS.h"
+static NSString * const newPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
+static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";
 
 NSString * const FHSProfileBackgroundColorKey = @"profile_background_color";
 NSString * const FHSProfileLinkColorKey = @"profile_link_color";
@@ -312,12 +313,7 @@ id removeNull(id rootObject) {
     
     NSURL *baseURL = [NSURL URLWithString:url_friends_list];
     
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *skipstatusP = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
-    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
-    OARequestParameter *screen_nameP = [OARequestParameter requestParameterWithName:isID?@"user_id":@"screen_name" value:user];
-    OARequestParameter *cursorP = [OARequestParameter requestParameterWithName:@"cursor" value:cursor];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, skipstatusP, screen_nameP, cursorP, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"include_entities":(_includeEntities?@"true":@"false"), (isID?@"user_id":@"screen_name"):user, @"cursor":cursor }];
 }
 
 - (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor {
@@ -327,12 +323,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_friends_list];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *skipstatusP = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
-    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
-    OARequestParameter *screen_nameP = [OARequestParameter requestParameterWithName:isID?@"user_id":@"screen_name" value:user];
-    OARequestParameter *cursorP = [OARequestParameter requestParameterWithName:@"cursor" value:cursor];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, skipstatusP, screen_nameP, cursorP, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"include_entities":(_includeEntities?@"true":@"false"), (isID?@"user_id":@"screen_name"):user, @"cursor":cursor }];
 }
 
 - (id)searchUsersWithQuery:(NSString *)q andCount:(int)count {
@@ -350,11 +341,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_users_search];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
-    OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
-    OARequestParameter *qP = [OARequestParameter requestParameterWithName:@"q" value:q];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:include_entitiesP, countP, qP, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"include_entities":(_includeEntities?@"true":@"false"), @"count":@(count).stringValue, @"q":q }];
 }
 
 - (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
@@ -372,38 +359,30 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_search_tweets];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *include_entitiesP = [OARequestParameter requestParameterWithName:@"include_entities" value:self.includeEntities?@"true":@"false"];
-    OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
-    OARequestParameter *untilP = [OARequestParameter requestParameterWithName:@"until" value:nil];
-    OARequestParameter *result_typeP = [OARequestParameter requestParameterWithName:@"result_type" value:nil];
-    OARequestParameter *qP = [OARequestParameter requestParameterWithName:@"q" value:q];
     
-    [self.dateFormatter setDateFormat:@"YYYY-MM-DD"];
-    NSString *untilString = [self.dateFormatter stringFromDate:untilDate];
-    [self.dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss ZZZZ yyyy"];
+    NSMutableDictionary *params = [@{ @"include_entities":(_includeEntities?@"true":@"false"), @"count":@(count).stringValue, @"q":q } mutableCopy];
     
-    untilP.value = untilString;
+    [_dateFormatter setDateFormat:@"YYYY-MM-DD"];
+    params[@"until"] = [_dateFormatter stringFromDate:untilDate];
+    [_dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss ZZZZ yyyy"];
 
     if (resultType == FHSTwitterEngineResultTypeMixed) {
-        result_typeP.value = @"mixed";
+        params[@"result_type"] = @"mixed";
     } else if (resultType == FHSTwitterEngineResultTypeRecent) {
-        result_typeP.value = @"recent";
+        params[@"result_type"] = @"recent";
     } else if (resultType == FHSTwitterEngineResultTypePopular) {
-        result_typeP.value = @"popular";
+        params[@"result_type"] = @"popular";
     }
     
-    NSMutableArray *params = [NSMutableArray arrayWithObjects:countP, include_entitiesP, qP, nil];
-    
     if (maxID.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"max_id" value:maxID]];
+        params[@"max_id"] = maxID;
     }
     
     if (sinceID.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
+        params[@"since_id"] = sinceID;
     }
     
-    return [self sendGETRequest:request withParameters:params];
+    return [self sendGETRequestForURL:baseURL andParams:params];
 }
 
 - (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description {
@@ -430,9 +409,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_show];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *listIDP = [OARequestParameter requestParameterWithName:@"list_id" value:listID];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:listIDP, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"list_id": listID }];
 }
 
 - (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name {
@@ -490,9 +467,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_members];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *listIDP = [OARequestParameter requestParameterWithName:@"list_id" value:listID];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:listIDP, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"list_id": listID }];
 }
 
 - (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users {
@@ -542,23 +517,17 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_statuses];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *countP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
-    OARequestParameter *excludeRepliesP = [OARequestParameter requestParameterWithName:@"exclude_replies" value:excludeReplies?@"true":@"false"];
-    OARequestParameter *includeRTsP = [OARequestParameter requestParameterWithName:@"include_rts" value:excludeRetweets?@"false":@"true"];
-    OARequestParameter *listIDP = [OARequestParameter requestParameterWithName:@"list_id" value:listID];
-    
-    NSMutableArray *params = [NSMutableArray arrayWithObjects:countP, excludeRepliesP, includeRTsP, listIDP, nil];
-    
+    NSMutableDictionary *params = [@{ @"count":@(count).stringValue, @"exclude_replies":(excludeReplies?@"true":@"false"), @"include_rts":(excludeRetweets?@"false":@"true"),@"list_id":listID } mutableCopy];
+
     if (sinceID.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"since_id" value:sinceID]];
+        params[@"since_id"] = sinceID;
     }
     
     if (maxID.length > 0) {
-        [params addObject:[OARequestParameter requestParameterWithName:@"max_id" value:maxID]];
+        params[@"max_id"] = maxID;
     }
     
-    return [self sendGETRequest:request withParameters:params];
+    return [self sendGETRequestForURL:baseURL andParams:params];
 }
 
 - (id)getListsForUser:(NSString *)user isID:(BOOL)isID {
@@ -568,9 +537,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_list];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *userP = [OARequestParameter requestParameterWithName:isID?@"user_id":@"screen_name" value:user];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:userP, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ (isID?@"user_id":@"screen_name"): user }];
 }
 
 - (id)getRetweetsForTweet:(NSString *)identifier count:(int)count {
@@ -584,9 +551,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/statuses/retweets/%@.json",identifier]];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *identifierP = [OARequestParameter requestParameterWithName:@"count" value:[NSString stringWithFormat:@"%d",count]];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:identifierP, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"count":@(count).stringValue }];
 }
 
 - (id)getRetweetedTimelineWithCount:(int)count {
@@ -698,10 +663,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_statuses_show];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *identifierP = [OARequestParameter requestParameterWithName:@"id" value:identifier];
-    OARequestParameter *includeMyRetweet = [OARequestParameter requestParameterWithName:@"include_my_retweet" value:@"true"];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:includeMyRetweet, identifierP, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"id":identifier, @"include_my_retweet":@"true" }];
 }
 
 - (id)oembedTweet:(NSString *)identifier maxWidth:(float)maxWidth alignmentMode:(FHSTwitterEngineAlignMode)alignmentMode {
@@ -816,6 +778,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_blocks_exists];
+    return [self sendGETRequestForURL:baseURL andParams:@{ (isID?@"user_id":@"screen_name"):@"true", @"skip_status":@"true" }];
     OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
     OARequestParameter *userP = [OARequestParameter requestParameterWithName:isID?@"user_id":@"screen_name" value:user];
     OARequestParameter *skipstatusP = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
@@ -837,34 +800,22 @@ id removeNull(id rootObject) {
 
 - (id)listBlockedUsers {
     NSURL *baseURL = [NSURL URLWithString:url_blocks_blocking];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *skipstatusP = [OARequestParameter requestParameterWithName:@"skip_status" value:@"true"];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:skipstatusP, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"skip_status":@"true" }];
 }
 
 - (id)listBlockedIDs {
     NSURL *baseURL = [NSURL URLWithString:url_blocks_blocking_ids];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *stringifyIDsP = [OARequestParameter requestParameterWithName:@"stringify_ids" value:@"true"];
-    
-    id object = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:stringifyIDsP, nil]];
-    
-    if ([object isKindOfClass:[NSDictionary class]]) {
-        return [(NSDictionary *)object objectForKey:@"ids"];
-    }
-    return object;
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"stringify_ids": @"true" }];
 }
 
 - (id)getLanguages {
     NSURL *baseURL = [NSURL URLWithString:url_help_languages];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    return [self sendGETRequest:request withParameters:nil];
+    return [self sendGETRequestForURL:baseURL andParams:nil];
 }
 
 - (id)getConfiguration {
     NSURL *baseURL = [NSURL URLWithString:url_help_configuration];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    return [self sendGETRequest:request withParameters:nil];
+    return [self sendGETRequestForURL:baseURL andParams:nil];
 }
 
 - (NSError *)reportUserAsSpam:(NSString *)user isID:(BOOL)isID {
@@ -878,15 +829,12 @@ id removeNull(id rootObject) {
 }
 
 - (id)showDirectMessage:(NSString *)messageID {
-    
     if (messageID.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_direct_messages_show];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *id_ = [OARequestParameter requestParameterWithName:@"id" value:messageID];
-    return [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:id_, nil]];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"id":messageID }];
 }
 
 - (NSError *)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID {
@@ -985,34 +933,12 @@ id removeNull(id rootObject) {
 
 - (id)getPendingOutgoingFollowers {
     NSURL *baseURL = [NSURL URLWithString:url_friendships_outgoing];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *stringifyIDsP = [OARequestParameter requestParameterWithName:@"stringify_ids" value:@"true"];
-    
-    id object = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:stringifyIDsP, nil]];
-    
-    if ([object isKindOfClass:[NSDictionary class]]) {
-        NSDictionary *dict = (NSDictionary *)object;
-        if ([dict.allKeys containsObject:@"ids"]) {
-            return [dict objectForKey:@"ids"];
-        }
-    }
-    return object;
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"stringify_ids":@"true" }];
 }
 
 - (id)getPendingIncomingFollowers {
     NSURL *baseURL = [NSURL URLWithString:url_friendships_incoming];
-    OAMutableURLRequest *request = [OAMutableURLRequest requestWithURL:baseURL consumer:self.consumer token:self.accessToken];
-    OARequestParameter *stringifyIDsP = [OARequestParameter requestParameterWithName:@"stringify_ids" value:@"true"];
-    
-    id object = [self sendGETRequest:request withParameters:[NSArray arrayWithObjects:stringifyIDsP, nil]];
-    
-    if ([object isKindOfClass:[NSDictionary class]]) {
-        NSDictionary *dict = (NSDictionary *)object;
-        if ([dict.allKeys containsObject:@"ids"]) {
-            return [dict objectForKey:@"ids"];
-        }
-    }
-    return object;
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"stringify_ids":@"true" }];
 }
 
 - (id)lookupFriendshipStatusForUsers:(NSArray *)users areIDs:(BOOL)areIDs {
@@ -1163,7 +1089,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_background_image];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"use":@"true", @"include_entities":_includeEntities?@"true":@"false", @"tiled":(isTiled?@"true":@"false"), @"image":[data base64EncodingWithLineLength:0]}];
+    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"use":@"true", @"include_entities":_includeEntities?@"true":@"false", @"tiled":(isTiled?@"true":@"false"), @"image":[data base64Encode]}];
 }
 
 - (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled {
@@ -1180,7 +1106,7 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_image];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"include_entities":(_includeEntities?@"true":@"false"), @"image":[data base64EncodingWithLineLength:0]}];
+    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"include_entities":(_includeEntities?@"true":@"false"), @"image":[data base64Encode]}];
 }
 
 - (NSError *)setProfileImageWithImageAtPath:(NSString *)file {
@@ -1572,10 +1498,15 @@ id removeNull(id rootObject) {
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
     unsigned char result[20];
 	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
-    char base64Result[32];
+    
+    
+    NSData *theData = [[[NSData dataWithBytes:result length:20]base64Encode]dataUsingEncoding:NSUTF8StringEncoding];
+    
+    /*char base64Result[32];
     size_t theResultLength = 32;
-    Base64EncodeDataFHS(result, 20, base64Result, &theResultLength);
-    NSData *theData = [NSData dataWithBytes:base64Result length:theResultLength];
+    Base64EncodeDataFHS(result, 20, base64Result, &theResultLength); // (const void *inInputData, size_t inInputDataSize, char *outOutputData, size_t *ioOutputDataSize)
+    NSData *theData = [NSData dataWithBytes:base64Result length:theResultLength];*/
+
     
     NSString *signature = [[[[NSString alloc]initWithData:theData encoding:NSUTF8StringEncoding]autorelease]fhs_URLEncode];
     
@@ -1985,9 +1916,6 @@ id removeNull(id rootObject) {
 
 @implementation FHSTwitterEngineController
 
-static NSString * const newPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
-static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";
-
 - (void)loadView {
     [super loadView];
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(pasteboardChanged:) name:UIPasteboardChangedNotification object:nil];
@@ -2199,162 +2127,57 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 @end
 
 
-static char const encodingTable[64] = {
-    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
-    'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
-    'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
-    'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/' };
+static char const Encode[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 @implementation NSData (Base64)
 
-+ (NSData *)dataWithBase64EncodedString:(NSString *)string {
-	return [[[NSData alloc]initWithBase64EncodedString:string]autorelease];
-}
+- (NSString *)base64Encode {
+    int outLength = ((((self.length*4)/3)/4)*4)+(((self.length*4)/3)%4?4:0);
+    const char *inputBuffer = self.bytes;
+    char *outputBuffer = malloc(outLength+1);
+    outputBuffer[outLength] = 0;
 
-- (id)initWithBase64EncodedString:(NSString *)string {
-	NSMutableData *mutableData = nil;
+    int cycle = 0;
+    int inpos = 0;
+    int outpos = 0;
+    char temp;
     
-	if (string) {
-		unsigned long ixtext = 0;
-		unsigned char ch = 0;
-        unsigned char inbuf[4] = {0,0,0,0};
-        unsigned char outbuf[3] = {0,0,0};
-		short ixinbuf = 0;
-		BOOL flignore = NO;
-		BOOL flendtext = NO;
-        
-		NSData *base64Data = [string dataUsingEncoding:NSASCIIStringEncoding];
-		const unsigned char *base64Bytes = [base64Data bytes];
-		mutableData = [NSMutableData dataWithCapacity:base64Data.length];
-		unsigned long lentext = [base64Data length];
-        
-        while (!(ixtext >= lentext)) {
-            
-			ch = base64Bytes[ixtext++];
-			flignore = NO;
-            
-			if ((ch >= 'A') && (ch <= 'Z')) {
-                ch = ch - 'A';
-            } else if ((ch >= 'a') && (ch <= 'z')) {
-                ch = ch - 'a' + 26;
-            } else if ((ch >= '0') && (ch <= '9')) {
-                ch = ch - '0' + 52;
-            } else if (ch == '+') {
-                ch = 62;
-            } else if (ch == '=') {
-                flendtext = YES;
-            } else if (ch == '/') {
-                ch = 63;
-            } else {
-                flignore = YES;
-            }
-            
-			if (!flignore) {
-				short ctcharsinbuf = 3;
-				BOOL flbreak = NO;
-                
-				if (flendtext) {
-					if (!ixinbuf) {
-                        break;
-                    }
-                    
-					if (ixinbuf == 1 || ixinbuf == 2) {
-                        ctcharsinbuf = 1;
-                    } else {
-                        ctcharsinbuf = 2;
-                    }
-                    
-					ixinbuf = 3;
-					flbreak = YES;
-				}
-                
-				inbuf[ixinbuf++] = ch;
-                
-				if (ixinbuf == 4) {
-					ixinbuf = 0;
-					outbuf[0] = (inbuf[0] << 2) | ((inbuf[1] & 0x30) >> 4);
-					outbuf[1] = ((inbuf[1] & 0x0F) << 4) | ((inbuf[2] & 0x3C) >> 2);
-					outbuf[2] = ((inbuf[2] & 0x03) << 6) | (inbuf[3] & 0x3F);
-                    
-					for (int i = 0; i < ctcharsinbuf; i++) {
-						[mutableData appendBytes:&outbuf[i] length:1];
-                    }
-				}
-                
-				if (flbreak)  {
-                    break;
-                }
-			}
-		}
-	}
+    outputBuffer[outLength-1] = '=';
+    outputBuffer[outLength-2] = '=';
     
-	self = [self initWithData:mutableData];
-	return self;
-}
-
-- (NSString *)base64EncodingWithLineLength:(unsigned int)lineLength {
-    
-	const unsigned char	*bytes = [self bytes];
-	unsigned long ixtext = 0;
-	unsigned long lentext = [self length];
-	long ctremaining = 0;
-    unsigned char inbuf[3] = {0,0,0};
-    unsigned char outbuf[4] = {0,0,0,0};
-    
-	short charsonline = 0;
-    short ctcopy = 0;
-	unsigned long ix = 0;
-    
-    NSMutableString *result = [NSMutableString stringWithCapacity:lentext];
-    
-	while (YES) {
-		ctremaining = lentext-ixtext;
-        
-		if (ctremaining <= 0) {
-            break;
-        }
-        
-		for (int i = 0; i < 3; i++) {
-			ix = ixtext + i;
-            inbuf[i] = (ix < lentext)?bytes[ix]:0;
-		}
-        
-		outbuf[0] = (inbuf[0] & 0xFC) >> 2;
-		outbuf[1] = ((inbuf[0] & 0x03) << 4) | ((inbuf[1] & 0xF0) >> 4);
-		outbuf[2] = ((inbuf[1] & 0x0F) << 2) | ((inbuf[2] & 0xC0) >> 6);
-		outbuf[3] = inbuf[2] & 0x3F;
-        
-		switch (ctremaining) {
+    while (inpos < self.length) {
+        switch (cycle) {
+            case 0:
+                outputBuffer[outpos++] = Encode[(inputBuffer[inpos]&0xFC)>>2];
+                cycle = 1;
+                break;
             case 1:
-                ctcopy = 2;
+                temp = (inputBuffer[inpos++]&0x03)<<4;
+                outputBuffer[outpos] = Encode[temp];
+                cycle = 2;
                 break;
             case 2:
-                ctcopy = 3;
+                outputBuffer[outpos++] = Encode[temp|(inputBuffer[inpos]&0xF0)>>4];
+                temp = (inputBuffer[inpos++]&0x0F)<<2;
+                outputBuffer[outpos] = Encode[temp];
+                cycle = 3;
+                break;
+            case 3:
+                outputBuffer[outpos++] = Encode[temp|(inputBuffer[inpos]&0xC0)>>6];
+                cycle = 4;
+                break;
+            case 4:
+                outputBuffer[outpos++] = Encode[inputBuffer[inpos++]&0x3f];
+                cycle = 0;
                 break;
             default:
-                ctcopy = 4;
+                cycle = 0;
                 break;
-		}
-        
-		for (int i = 0; i < ctcopy; i++) {
-			[result appendFormat:@"%c",encodingTable[outbuf[i]]];
         }
-        
-		for (int i = ctcopy; i < 4; i++) {
-            [result appendString:@"="];
-        }
-        
-		ixtext += 3;
-		charsonline += 4;
-        
-		if (lineLength > 0) {
-			if (charsonline >= lineLength) {
-				charsonline = 0;
-				[result appendString:@"\n"];
-			}
-		}
-	}
-	return result;
+    }
+    NSString *pictemp = [NSString stringWithUTF8String:outputBuffer];
+    free(outputBuffer);
+    return pictemp;
 }
 
 @end
