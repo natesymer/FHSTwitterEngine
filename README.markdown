@@ -1,7 +1,7 @@
 FHSTwitterEngine
 ================
 
-***The synchronous Twitter engine that doesn't suck!!***
+***The synchronous Twitter library that doesn't suck!!***
 
 Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](http://twitter.com/natesymer) 
 
@@ -119,15 +119,15 @@ Where did OAuthConsumer go? A separate repository. There were a number of issues
        		});
     	}
     });
-    
-    
-**The "singleton" pattern**
-The singleton pattern allows the programmer to drop all of the object management code, and allow faster and easier access to FHSTwitterEngine. The singleton pattern works by holding an FHSTwitterEngine in memory for the lifetime of the app by overriding the methods that would take it out of memory. Don't worry, it's not a leak and when the app is killed, the singleton instance will also be killed. It's really not that much different from what FHSTwitterEngine was before.
+<br />
+**The "Singleton" Pattern**
+
+The singleton pattern allows the programmer to use the library across scopes without having to manually keep a reference to the FHSTwitterEngine object. When the app is killed, any memory used by FHSTwitterEngine is freed.
 
 **Grand Central Dispatch**
 
-So what are those `GCDBackgroundThread` and `GCDMainThread` defines?<br />
-The defines are macros for `dispatch_async()` and `dispatch_sync()`, respectively. Instead of writing out a sometimes lengthy dispatch* call, you can punch in an easy macro. Plus, they help make your code more readable. By using GCD, the programmer can use FHSTwitterEngine procedurally.
+*So what are those `GCDBackgroundThread` and `GCDMainThread` defines?<br />*
+The defines are macros for `dispatch_async()` and `dispatch_sync()`. You could use any form of threading for FHSTwitterEngine, but GCD is the recommended technology.
 
 **General Comments**
 
@@ -148,35 +148,17 @@ GET methods return `id`. There returned object class can be one of the following
 - `NSError`
 - `nil`
 
-In the case of `authenticatedUserIsBlocking:isID:` and `testService`, an NSString will be returned. It will be `@"YES"` to indicate YES and `@"NO"` to indicate NO. Additionally, it will return an `NSError` if it fails. How else could I prevent false negatives?
-
 **For the future/To Do**
 
-Feel free to [email](mailto:nate@natesymer.com) me for suggestions.
+You should probably [email](mailto:nate@natesymer.com) me with suggestions.
 
-- Mac support (Whomever wants to do this for me, **go ahead**)
+- OS X OAuth login window
 - Add custom objects for profile settings
-- Replace OAuthConsumer with my own HTTP OAuth code
 
-**IMPORTANT**
+**Don't Email Me Saying It Doesn't Work**
 
-`FHSTwitterEngine` contains an overhauled version of `OAuthConsumer`. The changes are:
-
-- Removed `OADataFetcher` and `OAAsynchronousDataFetcher`
-- Added `+[OAMutableURLRequest fetchDataForRequest:withCompletionHandler:]` to manually send requests.
-- Fixed string comparisons
-- Fixed memory leaks
-- Fixed bugs
-- Added compatibility with alternative versions of OAuthConsumer
-
-**I'm from New Jersey, so pardon my sarcastic comments, capisce?**
-
-**Fixes for some common problems** (and best practices)
-
-The first thing you should do is spend an hour trying to fix the problem yourself. Don't go wild and try to change everything, just trace back your steps, and look closely at details.
+The first thing you should do is spend an hour trying to fix the problem yourself. Don't go wild and try to change everything, just trace back your steps, and look closely at details. Don't program by permutation.
 
 A common issue seems to be an `#import` loop. This is usually solved by, you guessed it, tracing back your steps. The `#import` loop happens when file A imports file B which imports file A. The loop is given away by a compile error, multiple declarations of class X.
 
-kthxbye
-
-
+If after an hour, you have no solution and your problem is in your code, I don't want to hear it. I'm not getting paid to do the job you should be capable of doing.

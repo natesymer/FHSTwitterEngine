@@ -1161,20 +1161,7 @@ id removeNull(id rootObject) {
 
 - (id)testService {
     NSURL *baseURL = [NSURL URLWithString:url_help_test];
-
-    id retValue = [self sendGETRequestForURL:baseURL andParams:nil];
-    
-    if ([retValue isKindOfClass:[NSString class]]) {
-        if ([(NSString *)retValue isEqualToString:@"ok"]) {
-            return @"YES";
-        } else {
-            return @"NO";
-        }
-    } else if ([retValue isKindOfClass:[NSError class]]) {
-        return retValue;
-    }
-    
-    return [NSError badRequestError];
+    return [self sendGETRequestForURL:baseURL andParams:nil];
 }
 
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count {
@@ -1978,7 +1965,6 @@ id removeNull(id rootObject) {
     [_theWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@""]]];
     [super dismissModalViewControllerAnimated:animated];
 }
-
 
 @end
 
