@@ -1,17 +1,13 @@
 FHSTwitterEngine
 ================
 
-***The synchronous Twitter library that doesn't suck!!***
+***Twitter API for Cocoa developers***
 
 Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](http://twitter.com/natesymer) 
 
-Feel free to <a href="http://natesymer.com/donate/" alt="Buy me a coffee or graphics card">buy me a coffee</a> if you like my work.
-
-
 `FHSTwitterEngine` can:
 
-- Login through OAuth and xAuth. 
-- Login with OAuth. (Login UI based on [SA_OAuthTwitterEngineController](https://github.com/bengottlieb/Twitter-OAuth-iPhone))
+- Authenicate using OAuth and/or xAuth.
 - Make a request to just about every API endpoint.
 
 Why you should use `FHSTwitterEngine`:
@@ -37,28 +33,24 @@ Where did OAuthConsumer go? A separate repository. There were a number of issues
 
 **Usage:**
 
---> Set up `FHSTwitterEngine`:
+> Set up `FHSTwitterEngine`
 
     [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
-    
-    // Or, if you want to assign your consumer key on a per-use basis:
+> Or with a temporary consumer that gets cleared after each request
+ 
     [[FHSTwitterEngine sharedEngine]temporarilySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
-    
-    // Then set the delegate. It is used for access token management, and is not required.
-    // If a delegate is not provided, FHSTwitterEngine will save ONE access token in NSUserDefaults.
+         
+> Set access token delegate (see header)
+
     [[FHSTwitterEngine sharedEngine]setDelegate:myDelegate]; 
     
---> Login via OAuth:
+> Login via OAuth:
     
     [[FHSTwitterEngine sharedEngine]showOAuthLoginControllerFromViewController:self withCompletion:^(BOOL success) {
-        if (success) {
-            NSLog(@"L0L success");
-        } else {
-            NSLog(@"O noes!!! Logen falyur!!!");
-        }
+        // handle success
     }];
     
---> Login via XAuth:
+> Login via XAuth:
     
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
@@ -72,27 +64,23 @@ Where did OAuthConsumer go? A separate repository. There were a number of issues
     	}
     });
     
---> Set up your consumer manually and temorarily
-	
-	// your keys will be cleared after the next request is prepared, before it is sent.
-	[[FHSTwitterEngine sharedEngine]temporarilySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
-	
-	// if you're really paranoid, use this to clear the keys
+> Clear the current consumer key
+
 	[[FHSTwitterEngine sharedEngine]clearConsumer];
 	
---> Reload a saved access_token:
+> Reload a saved access_token:
 
     [[FHSTwitterEngine sharedEngine]loadAccessToken];
 
---> End a session:
+> End a session:
 
     [[FHSTwitterEngine sharedEngine]clearAccessToken];
 
---> Check if a session is valid:
+> Check if a session is valid:
 
     [[FHSTwitterEngine sharedEngine]isAuthorized];
     
---> Do an API call (POST):
+> Do an API call (POST):
 
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
@@ -106,7 +94,7 @@ Where did OAuthConsumer go? A separate repository. There were a number of issues
     	}
     });
 
---> Do an API call (GET):
+> Do an API call (GET):
 
     dispatch_async(GCDBackgroundThread, ^{
     	@autoreleasepool {
@@ -154,6 +142,8 @@ You should probably [email](mailto:nate@natesymer.com) me with suggestions.
 
 - OS X OAuth login window
 - Add custom objects for profile settings
+- Have the OAuth method not require a view controller to be passed
+- POST requests returning data like GET requests
 
 **Don't Email Me Saying It Doesn't Work**
 
