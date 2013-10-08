@@ -1826,12 +1826,16 @@ id removeNull(id rootObject) {
         
             NSString *reqString = [[FHSTwitterEngine sharedEngine]getRequestTokenString];
 
-            if (reqString.length == 0) {
-                dispatch_sync(GCDMainThread, ^{
-                    @autoreleasepool {
-                   // [self dismissViewControllerAnimated:YES completion:nil];
-                    }
-                });
+            if (reqString.length == 0)
+            {
+                 @autoreleasepool {
+                     double delayInSeconds = 0.5;
+                     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+                     dispatch_after(popTime, dispatch_get_main_queue(), ^(void)
+                     {
+                         [self dismissViewControllerAnimated:YES completion:nil];
+                     });
+                 }
             } else {
                 self.requestToken = [FHSToken tokenWithHTTPResponseBody:reqString];
                 NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",_requestToken.key]]];
