@@ -230,14 +230,10 @@ id removeNull(id rootObject) {
 @interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate> 
 
 @property (nonatomic, strong) UINavigationBar *navBar;
-@property (nonatomic, strong) UIView *blockerView;
-@property (nonatomic, strong) UIToolbar *pinCopyBar;
-
 @property (nonatomic, strong) UIWebView *theWebView;
+@property (nonatomic, strong) UILabel *loadingText;
+@property (nonatomic, strong) UIActivityIndicatorView *spinner;
 @property (nonatomic, strong) FHSToken *requestToken;
-
-- (NSString *)locatePin;
-- (void)showPinCopyPrompt;
 
 @end
 
@@ -338,7 +334,6 @@ id removeNull(id rootObject) {
 }
 
 - (id)searchUsersWithQuery:(NSString *)q andCount:(int)count {
-    
     if (count == 0) {
         return nil;
     }
@@ -1712,15 +1707,14 @@ id removeNull(id rootObject) {
     self.consumer = [FHSConsumer consumerWithKey:consumerKey secret:consumerSecret];
 }
 
-- (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender {
-    [self showOAuthLoginControllerFromViewController:sender withCompletion:nil];
+- (UIViewController *)loginController {
+    return [[FHSTwitterEngineController alloc]init]; // It's legit because this project is ARC only.
 }
 
-- (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender withCompletion:(void(^)(BOOL success))block {
+- (UIViewController *)loginControllerWithCompletionHandler:(void(^)(BOOL success))block {
     FHSTwitterEngineController *vc = [[FHSTwitterEngineController alloc]init];
-    vc.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
     objc_setAssociatedObject(vc, "FHSTwitterEngineOAuthCompletion", block, OBJC_ASSOCIATION_COPY_NONATOMIC);
-    [sender presentViewController:vc animated:YES completion:nil];
+    return vc;
 }
 
 + (BOOL)isConnectedToInternet {
@@ -1773,69 +1767,53 @@ id removeNull(id rootObject) {
     [super loadView];
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(pasteboardChanged:) name:UIPasteboardChangedNotification object:nil];
     
-    self.view = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 460)];
-    self.view.backgroundColor = [UIColor grayColor];
+    self.view = [[UIView alloc]initWithFrame:UIScreen.mainScreen.bounds];
+    self.view.backgroundColor = [UIColor lightGrayColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    self.theWebView = [[UIWebView alloc]initWithFrame:CGRectMake(0, 44, 320, 416)];
+    self.navBar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, 320, (UIDevice.currentDevice.systemVersion.floatValue >= 7.0f)?64:44)];
+    _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"Twitter Login"];
+	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
+	[_navBar pushNavigationItem:navItem animated:NO];
+    
+    self.theWebView = [[UIWebView alloc]initWithFrame:CGRectMake(0, _navBar.bounds.size.height, self.view.bounds.size.width, self.view.bounds.size.height-_navBar.bounds.size.height)];
     _theWebView.hidden = YES;
     _theWebView.delegate = self;
     _theWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _theWebView.dataDetectorTypes = UIDataDetectorTypeNone;
-    _theWebView.backgroundColor = [UIColor darkGrayColor];
+    _theWebView.scrollView.clipsToBounds = NO;
+    _theWebView.backgroundColor = [UIColor lightGrayColor];
+    [self.view addSubview:_theWebView];
+    [self.view addSubview:_navBar];
     
-    self.navBar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, 320, 44)];
-    _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    self.loadingText = [[UILabel alloc]initWithFrame:CGRectMake((self.view.bounds.size.width/2)-40, (self.view.bounds.size.height/2)-10-7.5, 100, 15)];
+	_loadingText.text = @"Please Wait...";
+	_loadingText.backgroundColor = [UIColor clearColor];
+	_loadingText.textColor = [UIColor blackColor];
+	_loadingText.textAlignment = NSTextAlignmentLeft;
+	_loadingText.font = [UIFont boldSystemFontOfSize:15];
+	[self.view addSubview:_loadingText];
 	
-	[self.view addSubview:_theWebView];
-	[self.view addSubview:_navBar];
-    
-	self.blockerView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 200, 60)];
-	_blockerView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.8];
-	_blockerView.center = CGPointMake(self.view.bounds.size.width/2, self.view.bounds.size.height/2);
-	_blockerView.clipsToBounds = YES;
-    _blockerView.layer.cornerRadius = 10;
-    
-    self.pinCopyBar = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 44, self.view.bounds.size.width, 44)];
-    _pinCopyBar.barStyle = UIBarStyleBlackTranslucent;
-    _pinCopyBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
-    _pinCopyBar.items = [NSArray arrayWithObjects:[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], [[UIBarButtonItem alloc]initWithTitle:@"Select and Copy the PIN" style: UIBarButtonItemStylePlain target:nil action: nil], [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], nil];
-	
-	UILabel	*label = [[UILabel alloc]initWithFrame:CGRectMake(0, 5, _blockerView.bounds.size.width, 15)];
-	label.text = @"Please Wait...";
-	label.backgroundColor = [UIColor clearColor];
-	label.textColor = [UIColor whiteColor];
-	label.textAlignment = NSTextAlignmentCenter;
-	label.font = [UIFont boldSystemFontOfSize:15];
-	[_blockerView addSubview:label];
-	
-	UIActivityIndicatorView	*spinner = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
-	spinner.center = CGPointMake(_blockerView.bounds.size.width/2, (_blockerView.bounds.size.height/2)+10);
-	[_blockerView addSubview:spinner];
-	[self.view addSubview:_blockerView];
-	[spinner startAnimating];
-	
-	UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"Twitter Login"];
-	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
-	[_navBar pushNavigationItem:navItem animated:NO];
+	self.spinner = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+	_spinner.center = CGPointMake((self.view.bounds.size.width/2)-60, (self.view.bounds.size.height/2)-10);
+	[self.view addSubview:_spinner];
+	[_spinner startAnimating];
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
     dispatch_async(GCDBackgroundThread, ^{
         @autoreleasepool {
-        
             NSString *reqString = [[FHSTwitterEngine sharedEngine]getRequestTokenString];
 
-            if (reqString.length == 0)
-            {
-                 @autoreleasepool {
-                     double delayInSeconds = 0.5;
-                     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-                     dispatch_after(popTime, dispatch_get_main_queue(), ^(void)
-                     {
-                         [self dismissViewControllerAnimated:YES completion:nil];
-                     });
-                 }
+            if (reqString.length == 0) {
+                double delayInSeconds = 0.5;
+                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+                dispatch_after(popTime, dispatch_get_main_queue(),^(void) {
+                    @autoreleasepool {
+                        [self dismissViewControllerAnimated:YES completion:nil];
+                    }
+                });
             } else {
                 self.requestToken = [FHSToken tokenWithHTTPResponseBody:reqString];
                 NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",_requestToken.key]]];
@@ -1846,7 +1824,6 @@ id removeNull(id rootObject) {
                     }
                 });
             }
-
         }
     });
 }
@@ -1893,7 +1870,6 @@ id removeNull(id rootObject) {
 			return pin;
 		}
 	}
-	
 	return nil;
 }
 
@@ -1909,11 +1885,12 @@ id removeNull(id rootObject) {
     NSString *formCount = [webView stringByEvaluatingJavaScriptFromString:@"document.forms.length"];
     
     if ([formCount isEqualToString:@"0"]) {
-        [self showPinCopyPrompt];
+        _navBar.topItem.title = @"Select and Copy the PIN";
     }
 	
 	[UIView beginAnimations:nil context:nil];
-	_blockerView.hidden = YES;
+    _spinner.hidden = YES;
+    _loadingText.hidden = YES;
 	[UIView commitAnimations];
 	
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
@@ -1921,23 +1898,11 @@ id removeNull(id rootObject) {
     _theWebView.hidden = NO;
 }
 
-- (void)showPinCopyPrompt {
-	if (_pinCopyBar.superview) {
-        return;
-    }
-    
-	_pinCopyBar.center = CGPointMake(_pinCopyBar.bounds.size.width/2, _pinCopyBar.bounds.size.height/2);
-	[self.view insertSubview:_pinCopyBar belowSubview:_navBar];
-	
-	[UIView beginAnimations:nil context:nil];
-    _pinCopyBar.center = CGPointMake(_pinCopyBar.bounds.size.width/2, _navBar.bounds.size.height+_pinCopyBar.bounds.size.height/2);
-	[UIView commitAnimations];
-}
-
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     _theWebView.userInteractionEnabled = NO;
     [_theWebView setHidden:YES];
-    [_blockerView setHidden:NO];
+    _spinner.hidden = NO;
+    _loadingText.hidden = NO;
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 }
 
@@ -1965,9 +1930,12 @@ id removeNull(id rootObject) {
 
 - (void)dismissModalViewControllerAnimated:(BOOL)animated {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-    [[NSNotificationCenter defaultCenter]removeObserver:self];
     [_theWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@""]]];
     [super dismissModalViewControllerAnimated:animated];
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter]removeObserver:self];
 }
 
 @end

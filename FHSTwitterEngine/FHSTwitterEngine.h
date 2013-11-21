@@ -291,8 +291,8 @@ extern NSString * const FHSErrorDomain;
 - (NSError *)getXAuthAccessTokenForUsername:(NSString *)username password:(NSString *)password;
 
 // OAuth login
-- (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender;
-- (void)showOAuthLoginControllerFromViewController:(UIViewController *)sender withCompletion:(void(^)(BOOL success))completionBlock;
+- (UIViewController *)loginController;
+- (UIViewController *)loginControllerWithCompletionHandler:(void(^)(BOOL success))block;
 
 // Access Token Mangement
 - (void)clearAccessToken;

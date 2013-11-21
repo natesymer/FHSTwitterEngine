@@ -65,9 +65,10 @@
 }
 
 - (IBAction)showLoginWindow:(id)sender {
-    [[FHSTwitterEngine sharedEngine]showOAuthLoginControllerFromViewController:self withCompletion:^(BOOL success) {
+    UIViewController *loginController = [[FHSTwitterEngine sharedEngine]loginControllerWithCompletionHandler:^(BOOL success) {
         NSLog(success?@"L0L success":@"O noes!!! Loggen faylur!!!");
     }];
+    [self presentViewController:loginController animated:YES completion:nil];
 }
 
 - (IBAction)logout:(id)sender {
