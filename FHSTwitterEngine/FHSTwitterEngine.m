@@ -322,7 +322,7 @@ id removeNull(id rootObject) {
         return [NSError badRequestError];
     }
     
-    NSURL *baseURL = [NSURL URLWithString:url_friends_list];
+    NSURL *baseURL = [NSURL URLWithString:url_followers_list];
     
     return [self sendGETRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"include_entities":(_includeEntities?@"true":@"false"), (isID?@"user_id":@"screen_name"):user, @"cursor":cursor }];
 }
