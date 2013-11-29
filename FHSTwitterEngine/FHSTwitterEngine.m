@@ -33,6 +33,8 @@
 #import <netinet/in.h>
 #import <ifaddrs.h>
 
+static char const Encode[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
 static NSString * const newPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
 static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";
 
@@ -248,7 +250,6 @@ id removeNull(id rootObject) {
 // These are here to obfuscate them from prying eyes
 @property (strong, nonatomic) FHSConsumer *consumer;
 @property (assign, nonatomic) BOOL shouldClearConsumer;
-@property (strong, nonatomic) NSDateFormatter *dateFormatter;
 
 @end
 
@@ -310,12 +311,6 @@ id removeNull(id rootObject) {
 
 @end
 
-@interface NSData (FHSTwitterEngine)
-
-- (NSString *)appropriateFileExtension;
-
-@end
-
 @implementation NSData (FHSTwitterEngine)
 
 - (NSString *)appropriateFileExtension {
@@ -334,6 +329,55 @@ id removeNull(id rootObject) {
             return @"tiff";
     }
     return nil;
+}
+
+- (NSString *)base64Encode {
+    int outLength = ((((self.length*4)/3)/4)*4)+(((self.length*4)/3)%4?4:0);
+    const char *inputBuffer = self.bytes;
+    char *outputBuffer = malloc(outLength+1);
+    outputBuffer[outLength] = 0;
+    
+    int cycle = 0;
+    int inpos = 0;
+    int outpos = 0;
+    char temp;
+    
+    outputBuffer[outLength-1] = '=';
+    outputBuffer[outLength-2] = '=';
+    
+    while (inpos < self.length) {
+        switch (cycle) {
+            case 0:
+                outputBuffer[outpos++] = Encode[(inputBuffer[inpos]&0xFC)>>2];
+                cycle = 1;
+                break;
+            case 1:
+                temp = (inputBuffer[inpos++]&0x03)<<4;
+                outputBuffer[outpos] = Encode[temp];
+                cycle = 2;
+                break;
+            case 2:
+                outputBuffer[outpos++] = Encode[temp|(inputBuffer[inpos]&0xF0)>>4];
+                temp = (inputBuffer[inpos++]&0x0F)<<2;
+                outputBuffer[outpos] = Encode[temp];
+                cycle = 3;
+                break;
+            case 3:
+                outputBuffer[outpos++] = Encode[temp|(inputBuffer[inpos]&0xC0)>>6];
+                cycle = 4;
+                break;
+            case 4:
+                outputBuffer[outpos++] = Encode[inputBuffer[inpos++]&0x3f];
+                cycle = 0;
+                break;
+            default:
+                cycle = 0;
+                break;
+        }
+    }
+    NSString *pictemp = [NSString stringWithUTF8String:outputBuffer];
+    free(outputBuffer);
+    return pictemp;
 }
 
 @end
@@ -2076,62 +2120,6 @@ id removeNull(id rootObject) {
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter]removeObserver:self];
-}
-
-@end
-
-
-static char const Encode[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-@implementation NSData (Base64)
-
-- (NSString *)base64Encode {
-    int outLength = ((((self.length*4)/3)/4)*4)+(((self.length*4)/3)%4?4:0);
-    const char *inputBuffer = self.bytes;
-    char *outputBuffer = malloc(outLength+1);
-    outputBuffer[outLength] = 0;
-
-    int cycle = 0;
-    int inpos = 0;
-    int outpos = 0;
-    char temp;
-    
-    outputBuffer[outLength-1] = '=';
-    outputBuffer[outLength-2] = '=';
-    
-    while (inpos < self.length) {
-        switch (cycle) {
-            case 0:
-                outputBuffer[outpos++] = Encode[(inputBuffer[inpos]&0xFC)>>2];
-                cycle = 1;
-                break;
-            case 1:
-                temp = (inputBuffer[inpos++]&0x03)<<4;
-                outputBuffer[outpos] = Encode[temp];
-                cycle = 2;
-                break;
-            case 2:
-                outputBuffer[outpos++] = Encode[temp|(inputBuffer[inpos]&0xF0)>>4];
-                temp = (inputBuffer[inpos++]&0x0F)<<2;
-                outputBuffer[outpos] = Encode[temp];
-                cycle = 3;
-                break;
-            case 3:
-                outputBuffer[outpos++] = Encode[temp|(inputBuffer[inpos]&0xC0)>>6];
-                cycle = 4;
-                break;
-            case 4:
-                outputBuffer[outpos++] = Encode[inputBuffer[inpos++]&0x3f];
-                cycle = 0;
-                break;
-            default:
-                cycle = 0;
-                break;
-        }
-    }
-    NSString *pictemp = [NSString stringWithUTF8String:outputBuffer];
-    free(outputBuffer);
-    return pictemp;
 }
 
 @end

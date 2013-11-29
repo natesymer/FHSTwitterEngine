@@ -278,6 +278,11 @@ extern NSString * const FHSErrorDomain;
 // friends/list
 - (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
 
+//
+// TwitPic
+//
+
+- (id)uploadImageToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 
 //
 // Login and Auth
@@ -314,16 +319,20 @@ extern NSString * const FHSErrorDomain;
 @property (nonatomic, strong) NSString *authenticatedID;
 @property (nonatomic, strong) FHSToken *accessToken;
 
+@property (strong, nonatomic) NSDateFormatter *dateFormatter;
+
 // called to retrieve or save access tokens
 @property (nonatomic, weak) id<FHSTwitterEngineAccessTokenDelegate> delegate;
 
 @end
 
-@interface NSData (Base64)
+@interface NSData (FHSTwitterEngine)
+- (NSString *)appropriateFileExtension;
 - (NSString *)base64Encode;
 @end
 
 @interface NSString (FHSTwitterEngine)
+- (NSString *)fhs_URLEncode;
 - (NSString *)fhs_trimForTwitter;
 - (NSString *)fhs_stringWithRange:(NSRange)range;
 + (NSString *)fhs_UUID;
