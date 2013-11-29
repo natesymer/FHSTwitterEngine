@@ -310,6 +310,34 @@ id removeNull(id rootObject) {
 
 @end
 
+@interface NSData (FHSTwitterEngine)
+
+- (NSString *)appropriateFileExtension;
+
+@end
+
+@implementation NSData (FHSTwitterEngine)
+
+- (NSString *)appropriateFileExtension {
+    uint8_t c;
+    [self getBytes:&c length:1];
+    
+    switch (c) {
+        case 0xFF:
+            return @"jpeg";
+        case 0x89:
+            return @"png";
+        case 0x47:
+            return @"gif";
+        case 0x49:
+        case 0x4D:
+            return @"tiff";
+    }
+    return nil;
+}
+
+@end
+
 @implementation FHSTwitterEngine
 
 - (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor {
@@ -1200,12 +1228,124 @@ id removeNull(id rootObject) {
 
 - (id)getFollowersIDs {
     NSURL *baseURL = [NSURL URLWithString:url_followers_ids];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _loggedInUsername, @"stringify_ids":@"true"}];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _authenticatedUsername, @"stringify_ids":@"true"}];
 }
 
 - (id)getFriendsIDs {
     NSURL *baseURL = [NSURL URLWithString:url_friends_ids];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _loggedInUsername, @"stringify_ids":@"true"}];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _authenticatedUsername, @"stringify_ids":@"true"}];
+}
+
+- (id)uploadImageToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
+    
+    NSString *appropriateExtension = [imageData appropriateFileExtension];
+    
+    if (appropriateExtension == nil) {
+        return [NSError badRequestError];
+    }
+    
+    NSString *nonce = [NSString fhs_UUID];
+    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/account/verify_credentials.json"];
+    
+    NSString *timestamp = [NSString stringWithFormat:@"%ld", time(nil)];
+    
+    NSMutableArray *parameterPairs = [NSMutableArray arrayWithCapacity:6];
+    [parameterPairs addObject:[NSString stringWithFormat:@"oauth_consumer_key=%@",_consumer.key.fhs_URLEncode]];
+    [parameterPairs addObject:@"oauth_signature_method=HMAC-SHA1"];
+    [parameterPairs addObject:[NSString stringWithFormat:@"oauth_nonce=%@",nonce.fhs_URLEncode]];
+    [parameterPairs addObject:[NSString stringWithFormat:@"oauth_timestamp=%@",timestamp.fhs_URLEncode]];
+    [parameterPairs addObject:@"oauth_version=1.0"];
+    [parameterPairs addObject:[NSString stringWithFormat:@"oauth_token=%@",_accessToken.key]];
+    
+    NSArray *sortedPairs = [parameterPairs sortedArrayUsingSelector:@selector(compare:)];
+    NSString *normalizedRequestParameters = [sortedPairs componentsJoinedByString:@"&"];
+    
+    NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@", @"GET", [@"https://api.twitter.com/1.1/account/verify_credentials.json" fhs_URLEncode],normalizedRequestParameters.fhs_URLEncode];
+    
+    NSString *secretForSigning = [NSString stringWithFormat:@"%@&%@", _consumer.secret.fhs_URLEncode, _accessToken.secret.fhs_URLEncode];
+    
+    NSData *secretData = [secretForSigning dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
+    unsigned char result[20];
+	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
+    NSString *signature = [[NSData dataWithBytes:result length:20]base64Encode];
+    
+    NSString *oauthToken = [NSString stringWithFormat:@"oauth_token=\"%@\", ", _accessToken.key.fhs_URLEncode];
+    
+    NSString *oauthHeaders = [NSString stringWithFormat:@"OAuth realm=\"%@\", oauth_consumer_key=\"%@\", %@oauth_signature_method=\"HMAC-SHA1\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"", @"http://api.twitter.com/".fhs_URLEncode, _consumer.key.fhs_URLEncode, oauthToken, signature.fhs_URLEncode, timestamp, nonce];
+    
+    NSURL *url = [NSURL URLWithString:@"http://api.twitpic.com/2/upload.json"];
+    
+    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
+    [req setHTTPMethod:@"POST"];
+    [req setValue:oauthHeaders forHTTPHeaderField:@"X-Verify-Credentials-Authorization"];
+    [req setValue:baseURL.absoluteString forHTTPHeaderField:@"X-Auth-Service-Provider"];
+    
+    NSString *boundary = @"---------------------------14737809831466499882746641449";
+    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
+    
+    [req addValue:contentType forHTTPHeaderField:@"Content-Type"];
+    
+    NSMutableData *body = [NSMutableData data];
+    
+    // message
+    [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"message\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    [body appendData:[message dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    // key
+    [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"key\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[twitPicAPIKey dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    // picture
+    [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"media\"; filename=\"%@.%@\"\r\n",nonce,appropriateExtension] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithFormat:@"Content-Type: image/%@\r\n",appropriateExtension] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"Content-Transfer-Encoding: binary\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:imageData];
+    [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    [req setHTTPBody:body];
+    
+    [req setValue:[NSString stringWithFormat:@"%d",body.length] forHTTPHeaderField:@"Content-Length"];
+    
+    NSError *error = nil;
+    NSHTTPURLResponse *response = nil;
+    
+    NSData *responseData = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
+    
+    id parsedJSONResponse = removeNull([NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil]);
+    
+    if (error) {
+        return error;
+    }
+    
+    if (response.statusCode >= 304) {
+        return error;
+    }
+    
+    if ([parsedJSONResponse isKindOfClass:[NSDictionary class]]) {
+        NSString *errorMessage = [parsedJSONResponse objectForKey:@"error"];
+        NSArray *errorArray = [parsedJSONResponse objectForKey:@"errors"];
+        if (errorMessage.length > 0) {
+            return [NSError errorWithDomain:errorMessage code:[[parsedJSONResponse objectForKey:@"code"]intValue] userInfo:[NSDictionary dictionaryWithObject:req forKey:@"request"]];
+        } else if (errorArray.count > 0) {
+            if (errorArray.count > 1) {
+                return [NSError errorWithDomain:@"Multiple Errors" code:1337 userInfo:[NSDictionary dictionaryWithObject:req forKey:@"request"]];
+            } else {
+                NSDictionary *theError = [errorArray objectAtIndex:0];
+                return [NSError errorWithDomain:[theError objectForKey:@"message"] code:[[theError objectForKey:@"code"]integerValue] userInfo:[NSDictionary dictionaryWithObject:req forKey:@"request"]];
+            }
+        }
+    }
+    
+    return parsedJSONResponse;
 }
 
 - (instancetype)init {
@@ -1627,14 +1767,14 @@ id removeNull(id rootObject) {
     }
     
     self.accessToken = [FHSToken tokenWithHTTPResponseBody:savedHttpBody];
-    self.loggedInUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:savedHttpBody];
-    self.loggedInID = [self extractValueForKey:@"user_id" fromHTTPBody:savedHttpBody];
+    self.authenticatedUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:savedHttpBody];
+    self.authenticatedID = [self extractValueForKey:@"user_id" fromHTTPBody:savedHttpBody];
 }
 
 - (void)storeAccessToken:(NSString *)accessTokenZ {
     self.accessToken = [FHSToken tokenWithHTTPResponseBody:accessTokenZ];
-    self.loggedInUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:accessTokenZ];
-    self.loggedInID = [self extractValueForKey:@"user_id" fromHTTPBody:accessTokenZ];
+    self.authenticatedUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:accessTokenZ];
+    self.authenticatedID = [self extractValueForKey:@"user_id" fromHTTPBody:accessTokenZ];
     
     if (_delegate && [_delegate respondsToSelector:@selector(storeAccessToken:)]) {
         [_delegate storeAccessToken:accessTokenZ];
@@ -1690,7 +1830,7 @@ id removeNull(id rootObject) {
 - (void)clearAccessToken {
     [self storeAccessToken:@""];
 	self.accessToken = nil;
-    self.loggedInUsername = nil;
+    self.authenticatedID = nil;
 }
 
 - (void)clearConsumer {
@@ -1802,7 +1942,7 @@ id removeNull(id rootObject) {
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
-    dispatch_async(GCDBackgroundThread, ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @autoreleasepool {
             NSString *reqString = [[FHSTwitterEngine sharedEngine]getRequestTokenString];
 
@@ -1818,7 +1958,7 @@ id removeNull(id rootObject) {
                 self.requestToken = [FHSToken tokenWithHTTPResponseBody:reqString];
                 NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",_requestToken.key]]];
                 
-                dispatch_sync(GCDMainThread, ^{
+                dispatch_sync(dispatch_get_main_queue(), ^{
                     @autoreleasepool {
                         [_theWebView loadRequest:request];
                     }
@@ -1928,10 +2068,10 @@ id removeNull(id rootObject) {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (void)dismissModalViewControllerAnimated:(BOOL)animated {
+- (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     [_theWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@""]]];
-    [super dismissModalViewControllerAnimated:animated];
+    [super dismissViewControllerAnimated:flag completion:completion];
 }
 
 - (void)dealloc {

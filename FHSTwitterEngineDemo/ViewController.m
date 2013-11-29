@@ -9,50 +9,136 @@
 #import "ViewController.h"
 #import "FHSTwitterEngine.h"
 
-@interface ViewController () <FHSTwitterEngineAccessTokenDelegate, UIAlertViewDelegate>
+@interface ViewController () <FHSTwitterEngineAccessTokenDelegate, UIAlertViewDelegate, UITableViewDataSource, UITableViewDelegate>
 
-@property (nonatomic, strong) IBOutlet UITextField *tweetField;
-@property (nonatomic, strong) IBOutlet UILabel *loggedInUserLabel;
+@property (nonatomic, strong) UITableView *theTableView;
 
 @end
 
 @implementation ViewController
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-    if (buttonIndex == 1) {
-        NSString *username = [alertView textFieldAtIndex:0].text;
-        NSString *password = [alertView textFieldAtIndex:1].text;
-        
-        dispatch_async(GCDBackgroundThread, ^{
-            @autoreleasepool {
-                [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-                NSError *returnCode = [[FHSTwitterEngine sharedEngine]getXAuthAccessTokenForUsername:username password:password];
-                [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+- (void)loadView {
+    [super loadView];
+    self.view.backgroundColor = [UIColor lightGrayColor];
+    
+    self.theTableView = [[UITableView alloc]initWithFrame:UIScreen.mainScreen.bounds style:UITableViewStylePlain];
+    _theTableView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    _theTableView.dataSource = self;
+    _theTableView.delegate = self;
+    _theTableView.contentInset = UIEdgeInsetsMake(20+44, 0, 0, 0);
+    _theTableView.scrollIndicatorInsets = _theTableView.contentInset;
+    [self.view addSubview:_theTableView];
+    
+    UINavigationBar *bar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, 320, (UIDevice.currentDevice.systemVersion.floatValue >= 7.0f)?64:44)];
+    bar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"FHSTwitterEngine"];
+	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"XAuth" style:UIBarButtonItemStylePlain target:self action:@selector(loginXAuth)];
+    navItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"OAuth" style:UIBarButtonItemStylePlain target:self action:@selector(loginOAuth)];
+	[bar pushNavigationItem:navItem animated:NO];
+    [self.view addSubview:bar];
+    
+    [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"Xg3ACDprWAH8loEPjMzRg" andSecret:@"9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0"];
+    [[FHSTwitterEngine sharedEngine]setDelegate:self];
+    [[FHSTwitterEngine sharedEngine]loadAccessToken];
+}
 
-                dispatch_sync(GCDMainThread, ^{
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+    return @"Created by Nathaniel Symer (@natesymer)";
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return FHSTwitterEngine.sharedEngine.isAuthorized?3:2;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row == 0) {
+        [self postTweet];
+    } else if (indexPath.row == 1) {
+        [self logTimeline];
+    } else if (indexPath.row == 2) {
+        [self logout];
+    }
+    [_theTableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *CellID = @"CellID";
+    
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellID];
+    
+    if (!cell) {
+        cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellID];
+    }
+    
+    if (indexPath.row == 0) {
+        cell.textLabel.text = @"Post Tweet";
+        cell.detailTextLabel.text = nil;
+    } else if (indexPath.row == 1) {
+        cell.textLabel.text = @"NSLog() Timeline";
+        cell.detailTextLabel.text = nil;
+    } else if (indexPath.row == 2) {
+        cell.textLabel.text = @"Logout";
+        cell.detailTextLabel.text = FHSTwitterEngine.sharedEngine.authenticatedUsername;
+    }
+    
+    return cell;
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if ([alertView.title isEqualToString:@"Tweet"]) {
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            @autoreleasepool {
+                NSString *tweet = [alertView textFieldAtIndex:0].text;
+                id returned = [[FHSTwitterEngine sharedEngine]postTweet:tweet];
+                [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                
+                NSString *title = nil;
+                NSString *message = nil;
+                
+                if ([returned isKindOfClass:[NSError class]]) {
+                    NSError *error = (NSError *)returned;
+                    title = [NSString stringWithFormat:@"Error %d",error.code];
+                    message = error.localizedDescription;
+                } else {
+                    NSLog(@"%@",returned);
+                    title = @"Tweet Posted";
+                    message = tweet;
+                }
+                
+                dispatch_sync(dispatch_get_main_queue(), ^{
                     @autoreleasepool {
-                        NSString *title = nil;
-                        NSString *message = nil;
-                        
-                        if (returnCode) {
-                            title = [NSString stringWithFormat:@"Error %d",returnCode.code];
-                            message = returnCode.domain;
-                        } else {
-                            title = @"Success";
-                            message = @"You have successfully logged in via XAuth";
-                            NSString *username = [[FHSTwitterEngine sharedEngine]loggedInUsername]; //self.engine.loggedInUsername;
-                            if (username.length > 0) {
-                                _loggedInUserLabel.text = [NSString stringWithFormat:@"Logged in as %@.",username];
-                            } else {
-                                _loggedInUserLabel.text = @"You are not logged in.";
-                            }
-                        }
                         UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
                         [av show];
                     }
                 });
             }
         });
+    } else {
+        if (buttonIndex == 1) {
+            NSString *username = [alertView textFieldAtIndex:0].text;
+            NSString *password = [alertView textFieldAtIndex:1].text;
+            
+            [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+            
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                @autoreleasepool {
+                    // getXAuthAccessTokenForUsername:password: returns an NSError, not id.
+                    NSError *returnValue = [[FHSTwitterEngine sharedEngine]getXAuthAccessTokenForUsername:username password:password];
+                    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                    
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        @autoreleasepool {
+                            NSString *title = returnValue?[NSString stringWithFormat:@"Error %d",returnValue.code]:@"Success";
+                            NSString *message = returnValue?returnValue.localizedDescription:@"You have successfully logged in via XAuth";
+                            UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                            [av show];
+                            [_theTableView reloadData];
+                        }
+                    });
+                }
+            });
+        }
     }
 }
 
@@ -64,37 +150,36 @@
     return [[NSUserDefaults standardUserDefaults]objectForKey:@"SavedAccessHTTPBody"];
 }
 
-- (IBAction)showLoginWindow:(id)sender {
+- (void)loginOAuth {
     UIViewController *loginController = [[FHSTwitterEngine sharedEngine]loginControllerWithCompletionHandler:^(BOOL success) {
         NSLog(success?@"L0L success":@"O noes!!! Loggen faylur!!!");
+        [_theTableView reloadData];
     }];
     [self presentViewController:loginController animated:YES completion:nil];
 }
 
-- (IBAction)logout:(id)sender {
-    [_tweetField resignFirstResponder];
-    _loggedInUserLabel.text = @"You are not logged in.";
-    [[FHSTwitterEngine sharedEngine]clearAccessToken];
-}
-
-- (IBAction)loginXAuth:(id)sender {
-    UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"xAuth Login" message:@"" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Login", nil];
+- (void)loginXAuth {
+    UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"xAuth Login" message:@"Enter your Twitter login credentials:" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Login", nil];
     [av setAlertViewStyle:UIAlertViewStyleLoginAndPasswordInput];
     [[av textFieldAtIndex:0]setPlaceholder:@"Username"];
     [[av textFieldAtIndex:1]setPlaceholder:@"Password"];
     [av show];
 }
 
-- (IBAction)listFriends:(id)sender {
-    [_tweetField resignFirstResponder];
-    dispatch_async(GCDBackgroundThread, ^{
+- (void)logout {
+    [[FHSTwitterEngine sharedEngine]clearAccessToken];
+    [_theTableView reloadData];
+}
+
+- (void)logTimeline {
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @autoreleasepool {
-            [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            NSLog(@"Friends' IDs: %@",[[FHSTwitterEngine sharedEngine]getFriendsIDs]);
+            NSLog(@"%@",[[FHSTwitterEngine sharedEngine]getTimelineForUser:[[FHSTwitterEngine sharedEngine]authenticatedID] isID:YES count:10]);
             
-            dispatch_sync(GCDMainThread, ^{
+            dispatch_sync(dispatch_get_main_queue(), ^{
                 @autoreleasepool {
-                    [[[UIAlertView alloc]initWithTitle:@"Complete" message:@"Your list of followers has been fetched..." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]show];
+                    [[[UIAlertView alloc]initWithTitle:@"Complete" message:@"Your list of followers has been fetched. Check your debugger." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]show];
                     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
                 }
             });
@@ -102,53 +187,11 @@
     });
 }
 
-- (IBAction)postTweet:(id)sender {
-
-    [_tweetField resignFirstResponder];
-    
-    dispatch_async(GCDBackgroundThread, ^{
-        @autoreleasepool {
-            
-            [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-            NSError *returnCode = [[FHSTwitterEngine sharedEngine]postTweet:self.tweetField.text];
-            [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-            
-            NSString *title = nil;
-            NSString *message = nil;
-            
-            if (returnCode) {
-                title = [NSString stringWithFormat:@"Error %d",returnCode.code];
-                message = returnCode.localizedDescription;
-            } else {
-                title = @"Tweet Posted";
-                message = _tweetField.text;
-            }
-            
-            dispatch_sync(GCDMainThread, ^{
-                @autoreleasepool {
-                    UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-                    [av show];
-                }
-            });
-        }
-    });
-}
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"Xg3ACDprWAH8loEPjMzRg" andSecret:@"9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0"];
-    [[FHSTwitterEngine sharedEngine]setDelegate:self];
-    [self.tweetField addTarget:self action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-    [[FHSTwitterEngine sharedEngine]loadAccessToken];
-    NSString *username = [[FHSTwitterEngine sharedEngine]loggedInUsername];// self.engine.loggedInUsername;
-    if (username.length > 0) {
-        _loggedInUserLabel.text = [NSString stringWithFormat:@"Logged in as %@",username];
-    } else {
-        _loggedInUserLabel.text = @"You are not logged in.";
-    }
+- (void)postTweet {
+    UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"Tweet" message:@"Write a tweet below. Make sure you're using a testing account." delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Tweet", nil];
+    [av setAlertViewStyle:UIAlertViewStylePlainTextInput];
+    [[av textFieldAtIndex:0]setPlaceholder:@"Write a tweet here..."];
+    [av show];
 }
 
 @end

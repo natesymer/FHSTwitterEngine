@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		9B2A1BC415E805D1007E66E0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1B9915E805D1007E66E0 /* AppDelegate.m */; };
 		9B2A1BC515E805D1007E66E0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9B2A1B9A15E805D1007E66E0 /* InfoPlist.strings */; };
-		9B2A1BC615E805D1007E66E0 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9B2A1B9C15E805D1007E66E0 /* ViewController.xib */; };
 		9B2A1BC915E805D1007E66E0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BA215E805D1007E66E0 /* main.m */; };
 		9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BC315E805D1007E66E0 /* ViewController.m */; };
 		9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */; settings = {COMPILER_FLAGS = ""; }; };
@@ -24,7 +23,6 @@
 		9B2A1B9815E805D1007E66E0 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		9B2A1B9915E805D1007E66E0 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		9B2A1B9B15E805D1007E66E0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		9B2A1B9D15E805D1007E66E0 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController.xib; sourceTree = "<group>"; };
 		9B2A1B9E15E805D1007E66E0 /* FHSTwitterEngine-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "FHSTwitterEngine-Info.plist"; sourceTree = "<group>"; };
 		9B2A1B9F15E805D1007E66E0 /* FHSTwitterEngine-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FHSTwitterEngine-Prefix.pch"; sourceTree = "<group>"; };
 		9B2A1BA215E805D1007E66E0 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -62,7 +60,6 @@
 				9B2A1B9915E805D1007E66E0 /* AppDelegate.m */,
 				9B2A1BC215E805D1007E66E0 /* ViewController.h */,
 				9B2A1BC315E805D1007E66E0 /* ViewController.m */,
-				9B2A1B9C15E805D1007E66E0 /* ViewController.xib */,
 				9B2A1C0715E807D9007E66E0 /* FHSTwitterEngine */,
 				9B2A1BD815E80601007E66E0 /* Supporting Files */,
 			);
@@ -170,7 +167,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B2A1BC515E805D1007E66E0 /* InfoPlist.strings in Resources */,
-				9B2A1BC615E805D1007E66E0 /* ViewController.xib in Resources */,
 				9B2A59E41628F053003B4E2E /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -198,14 +194,6 @@
 				9B2A1B9B15E805D1007E66E0 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		9B2A1B9C15E805D1007E66E0 /* ViewController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				9B2A1B9D15E805D1007E66E0 /* en */,
-			);
-			name = ViewController.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -285,7 +273,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/FHSTwitterEngineDemo\"",
-					"\"$(SRCROOT)/FHSTwitterEngine/OAuthConsumer\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
@@ -302,7 +289,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/FHSTwitterEngineDemo\"",
-					"\"$(SRCROOT)/FHSTwitterEngine/OAuthConsumer\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;

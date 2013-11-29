@@ -30,10 +30,6 @@
 
 #import <Foundation/Foundation.h>
 
-// These are for the dispatch_async() calls that you use to get around the synchronous-ness
-#define GCDBackgroundThread dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-#define GCDMainThread dispatch_get_main_queue()
-
 // Image sizes
 typedef enum {
     FHSTwitterEngineImageSizeMini, // 24px by 24px
@@ -314,8 +310,8 @@ extern NSString * const FHSErrorDomain;
 + (BOOL)isConnectedToInternet;
 
 @property (nonatomic, assign) BOOL includeEntities;
-@property (nonatomic, strong) NSString *loggedInUsername;
-@property (nonatomic, strong) NSString *loggedInID;
+@property (nonatomic, strong) NSString *authenticatedUsername;
+@property (nonatomic, strong) NSString *authenticatedID;
 @property (nonatomic, strong) FHSToken *accessToken;
 
 // called to retrieve or save access tokens
