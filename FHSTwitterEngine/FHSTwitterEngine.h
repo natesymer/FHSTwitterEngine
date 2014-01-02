@@ -204,6 +204,7 @@ extern NSString * const FHSErrorDomain;
 
 // users/profile_image
 - (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
+- (id)getProfileImageURLStringForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
 
 // statuses/user_timeline
 - (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count;
