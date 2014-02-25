@@ -700,6 +700,7 @@ id removeNull(id rootObject) {
     NSURL *baseURL = [NSURL URLWithString:url_statuses_update_with_media];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    params[@"status"] = tweetString;
     params[@"media[]"] = theData;
     
     if (irt.length > 0) {
@@ -1596,17 +1597,18 @@ id removeNull(id rootObject) {
         
         NSData *data = nil;
         
+        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n",key] dataUsingEncoding:NSUTF8StringEncoding]];
+        
         if ([obj isKindOfClass:[NSData class]]) {
             [body appendData:[@"Content-Type: application/octet-stream\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
             data = (NSData *)obj;
         } else if ([obj isKindOfClass:[NSString class]]) {
-            data = [[NSString stringWithFormat:@"%@\r\n",(NSString *)obj]dataUsingEncoding:NSUTF8StringEncoding];
+            data = [[NSString stringWithFormat:@"%@",(NSString *)obj]dataUsingEncoding:NSUTF8StringEncoding];
         }
-        
-        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n",key] dataUsingEncoding:NSUTF8StringEncoding]];
         
         [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:data];
+        [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
     }
     
     [body appendData:[[NSString stringWithFormat:@"--%@--\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
