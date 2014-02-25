@@ -802,6 +802,34 @@ id removeNull(id rootObject) {
     return [NSError badRequestError];
 }
 
+- (id)getProfileImageURLStringForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size {
+    
+    if (username.length == 0) {
+        return [NSError badRequestError];
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_users_show];
+    id userShowReturn = [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name":username }];
+    
+    if ([userShowReturn isKindOfClass:[NSError class]]) {
+        return userShowReturn;
+    } else if ([userShowReturn isKindOfClass:[NSDictionary class]]) {
+        NSString *url = userShowReturn[@"profile_image_url"]; // normal
+        
+        if (size == 0) { // mini
+            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@"_mini"];
+        } else if (size == 2) { // bigger
+            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@"_bigger"];
+        } else if (size == 3) { // original
+            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@""];
+        }
+        
+        return url;
+    }
+    
+    return [NSError badRequestError];
+}
+
 - (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID {
     if (user.length == 0) {
         return [NSError badRequestError];
