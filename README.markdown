@@ -124,6 +124,8 @@ You should probably [email](mailto:nate@natesymer.com) me with suggestions.
 
 - OS X OAuth login window
 - Custom objects for profile settings
+- Tag releases
+- Tests
 
 **Debugging 101 for outsource developers**
 
