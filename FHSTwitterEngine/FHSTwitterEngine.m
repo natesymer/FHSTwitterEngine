@@ -1431,6 +1431,8 @@ id removeNull(id rootObject) {
         _dateFormatter.dateStyle = NSDateFormatterLongStyle;
         _dateFormatter.formatterBehavior = NSDateFormatterBehavior10_4;
         _dateFormatter.dateFormat = @"EEE MMM dd HH:mm:ss ZZZZ yyyy";
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelTouched:) name:@"FHSTwitterEngineControllerDidCancel" object:nil];
     }
     return self;
 }
@@ -1969,8 +1971,14 @@ id removeNull(id rootObject) {
     return NO;
 }
 
+- (void)cancelTouched:(NSNotification *)notification
+{
+    [_delegate twitterEngineControllerDidCancel];
+}
+
 - (void)dealloc {
     [self setDelegate:nil];
+    [[NSNotificationCenter defaultCenter]removeObserver:self];
 }
 
 @end
@@ -2140,6 +2148,7 @@ id removeNull(id rootObject) {
 
 - (void)close {
     [self dismissViewControllerAnimated:YES completion:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"FHSTwitterEngineControllerDidCancel" object:nil userInfo:nil];
 }
 
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion {

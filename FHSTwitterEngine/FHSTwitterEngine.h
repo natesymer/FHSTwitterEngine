@@ -76,6 +76,9 @@ extern NSString * const FHSErrorDomain;
 - (NSString *)loadAccessToken;
 - (void)storeAccessToken:(NSString *)accessToken;
 
+@optional
+- (void)twitterEngineControllerDidCancel;
+
 @end
 
 @interface FHSTwitterEngine : NSObject
