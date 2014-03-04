@@ -126,6 +126,7 @@ You should probably [email](mailto:nate@natesymer.com) me with suggestions.
 - Custom objects for profile settings
 - Tag releases
 - Tests
+- Add license
 - Create a CocoaPod
 
 **Debugging 101 for outsource developers**
