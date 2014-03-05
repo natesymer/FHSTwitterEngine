@@ -1971,9 +1971,10 @@ id removeNull(id rootObject) {
     return NO;
 }
 
-- (void)cancelTouched:(NSNotification *)notification
-{
-    [_delegate twitterEngineControllerDidCancel];
+- (void)cancelTouched:(NSNotification *)notification {
+    if ( [_delegate respondsToSelector:@selector(twitterEngineControllerDidCancel)] ) {
+        [_delegate twitterEngineControllerDidCancel];
+    }
 }
 
 - (void)dealloc {
