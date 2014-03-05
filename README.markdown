@@ -120,7 +120,7 @@ Most methods return `id`. The returned object can be a(n):
 
 **For the future/To Do**
 
-You should probably [email](mailto:nate@natesymer.com) me with suggestions.
+You can [email](mailto:nate@natesymer.com) me with suggestions or open an [issue](https://github.com/fhsjaagshs/FHSTwitterEngine/issues).
 
 - OS X OAuth login window
 - Custom objects for profile settings
