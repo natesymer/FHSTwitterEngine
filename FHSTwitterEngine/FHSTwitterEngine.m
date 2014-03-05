@@ -1994,8 +1994,8 @@ id removeNull(id rootObject) {
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    self.navBar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, 320, (UIDevice.currentDevice.systemVersion.floatValue >= 7.0f)?64:44)];
-    _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    self.navBar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, (UIDevice.currentDevice.systemVersion.floatValue >= 7.0f)?64:44)];
+    //_navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"Twitter Login"];
 	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
 	[_navBar pushNavigationItem:navItem animated:NO];
