@@ -2139,7 +2139,7 @@ id removeNull(id rootObject) {
 	char *raw = data?(char *)[data bytes]:"";
 	
 	if (raw && (strstr(raw, "cancel=") || strstr(raw, "deny="))) {
-		[self dismissViewControllerAnimated:YES completion:nil];
+        [self close];
 		return NO;
 	}
     
