@@ -2147,8 +2147,9 @@ id removeNull(id rootObject) {
 }
 
 - (void)close {
-    [self dismissViewControllerAnimated:YES completion:nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"FHSTwitterEngineControllerDidCancel" object:nil userInfo:nil];
+    [self dismissViewControllerAnimated:YES completion:^(void){
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"FHSTwitterEngineControllerDidCancel" object:nil userInfo:nil];
+    }];
 }
 
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion {
