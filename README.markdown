@@ -128,6 +128,7 @@ You should probably [email](mailto:nate@natesymer.com) me with suggestions.
 - Tests
 - Add license
 - Create a CocoaPod
+- Make demo universal
 
 **Debugging 101 for outsource developers**
 
