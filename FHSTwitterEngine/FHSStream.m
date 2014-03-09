@@ -13,6 +13,8 @@
 @property (nonatomic, strong) NSURLConnection *connection;
 @property (nonatomic, strong) NSMutableDictionary *params;
 @property (nonatomic, strong) NSString *URL;
+@property (nonatomic, strong) NSString *HTTPMethod;
+@property (nonatomic, assign) float timeout;
 
 @end
 
@@ -25,22 +27,13 @@
 - (instancetype)initWithURL:(NSString *)url httpMethod:(NSString *)httpMethod parameters:(NSDictionary *)params timeout:(float)timeout block:(StreamBlock)block {
     self = [super init];
     if (self) {
+        self.timeout = timeout;
         self.URL = url;
+        self.HTTPMethod = httpMethod;
         self.params = params.mutableCopy;
         _params[@"delimited"] = @"length"; // absolutely necessary
         _params[@"stall_warnings"] = @"true";
         self.block = block;
-        id req = [[FHSTwitterEngine sharedEngine]streamingRequestForURL:[NSURL URLWithString:url] HTTPMethod:httpMethod parameters:params];
-        
-        NSLog(@"%@",req);
-        
-        if (![req isKindOfClass:[NSURLRequest class]]) {
-            if (_block) {
-                _block(req, NULL);
-            }
-        } else {
-            self.connection = [[NSURLConnection alloc]initWithRequest:req delegate:self startImmediately:NO];
-        }
     }
     return self;
 }
@@ -59,6 +52,7 @@
     NSMutableString *message = nil;
     
     NSString *response = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+
     for (NSString *part in [response componentsSeparatedByString:@"\r\n"]) {
         int length = [part intValue];
         
@@ -76,18 +70,14 @@
                 if (message.length == bytesExpected) {
                     NSError *jsonError = nil;
                     id json = [NSJSONSerialization JSONObjectWithData:[message dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:&jsonError];
-                    
+
                     BOOL stop = NO;
                     
                     if (!jsonError) {
                         _block(json, &stop);
                         [self keepAlive];
                     } else {
-                        NSError *error = [NSError errorWithDomain:FHSErrorDomain code:406 userInfo:@{
-                                                                                    NSUnderlyingErrorKey: jsonError,
-                                                                                    NSLocalizedDescriptionKey: @"Invalid JSON was returned from Twitter",
-                                                                                    @"json": json
-                                                                                    }];
+                        NSError *error = [NSError errorWithDomain:FHSErrorDomain code:406 userInfo:@{ NSUnderlyingErrorKey: jsonError, NSLocalizedDescriptionKey: @"Invalid JSON was returned from Twitter", @"json": json }];
                         _block(error, &stop);
                     }
                     
@@ -116,8 +106,15 @@
 }
 
 - (void)start {
-    [_connection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
-    [_connection start];
+    id req = [[FHSTwitterEngine sharedEngine]streamingRequestForURL:[NSURL URLWithString:_URL] HTTPMethod:_HTTPMethod parameters:_params];
+    
+    if (![req isKindOfClass:[NSURLRequest class]]) {
+        if (_block) {
+            _block(req, NULL);
+        }
+    } else {
+        self.connection = [NSURLConnection connectionWithRequest:req delegate:self];
+    }
     [self performSelector:@selector(stop) withObject:nil afterDelay:_timeout];
 }
 

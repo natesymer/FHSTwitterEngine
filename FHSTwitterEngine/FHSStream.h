@@ -11,7 +11,6 @@
 
 @interface FHSStream : NSObject
 
-@property (nonatomic, assign) float timeout;
 @property (nonatomic, copy) StreamBlock block;
 
 + (FHSStream *)streamWithURL:(NSString *)url httpMethod:(NSString *)httpMethod parameters:(NSDictionary *)params timeout:(float)timeout block:(StreamBlock)block;
