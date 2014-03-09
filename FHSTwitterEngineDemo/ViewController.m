@@ -12,6 +12,7 @@
 @interface ViewController () <FHSTwitterEngineAccessTokenDelegate, UIAlertViewDelegate, UITableViewDataSource, UITableViewDelegate>
 
 @property (nonatomic, strong) UITableView *theTableView;
+@property (nonatomic, assign) BOOL isStreaming;
 
 @end
 
@@ -47,17 +48,27 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return FHSTwitterEngine.sharedEngine.isAuthorized?3:2;
+    return FHSTwitterEngine.sharedEngine.isAuthorized?4:3;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.row == 0) {
-        [self postTweet];
-    } else if (indexPath.row == 1) {
-        [self logTimeline];
-    } else if (indexPath.row == 2) {
-        [self logout];
+    switch (indexPath.row) {
+        case 0:
+            [self postTweet];
+            break;
+        case 1:
+            [self logTimeline];
+            break;
+        case 2:
+            [self toggleStreaming];
+            break;
+        case 3:
+            [self logout];
+            break;
+        default:
+            break;
     }
+    
     [_theTableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
@@ -70,15 +81,25 @@
         cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellID];
     }
     
-    if (indexPath.row == 0) {
-        cell.textLabel.text = @"Post Tweet";
-        cell.detailTextLabel.text = nil;
-    } else if (indexPath.row == 1) {
-        cell.textLabel.text = @"NSLog() Timeline";
-        cell.detailTextLabel.text = nil;
-    } else if (indexPath.row == 2) {
-        cell.textLabel.text = @"Logout";
-        cell.detailTextLabel.text = FHSTwitterEngine.sharedEngine.authenticatedUsername;
+    switch (indexPath.row) {
+        case 0:
+            cell.textLabel.text = @"Post Tweet";
+            cell.detailTextLabel.text = nil;
+            break;
+        case 1:
+            cell.textLabel.text = @"Log Timeline";
+            cell.detailTextLabel.text = nil;
+            break;
+        case 2:
+            cell.textLabel.text = @"Log Stream";
+            cell.detailTextLabel.text = nil;
+            break;
+        case 3:
+            cell.textLabel.text = @"Logout";
+            cell.detailTextLabel.text = FHSTwitterEngine.sharedEngine.authenticatedUsername;
+            break;
+        default:
+            break;
     }
     
     return cell;
@@ -192,6 +213,21 @@
     [av setAlertViewStyle:UIAlertViewStylePlainTextInput];
     [[av textFieldAtIndex:0]setPlaceholder:@"Write a tweet here..."];
     [av show];
+}
+
+- (void)toggleStreaming {
+    NSLog(@"Streaming");
+    if (!_isStreaming) {
+        self.isStreaming = YES;
+        [[FHSTwitterEngine sharedEngine]streamSampleStatusesWithBlock:^(id result, BOOL *stop) {
+            NSLog(@"%@",result);
+            if (_isStreaming == NO) {
+                *stop = YES;
+            }
+        }];
+    } else {
+        self.isStreaming = NO;
+    }
 }
 
 @end

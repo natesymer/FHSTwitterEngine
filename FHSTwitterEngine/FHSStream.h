@@ -7,10 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
-@class FHSStream;
-
-typedef void(^StreamBlock)(id result, BOOL *stop);
+#import "FHSTwitterEngine.h"
 
 @interface FHSStream : NSObject
 

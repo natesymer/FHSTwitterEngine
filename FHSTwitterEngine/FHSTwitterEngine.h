@@ -44,6 +44,8 @@ typedef enum {
     FHSTwitterEngineResultTypePopular
 } FHSTwitterEngineResultType;
 
+typedef void(^StreamBlock)(id result, BOOL *stop);
+
 // Remove NSNulls from NSDictionary and NSArray
 // Credit for this function goes to Conrad Kramer
 id removeNull(id rootObject);
@@ -289,6 +291,15 @@ extern NSString * const FHSErrorDomain;
 - (id)uploadImageToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 
 //
+// Streaming
+//
+
+- (void)streamUserMessagesWith:(NSArray *)with replies:(BOOL)replies keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block;
+- (void)streamPublicStatusesForUsers:(NSArray *)users keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block;
+- (void)streamSampleStatusesWithBlock:(StreamBlock)block;
+- (void)streamFirehoseWithBlock:(StreamBlock)block;
+
+//
 // Request Generators
 //
 
@@ -343,6 +354,7 @@ extern NSString * const FHSErrorDomain;
 
 @interface NSString (FHSTwitterEngine)
 - (NSString *)fhs_URLEncode;
+- (NSString *)fhs_truncatedToLength:(int)length;
 - (NSString *)fhs_trimForTwitter;
 - (NSString *)fhs_stringWithRange:(NSRange)range;
 + (NSString *)fhs_UUID;

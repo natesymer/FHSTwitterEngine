@@ -38,6 +38,8 @@
 
 static NSURLRequestCachePolicy const cachePolicy = NSURLRequestReloadRevalidatingCacheData;
 
+static float const streamingTimeoutInterval = 30.0f;
+
 static char const Encode[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 static NSString * const newPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
@@ -285,9 +287,12 @@ id removeNull(id rootObject) {
 	return (__bridge NSString *)url;
 }
 
+- (NSString *)fhs_truncatedToLength:(int)length {
+    return [self substringToIndex:MIN(length, self.length)];
+}
+
 - (NSString *)fhs_trimForTwitter {
-    NSString *string = [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    return (string.length > 140)?[string substringToIndex:140]:string;
+    return [self fhs_truncatedToLength:140];
 }
 
 - (NSString *)fhs_stringWithRange:(NSRange)range {
@@ -1430,6 +1435,80 @@ id removeNull(id rootObject) {
     return parsedJSONResponse;
 }
 
+//
+// Streaming API
+//
+
+// check out the streaming parameters here:
+// https://dev.twitter.com/docs/streaming-apis/parameters
+
+- (NSString *)generateTrackParameter:(NSArray *)keywords {
+    NSMutableArray *sanitized = [NSMutableArray arrayWithCapacity:keywords.count];
+    
+    for (NSString *string in keywords) {
+        [sanitized addObject:[string fhs_truncatedToLength:60]];
+    }
+    
+    return [sanitized componentsJoinedByString:@","];
+}
+
+
+// Actual calls to the Twitter API
+
+- (void)streamUserMessagesWith:(NSArray *)with replies:(BOOL)replies keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block {
+    NSMutableDictionary *params = @{ @"stringify_friend_ids": @"true" }.mutableCopy;
+    
+    if (with.count > 0) {
+        params[@"with"] = [with componentsJoinedByString:@","];
+    }
+    
+    if (keywords.count > 0) {
+        params[@"track"] = [self generateTrackParameter:keywords];
+    }
+    
+    if (locBox.count == 4) {
+        params[@"locations"] = [locBox componentsJoinedByString:@","];
+    }
+    
+    [[FHSStream streamWithURL:@"https://userstream.twitter.com/1.1/user.json" httpMethod:@"POST" parameters:params timeout:streamingTimeoutInterval block:block]start]; // Twitter says it should be GET, but on further investigation of the docs, POST works too.
+}
+
+- (void)streamPublicStatusesForUsers:(NSArray *)users keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block {
+    BOOL usersValid = users.count > 0 && users.count < 5000;
+    BOOL keywordsValid = keywords.count > 0 && keywords.count < 400;
+    BOOL locBoxValid = locBox.count == 4;
+    
+    if (!usersValid && !keywordsValid && !locBoxValid) {
+        NSError *error = [NSError errorWithDomain:FHSErrorDomain code:400 userInfo:@{NSLocalizedDescriptionKey: @"Bad Request: invalid parameters: POST statuses/filter requires at least one predicate parameter (follow, locations, or track)."}];
+        block(error, NULL);
+        return;
+    }
+    
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:5];
+
+    if (usersValid) {
+        params[@"follow"] = [users componentsJoinedByString:@","];
+    }
+    
+    if (keywordsValid) {
+        params[@"track"] = [self generateTrackParameter:keywords];
+    }
+    
+    if (locBoxValid) {
+        params[@"locations"] = [locBox componentsJoinedByString:@","];
+    }
+    
+    [[FHSStream streamWithURL:@"https://stream.twitter.com/1.1/statuses/filter.json" httpMethod:@"POST" parameters:params timeout:streamingTimeoutInterval block:block]start];
+}
+
+- (void)streamSampleStatusesWithBlock:(StreamBlock)block {
+    [[FHSStream streamWithURL:@"https://stream.twitter.com/1.1/statuses/sample.json" httpMethod:@"GET" parameters:nil timeout:streamingTimeoutInterval block:block]start];
+}
+
+- (void)streamFirehoseWithBlock:(StreamBlock)block {
+    [[FHSStream streamWithURL:@"https://stream.twitter.com/1.1/statuses/firehose.json" httpMethod:@"GET" parameters:nil timeout:streamingTimeoutInterval block:block]start];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -1605,6 +1684,18 @@ id removeNull(id rootObject) {
     NSString *oauthHeader = [NSString stringWithFormat:@"OAuth oauth_consumer_key=\"%@\", %@%@oauth_signature_method=\"HMAC-SHA1\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"",consumerKey,oauthToken,oauthVerifier,signature,timestamp,nonce];
     
     [request setValue:oauthHeader forHTTPHeaderField:@"Authorization"];
+}
+
+- (int)parameterLengthForURL:(NSString *)url params:(NSMutableDictionary *)params {
+    int length = url.length;
+
+    for (NSString *key in params) {
+        length += [key fhs_URLEncode].length;
+        length += [params[key] fhs_URLEncode].length;
+        length += 1; // for the equal sign
+    }
+    
+    return length;
 }
 
 - (NSError *)checkAuth {

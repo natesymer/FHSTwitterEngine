@@ -7,13 +7,6 @@
 //
 
 #import "FHSStream.h"
-#import "FHSTwitterEngine.h"
-
-@interface FHSTwitterEngine (Streaming)
-
-
-
-@end
 
 @interface FHSStream () <NSURLConnectionDelegate>
 
@@ -34,11 +27,18 @@
     if (self) {
         self.URL = url;
         self.params = params.mutableCopy;
-        _params[@"delimited"] = @"length";
+        _params[@"delimited"] = @"length"; // absolutely necessary
+        _params[@"stall_warnings"] = @"true";
         self.block = block;
         id req = [[FHSTwitterEngine sharedEngine]streamingRequestForURL:[NSURL URLWithString:url] HTTPMethod:httpMethod parameters:params];
         
-        if ([req isKindOfClass:[NSURLRequest class]]) {
+        NSLog(@"%@",req);
+        
+        if (![req isKindOfClass:[NSURLRequest class]]) {
+            if (_block) {
+                _block(req, NULL);
+            }
+        } else {
             self.connection = [[NSURLConnection alloc]initWithRequest:req delegate:self startImmediately:NO];
         }
     }
@@ -46,7 +46,12 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    _block(error, NO);
+    BOOL stop = NO;
+    _block(error, &stop);
+    
+    if (stop) {
+        [self stop];
+    }
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
