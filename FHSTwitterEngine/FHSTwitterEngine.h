@@ -289,6 +289,12 @@ extern NSString * const FHSErrorDomain;
 - (id)uploadImageToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 
 //
+// Request Generators
+//
+
+- (id)streamingRequestForURL:(NSURL *)url HTTPMethod:(NSString *)method parameters:(NSDictionary *)params;
+
+//
 // Login and Auth
 //
 
