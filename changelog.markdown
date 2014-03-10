@@ -108,6 +108,10 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Cleaned up login controller
 - Updated Demo app
 
+**Version 1.8**
+
+- Added streaming
+
 OAuthConsumer
 ===
 *Version numbers below are for **\_my\_** version of OAuthConsumer. I modified OAuthConsumer almost beyond recognition...*
