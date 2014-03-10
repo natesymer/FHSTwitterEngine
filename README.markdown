@@ -12,24 +12,17 @@ Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](http:/
 
 Why you should use `FHSTwitterEngine`:
 
-- Single .h/.m pair
-- No dependencies
+- No 3rd party dependencies
+- Works with OAuth or iOS twitter accounts
 - Shared instance
 - Scientific
 
-Where did OAuthConsumer go? It's gone :) because there were a number of issues with it:
-
-1. It had too much compatibility code
-2. It concatenated and signed POST params
-3. It could not take raw data as post params by design (see #2)
-4. It duplicated functionality I already implemented.
-
 **Setup**
 
-1. Add `FHSTwitterEngine.h` and `FHSTwitterEngine.m` to your project
+1. Add the `FHSTwitterEngine` folder to your project.
 2. `#import "FHSTwitterEngine.h"` where necessary
-3. Link against `SystemConfiguration.framework`
-4. Enable ARC for both files if applicable
+3. Link against `SystemConfiguration.framework` and `Twitter.framework`
+4. Enable ARC for the `FHSTwitterEngine` folder
 
 **Usage:**
 
@@ -122,13 +115,14 @@ Most methods return `id`. The returned object can be a(n):
 
 You can [email](mailto:nate@natesymer.com) me with suggestions or open an [issue](https://github.com/fhsjaagshs/FHSTwitterEngine/issues).
 
-- OS X OAuth login window
+- OS X compatibility
 - Custom objects for profile settings
 - Tag releases
 - Tests
-- Add license
-- Create a CocoaPod
+- <strike>Add license</strike>
+- <strike>Create a CocoaPod</strike> Add podspec to cocoapods
 - Make demo universal
+- Clean up FHSTwitterEngine.{h,m}
 
 **Debugging 101 for outsource developers**
 
