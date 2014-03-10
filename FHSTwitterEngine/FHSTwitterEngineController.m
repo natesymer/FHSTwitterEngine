@@ -8,6 +8,9 @@
 
 #import "FHSTwitterEngineController.h"
 
+#import "NSString+FHSTE.h"
+#import "FHSTwitterEngine+Auth.h"
+
 static NSString * const newPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
 static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";
 
@@ -62,23 +65,27 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @autoreleasepool {
-            NSString *reqString = [[FHSTwitterEngine sharedEngine]getRequestTokenString];
-            
-            if (reqString.length == 0) {
-                double delayInSeconds = 0.5;
-                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-                dispatch_after(popTime, dispatch_get_main_queue(),^(void) {
-                    @autoreleasepool {
-                        [self dismissViewControllerAnimated:YES completion:nil];
-                    }
-                });
-            } else {
-                self.requestToken = [FHSToken tokenWithHTTPResponseBody:reqString];
+            id res = [[FHSTwitterEngine sharedEngine]getRequestToken];
+
+            if ([res isKindOfClass:[NSString class]]) {
+                self.requestToken = [FHSToken tokenWithHTTPResponseBody:(NSString *)res];
                 NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/oauth/authorize?oauth_token=%@",_requestToken.key]]];
                 
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     @autoreleasepool {
                         [_theWebView loadRequest:request];
+                    }
+                });
+            } else {
+                double delayInSeconds = 0.5;
+                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+                dispatch_after(popTime, dispatch_get_main_queue(),^(void) {
+                    @autoreleasepool {
+                        [self dismissViewControllerAnimated:YES completion:^(void){
+                            if (_block) {
+                                _block(FHSTwitterEngineControllerResultFailed);
+                            }
+                        }];
                     }
                 });
             }
@@ -90,7 +97,6 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     _requestToken.verifier = pin;
     BOOL ret = [[FHSTwitterEngine sharedEngine]finishAuthWithRequestToken:_requestToken];
     
-
     if (_block) {
         _block(ret?FHSTwitterEngineControllerResultSucceeded:FHSTwitterEngineControllerResultFailed);
     }
@@ -99,7 +105,6 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 }
 
 - (void)pasteboardChanged:(NSNotification *)note {
-	
 	if (![note.userInfo objectForKey:UIPasteboardChangedTypesAddedKey]) {
         return;
     }
@@ -116,12 +121,12 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 - (NSString *)locatePin {
 	NSString *pin = [[_theWebView stringByEvaluatingJavaScriptFromString:newPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	
-	if (pin.length == 7) {
+	if (pin.length == 7 && pin.fhs_isNumeric) {
 		return pin;
 	} else {
 		pin = [[_theWebView stringByEvaluatingJavaScriptFromString:oldPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 		
-		if (pin.length == 7) {
+		if (pin.length == 7 && pin.fhs_isNumeric) {
 			return pin;
 		}
 	}
@@ -180,7 +185,9 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 
 - (void)close {
     [self dismissViewControllerAnimated:YES completion:^(void){
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"FHSTwitterEngineControllerDidCancel" object:nil userInfo:nil];
+        if (_block) {
+            _block(FHSTwitterEngineControllerResultCancelled);
+        }
     }];
 }
 

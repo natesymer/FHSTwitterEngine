@@ -76,11 +76,10 @@
     NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:mutableParams.count];
     
     for (NSString *key in mutableParams.allKeys) {
-        [paramPairs addObject:[NSString stringWithFormat:@"%@=%@",[key fhs_URLEncode],[mutableParams[key] fhs_URLEncode]]];
+        [paramPairs addObject:[NSString stringWithFormat:@"%@=%@",key.fhs_URLEncode,[mutableParams[key] fhs_URLEncode]]];
     }
     
     if ([request.HTTPMethod isEqualToString:@"GET"]) {
-        
         NSArray *halves = [request.URL.absoluteString componentsSeparatedByString:@"?"];
         
         if (halves.count > 1) {
@@ -158,7 +157,7 @@
         NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:params.count];
         
         for (NSString *key in params) {
-            NSString *paramPair = [NSString stringWithFormat:@"%@=%@",[key fhs_URLEncode],[params[key] fhs_URLEncode]];
+            NSString *paramPair = [NSString stringWithFormat:@"%@=%@",key.fhs_URLEncode,[params[key] fhs_URLEncode]];
             [paramPairs addObject:paramPair];
         }
         

@@ -33,9 +33,11 @@
 #import <netinet/in.h>
 #import <ifaddrs.h>
 
-#include "FHSStream.h"
-#include "FHSTwitterEngine+Requests.h"
+#import "FHSStream.h"
+#import "FHSTwitterEngine+Requests.h"
 #import "NSError+FHSTE.h"
+#import "NSData+FHSTE.h"
+#import "NSString+FHSTE.h"
 
 static NSURLRequestCachePolicy const cachePolicy = NSURLRequestReloadRevalidatingCacheData;
 
@@ -176,10 +178,6 @@ id removeNull(id rootObject) {
 
 @interface FHSTwitterEngine ()
 
-// Login stuff
-- (NSString *)getRequestTokenString;
-
-// These are here to obfuscate them from prying eyes
 @property (strong, nonatomic) FHSConsumer *consumer;
 @property (assign, nonatomic) BOOL shouldClearConsumer;
 
@@ -1104,12 +1102,12 @@ id removeNull(id rootObject) {
 
 - (id)getFollowersIDs {
     NSURL *baseURL = [NSURL URLWithString:url_followers_ids];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _authenticatedUsername, @"stringify_ids":@"true"}];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _accessToken.username, @"stringify_ids":@"true"}];
 }
 
 - (id)getFriendsIDs {
     NSURL *baseURL = [NSURL URLWithString:url_friends_ids];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _authenticatedUsername, @"stringify_ids":@"true"}];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _accessToken.username, @"stringify_ids":@"true"}];
 }
 
 - (id)uploadImageToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
@@ -1123,6 +1121,8 @@ id removeNull(id rootObject) {
     NSString *nonce = [NSString fhs_UUID];
     NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/account/verify_credentials.json"];
     
+    // TODO: Refactor this to remove format string
+    // NSString *timestamp = @(time(nil)).stringValue;
     NSString *timestamp = [NSString stringWithFormat:@"%ld", time(nil)];
     
     NSMutableArray *parameterPairs = [NSMutableArray arrayWithCapacity:6];
@@ -1189,14 +1189,14 @@ id removeNull(id rootObject) {
     
     [req setHTTPBody:body];
     
-    [req setValue:[NSString stringWithFormat:@"%d",body.length] forHTTPHeaderField:@"Content-Length"];
+    [req setValue:@(body.length).stringValue forHTTPHeaderField:@"Content-Length"];
     
     NSError *error = nil;
     NSHTTPURLResponse *response = nil;
     
     NSData *responseData = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
     
-    id parsedJSONResponse = removeNull([NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil]);
+    id res = removeNull([NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil]);
     
     if (error) {
         return error;
@@ -1206,22 +1206,19 @@ id removeNull(id rootObject) {
         return error;
     }
     
-    if ([parsedJSONResponse isKindOfClass:[NSDictionary class]]) {
-        NSString *errorMessage = [parsedJSONResponse objectForKey:@"error"];
-        NSArray *errorArray = [parsedJSONResponse objectForKey:@"errors"];
-        if (errorMessage.length > 0) {
-            return [NSError errorWithDomain:errorMessage code:[[parsedJSONResponse objectForKey:@"code"]intValue] userInfo:[NSDictionary dictionaryWithObject:req forKey:@"request"]];
-        } else if (errorArray.count > 0) {
-            if (errorArray.count > 1) {
-                return [NSError errorWithDomain:@"Multiple Errors" code:1337 userInfo:[NSDictionary dictionaryWithObject:req forKey:@"request"]];
+    if ([res isKindOfClass:[NSDictionary class]]) {
+        NSArray *errors = res[@"errors"];
+        if (errors.count > 0) {
+            if (errors.count > 1) {
+                return [NSError errorWithDomain:@"Multiple Errors" code:1337 userInfo:@{@"request": req}];
             } else {
-                NSDictionary *theError = [errorArray objectAtIndex:0];
-                return [NSError errorWithDomain:[theError objectForKey:@"message"] code:[[theError objectForKey:@"code"]integerValue] userInfo:[NSDictionary dictionaryWithObject:req forKey:@"request"]];
+                NSDictionary *error = errors.firstObject;
+                return [NSError errorWithDomain:error[@"message"] code:[error[@"code"] integerValue] userInfo:@{@"request": req}];
             }
         }
     }
     
-    return parsedJSONResponse;
+    return res;
 }
 
 //
@@ -1308,8 +1305,6 @@ id removeNull(id rootObject) {
         _dateFormatter.dateStyle = NSDateFormatterLongStyle;
         _dateFormatter.formatterBehavior = NSDateFormatterBehavior10_4;
         _dateFormatter.dateFormat = @"EEE MMM dd HH:mm:ss ZZZZ yyyy";
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelTouched:) name:@"FHSTwitterEngineControllerDidCancel" object:nil];
     }
     return self;
 }
@@ -1364,170 +1359,38 @@ id removeNull(id rootObject) {
 }
 
 //
-// OAuth
-//
-
-- (NSString *)getRequestTokenString {
-    
-    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
-    [request setHTTPMethod:@"POST"];
-    [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil];
-
-    id retobj = [self sendRequest:request];
-    
-    if ([retobj isKindOfClass:[NSData class]]) {
-        return [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
-    }
-    
-    return nil;
-}
-
-- (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken {
-
-    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
-    [request setHTTPMethod:@"POST"];
-    [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier];
-    
-    if (_shouldClearConsumer) {
-        self.shouldClearConsumer = NO;
-        self.consumer = nil;
-    }
-    
-    id retobj = [self sendRequest:request];
-    
-    if ([retobj isKindOfClass:[NSError class]]) {
-        return NO;
-    }
-    
-    NSString *response = [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
-    
-    if (response.length == 0) {
-        return NO;
-    }
-    
-    [self storeAccessToken:response];
-    
-    return YES;
-}
-
-//
-// XAuth
-//
-
-- (NSError *)getXAuthAccessTokenForUsername:(NSString *)username password:(NSString *)password {
-    
-    if (password.length == 0) {
-        return [NSError badRequestError];
-    } else if (username.length == 0) {
-        return [NSError badRequestError];
-    }
-    
-    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
-    [request setHTTPMethod:@"POST"];
-    [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil];
-    
-    // generate the POST body...
-    
-    NSString *bodyString = [NSString stringWithFormat:@"x_auth_mode=client_auth&x_auth_username=%@&x_auth_password=%@",username,password];
-    request.HTTPBody = [bodyString dataUsingEncoding:NSUTF8StringEncoding];
-    
-    if (_shouldClearConsumer) {
-        self.shouldClearConsumer = NO;
-        self.consumer = nil;
-    }
-    
-    id ret = [self sendRequest:request];
-    
-    if ([ret isKindOfClass:[NSError class]]) {
-        return ret;
-    } else if ([ret isKindOfClass:[NSData class]]) {
-        NSString *httpBody = [[NSString alloc]initWithData:(NSData *)ret encoding:NSUTF8StringEncoding];
-        
-        if (httpBody.length > 0) {
-            [self storeAccessToken:httpBody];
-        } else {
-            [self storeAccessToken:nil];
-            return [NSError errorWithDomain:FHSErrorDomain code:422 userInfo:@{NSLocalizedDescriptionKey:@"The request was well-formed but was unable to be followed due to semantic errors.", @"request":request}];
-        }
-    }
-    
-    return nil;
-}
-
-//
 // Access Token Management
 //
 
 - (void)loadAccessToken {
-    
     NSString *savedHttpBody = nil;
     
-    if (_delegate && [_delegate respondsToSelector:@selector(loadAccessToken)]) {
-        savedHttpBody = [_delegate loadAccessToken];
+    if (_loadAccessTokenBlock) {
+        savedHttpBody = _loadAccessTokenBlock();
     } else {
         savedHttpBody = [[NSUserDefaults standardUserDefaults]objectForKey:@"SavedAccessHTTPBody"];
     }
-    
+
     self.accessToken = [FHSToken tokenWithHTTPResponseBody:savedHttpBody];
-    self.authenticatedUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:savedHttpBody];
-    self.authenticatedID = [self extractValueForKey:@"user_id" fromHTTPBody:savedHttpBody];
 }
 
 - (void)storeAccessToken:(NSString *)accessTokenZ {
     self.accessToken = [FHSToken tokenWithHTTPResponseBody:accessTokenZ];
-    self.authenticatedUsername = [self extractValueForKey:@"screen_name" fromHTTPBody:accessTokenZ];
-    self.authenticatedID = [self extractValueForKey:@"user_id" fromHTTPBody:accessTokenZ];
     
-    if (_delegate && [_delegate respondsToSelector:@selector(storeAccessToken:)]) {
-        [_delegate storeAccessToken:accessTokenZ];
+    if (_storeAccessTokenBlock) {
+        _storeAccessTokenBlock(accessTokenZ);
     } else {
         [[NSUserDefaults standardUserDefaults]setObject:accessTokenZ forKey:@"SavedAccessHTTPBody"];
     }
 }
 
-- (NSString *)extractValueForKey:(NSString *)target fromHTTPBody:(NSString *)body {
-    if (body.length == 0) {
-        return nil;
-    }
-    
-    if (target.length == 0) {
-        return nil;
-    }
-	
-	NSArray *tuples = [body componentsSeparatedByString:@"&"];
-	if (tuples.count < 1) {
-        return nil;
-    }
-	
-	for (NSString *tuple in tuples) {
-		NSArray *keyValueArray = [tuple componentsSeparatedByString:@"="];
-		
-		if (keyValueArray.count >= 2) {
-			NSString *key = [keyValueArray objectAtIndex:0];
-			NSString *value = [keyValueArray objectAtIndex:1];
-			
-			if ([key isEqualToString:target]) {
-                return value;
-            }
-		}
-	}
-	
-	return nil;
-}
-
 - (BOOL)isAuthorized {
-    if (!self.consumer) {
+    if (!_consumer) {
         return NO;
     }
     
-	if (self.accessToken.key && self.accessToken.secret) {
-        if (self.accessToken.key.length > 0 && self.accessToken.secret.length > 0) {
+	if (_accessToken.key && _accessToken.secret) {
+        if (_accessToken.key.length > 0 && _accessToken.secret.length > 0) {
             return YES;
         }
     }
@@ -1538,7 +1401,6 @@ id removeNull(id rootObject) {
 - (void)clearAccessToken {
     [self storeAccessToken:@""];
 	self.accessToken = nil;
-    self.authenticatedID = nil;
 }
 
 - (void)clearConsumer {
@@ -1597,17 +1459,4 @@ id removeNull(id rootObject) {
     return NO;
 }
 
-- (void)cancelTouched:(NSNotification *)notification {
-    if ( [_delegate respondsToSelector:@selector(twitterEngineControllerDidCancel)] ) {
-        [_delegate twitterEngineControllerDidCancel];
-    }
-}
-
-- (void)dealloc {
-    [self setDelegate:nil];
-    [[NSNotificationCenter defaultCenter]removeObserver:self];
-}
-
 @end
-
-

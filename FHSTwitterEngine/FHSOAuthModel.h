@@ -14,6 +14,7 @@
 @property (nonatomic, strong) NSString *secret;
 
 + (FHSConsumer *)consumerWithKey:(NSString *)key secret:(NSString *)secret;
+- (instancetype)initWithKey:(NSString *)key secret:(NSString *)secret;
 
 @end
 
@@ -23,6 +24,10 @@
 @property (nonatomic, strong) NSString *secret;
 @property (nonatomic, strong) NSString *verifier;
 
+@property (nonatomic, strong) NSString *username;
+@property (nonatomic, strong) NSString *user_id;
+
 + (FHSToken *)tokenWithHTTPResponseBody:(NSString *)body;
+- (instancetype)initWithHTTPResponseBody:(NSString *)body;
 
 @end

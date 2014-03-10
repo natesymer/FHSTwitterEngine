@@ -31,15 +31,13 @@
     return [[[self class]alloc]initWithHTTPResponseBody:body];
 }
 
-- (id)initWithHTTPResponseBody:(NSString *)body {
+- (instancetype)initWithHTTPResponseBody:(NSString *)body {
     self = [super init];
 	if (self) {
-        
         if (body.length > 0) {
             NSArray *pairs = [body componentsSeparatedByString:@"&"];
             
             for (NSString *pair in pairs) {
-                
                 NSArray *elements = [pair componentsSeparatedByString:@"="];
                 
                 if (elements.count > 1) {
@@ -50,6 +48,10 @@
                         self.key = [value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
                     } else if ([field isEqualToString:@"oauth_token_secret"]) {
                         self.secret = [value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                    } else if ([field isEqualToString:@"screen_name"]) {
+                        self.username = [value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                    } else if ([field isEqualToString:@"user_id"]) {
+                        self.user_id = [value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
                     }
                 }
             }

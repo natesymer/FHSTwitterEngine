@@ -285,12 +285,6 @@ extern NSString * const FHSProfileDescriptionKey;
 // Login and Auth
 //
 
-// XAuth login
-- (NSError *)getXAuthAccessTokenForUsername:(NSString *)username password:(NSString *)password;
-
-// OAuth login
-- (UIViewController *)loginControllerWithBlock:(LoginControllerBlock)block;
-
 // Access Token Mangement
 - (void)clearAccessToken;
 - (void)loadAccessToken;
@@ -311,10 +305,7 @@ extern NSString * const FHSProfileDescriptionKey;
 + (BOOL)isConnectedToInternet;
 
 @property (nonatomic, assign) BOOL includeEntities;
-@property (nonatomic, strong) NSString *authenticatedUsername;
-@property (nonatomic, strong) NSString *authenticatedID;
 @property (nonatomic, strong) FHSToken *accessToken;
-
 @property (nonatomic, strong) NSDateFormatter *dateFormatter;
 
 // Blocks to load the access token or store the access token
