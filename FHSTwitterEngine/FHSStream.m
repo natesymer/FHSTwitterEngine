@@ -7,6 +7,8 @@
 //
 
 #import "FHSStream.h"
+#import "FHSTwitterEngine+Requests.h"
+#import "NSError+FHSTE.h"
 
 @interface FHSStream () <NSURLConnectionDelegate>
 

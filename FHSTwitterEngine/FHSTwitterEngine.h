@@ -29,6 +29,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "FHSOAuthModel.h"
+#import "FHSTwitterEngineController.h"
 
 // Image sizes
 typedef enum {
@@ -45,6 +47,8 @@ typedef enum {
 } FHSTwitterEngineResultType;
 
 typedef void(^StreamBlock)(id result, BOOL *stop);
+typedef NSString *(^LoadAccessTokenBlock)(void);
+typedef void(^StoreAccessTokenBlock)(NSString *accessToken);
 
 // Remove NSNulls from NSDictionary and NSArray
 // Credit for this function goes to Conrad Kramer
@@ -60,28 +64,6 @@ extern NSString * const FHSProfileNameKey;
 extern NSString * const FHSProfileURLKey;
 extern NSString * const FHSProfileLocationKey;
 extern NSString * const FHSProfileDescriptionKey;
-
-extern NSString * const FHSErrorDomain;
-
-@interface FHSToken : NSObject
-
-@property (nonatomic, strong) NSString *key;
-@property (nonatomic, strong) NSString *secret;
-@property (nonatomic, strong) NSString *verifier;
-
-+ (FHSToken *)tokenWithHTTPResponseBody:(NSString *)body;
-
-@end
-
-@protocol FHSTwitterEngineAccessTokenDelegate <NSObject>
-
-- (NSString *)loadAccessToken;
-- (void)storeAccessToken:(NSString *)accessToken;
-
-@optional
-- (void)twitterEngineControllerDidCancel;
-
-@end
 
 @interface FHSTwitterEngine : NSObject
 
@@ -300,12 +282,6 @@ extern NSString * const FHSErrorDomain;
 - (void)streamFirehoseWithBlock:(StreamBlock)block;
 
 //
-// Request Generators
-//
-
-- (id)streamingRequestForURL:(NSURL *)url HTTPMethod:(NSString *)method parameters:(NSDictionary *)params;
-
-//
 // Login and Auth
 //
 
@@ -313,8 +289,7 @@ extern NSString * const FHSErrorDomain;
 - (NSError *)getXAuthAccessTokenForUsername:(NSString *)username password:(NSString *)password;
 
 // OAuth login
-- (UIViewController *)loginController;
-- (UIViewController *)loginControllerWithCompletionHandler:(void(^)(BOOL success))block;
+- (UIViewController *)loginControllerWithBlock:(LoginControllerBlock)block;
 
 // Access Token Mangement
 - (void)clearAccessToken;
@@ -330,8 +305,8 @@ extern NSString * const FHSErrorDomain;
 // 100 ids/usernames per concatenated string
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array;
 
-// never call -[FHSTwitterEngine init] directly
-+ (FHSTwitterEngine *)sharedEngine; 
+// never call -[FHSTwitterEngine init] directly.
++ (FHSTwitterEngine *)sharedEngine;
 
 + (BOOL)isConnectedToInternet;
 
@@ -340,31 +315,10 @@ extern NSString * const FHSErrorDomain;
 @property (nonatomic, strong) NSString *authenticatedID;
 @property (nonatomic, strong) FHSToken *accessToken;
 
-@property (strong, nonatomic) NSDateFormatter *dateFormatter;
+@property (nonatomic, strong) NSDateFormatter *dateFormatter;
 
-// called to retrieve or save access tokens
-@property (nonatomic, weak) id<FHSTwitterEngineAccessTokenDelegate> delegate;
-
-@end
-
-@interface NSData (FHSTwitterEngine)
-- (NSString *)appropriateFileExtension;
-- (NSString *)base64Encode;
-@end
-
-@interface NSString (FHSTwitterEngine)
-- (NSString *)fhs_URLEncode;
-- (NSString *)fhs_truncatedToLength:(int)length;
-- (NSString *)fhs_trimForTwitter;
-- (NSString *)fhs_stringWithRange:(NSRange)range;
-+ (NSString *)fhs_UUID;
-- (BOOL)fhs_isNumeric;
-@end
-
-@interface NSError (FHSTwitterEngine)
-
-+ (NSError *)badRequestError;
-+ (NSError *)noDataError;
-+ (NSError *)imageTooLargeError;
+// Blocks to load the access token or store the access token
+@property (nonatomic, copy) StoreAccessTokenBlock storeAccessTokenBlock;
+@property (nonatomic, copy) LoadAccessTokenBlock loadAccessTokenBlock;
 
 @end
