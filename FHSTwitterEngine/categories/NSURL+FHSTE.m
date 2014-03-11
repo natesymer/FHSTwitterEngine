@@ -11,12 +11,19 @@
 @implementation NSURL (FHSTwitterEngine)
 
 - (NSString *)absoluteStringWithoutParameters {
-    if (self.absoluteString.length == 0) {
-        return nil;
+    return [[NSURL alloc]initWithScheme:self.scheme host:self.host path:self.path].absoluteString;
+}
+
+- (NSDictionary *)queryDictionary {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    
+    for (NSString *param in [self.query componentsSeparatedByString:@"&"]) {
+        NSArray *parts = [param componentsSeparatedByString:@"="];
+        if (parts.count < 2) continue;
+        params[parts[1]] = parts.firstObject;
     }
     
-    NSArray *parts = [self.absoluteString componentsSeparatedByString:@"?"];
-    return (parts.count == 0)?nil:parts[0];
+    return params;
 }
 
 @end

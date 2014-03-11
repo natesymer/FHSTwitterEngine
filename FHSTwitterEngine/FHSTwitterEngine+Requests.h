@@ -8,9 +8,13 @@
 
 #import "FHSTwitterEngine.h"
 
-@interface FHSTwitterEngine (Requests)
+//
+// NOTE
+// You should never find yourself using this
+// Category.
+//
 
-- (int)parameterLengthForURL:(NSString *)url params:(NSMutableDictionary *)params;
+@interface FHSTwitterEngine (Requests)
 
 // send requests
 - (id)sendRequest:(NSURLRequest *)request;
@@ -27,6 +31,19 @@
 
 // Request signing
 - (void)signRequest:(NSMutableURLRequest *)request;
-- (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString;
+- (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm;
+
+// Generate a POST body from parameters. See implementation for details
+- (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary;
+
+// Append GET params to a URL
+- (void)appendGETParams:(NSDictionary *)params toURL:(NSURL **)url;
+
+// DRY up auth & error checking
+- (NSError *)checkAuth;
+- (NSError *)checkError:(id)json;
+
+// Get length of url w/ parameters
+- (int)parameterLengthForURL:(NSString *)url params:(NSMutableDictionary *)params;
 
 @end

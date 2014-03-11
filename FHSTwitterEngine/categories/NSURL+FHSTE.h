@@ -11,5 +11,6 @@
 @interface NSURL (FHSTwitterEngine)
 
 - (NSString *)absoluteStringWithoutParameters;
+- (NSDictionary *)queryDictionary;
 
 @end

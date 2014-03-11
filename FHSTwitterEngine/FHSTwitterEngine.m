@@ -673,7 +673,7 @@
     NSURL *baseURL = [NSURL URLWithString:url_favorites_list];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:5];
-    params[@"count"] = [NSString stringWithFormat:@"%d",count];
+    params[@"count"] = @(count).stringValue;
     params[(isID?@"user_id":@"screen_name")] = user;
     params[@"include_entities"] = _includeEntities?@"true":@"false";
     
@@ -923,7 +923,7 @@
     NSURL *baseURL = [NSURL URLWithString:url_statuses_home_timeline];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:2];
-    params[@"count"] = [NSString stringWithFormat:@"%d",count];
+    params[@"count"] = @(count).stringValue;
     
     if (sinceID.length > 0) {
         params[@"since_id"] = sinceID;
@@ -963,7 +963,11 @@
     return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _accessToken.username, @"stringify_ids":@"true"}];
 }
 
-- (id)uploadImageToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
+- (id)uploadImageToTwitPic:(UIImage *)image withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
+    return [self uploadImageDataToTwitPic:UIImagePNGRepresentation(image) withMessage:message twitPicAPIKey:twitPicAPIKey];
+}
+
+- (id)uploadImageDataToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
     
     //
     //
@@ -978,11 +982,7 @@
     }
     
     NSString *nonce = [NSString fhs_UUID];
-    NSURL *baseURL = [NSURL URLWithString:@"https://api.twitter.com/1.1/account/verify_credentials.json"];
-    
-    // TODO: Refactor this to remove format string
-    // NSString *timestamp = @(time(nil)).stringValue;
-    NSString *timestamp = [NSString stringWithFormat:@"%ld", time(nil)];
+    NSString *timestamp = @(time(nil)).stringValue;
     
     NSMutableArray *parameterPairs = [NSMutableArray arrayWithCapacity:6];
     [parameterPairs addObject:[NSString stringWithFormat:@"oauth_consumer_key=%@",_consumer.key.fhs_URLEncode]];
@@ -992,7 +992,7 @@
     [parameterPairs addObject:@"oauth_version=1.0"];
     [parameterPairs addObject:[NSString stringWithFormat:@"oauth_token=%@",_accessToken.key]];
     
-    NSArray *sortedPairs = [parameterPairs sortedArrayUsingSelector:@selector(compare:)];
+    NSArray *sortedPairs = [parameterPairs sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
     NSString *normalizedRequestParameters = [sortedPairs componentsJoinedByString:@"&"];
     
     NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@", @"GET", [@"https://api.twitter.com/1.1/account/verify_credentials.json" fhs_URLEncode],normalizedRequestParameters.fhs_URLEncode];
@@ -1005,79 +1005,51 @@
 	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
     NSString *signature = [[NSData dataWithBytes:result length:20]base64Encode];
     
-    NSString *oauthToken = [NSString stringWithFormat:@"oauth_token=\"%@\", ", _accessToken.key.fhs_URLEncode];
+    NSString *oauthHeaders = [NSString stringWithFormat:@"OAuth realm=\"%@\", oauth_consumer_key=\"%@\", oauth_token=\"%@\", oauth_signature_method=\"HMAC-SHA1\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"", @"http://api.twitter.com/".fhs_URLEncode, _consumer.key.fhs_URLEncode, _accessToken.key.fhs_URLEncode, signature.fhs_URLEncode, timestamp, nonce];
     
-    NSString *oauthHeaders = [NSString stringWithFormat:@"OAuth realm=\"%@\", oauth_consumer_key=\"%@\", %@oauth_signature_method=\"HMAC-SHA1\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"", @"http://api.twitter.com/".fhs_URLEncode, _consumer.key.fhs_URLEncode, oauthToken, signature.fhs_URLEncode, timestamp, nonce];
+    
     
     NSURL *url = [NSURL URLWithString:@"http://api.twitpic.com/2/upload.json"];
-    
+
+    NSString *verifyURL = @"https://api.twitter.com/1.1/account/verify_credentials.json";
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
     [req setHTTPMethod:@"POST"];
     [req setValue:oauthHeaders forHTTPHeaderField:@"X-Verify-Credentials-Authorization"];
-    [req setValue:baseURL.absoluteString forHTTPHeaderField:@"X-Auth-Service-Provider"];
-    
-    NSString *boundary = @"---------------------------14737809831466499882746641449";
+    [req setValue:verifyURL forHTTPHeaderField:@"X-Auth-Service-Provider"];
+
+    NSString *boundary = [NSString fhs_UUID];
     NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
-    
     [req addValue:contentType forHTTPHeaderField:@"Content-Type"];
     
-    NSMutableData *body = [NSMutableData data];
+    NSDictionary *params = @{
+                             @"message": message,
+                             @"key": twitPicAPIKey,
+                             @"media": @{
+                                          @"type": @"file",
+                                          @"filename": [NSString stringWithFormat:@"%@.%@",nonce,appropriateExtension],
+                                          @"data": imageData,
+                                          @"mimetype": [NSString stringWithFormat:@"image/%@",appropriateExtension]
+                                        }
+                             };
     
-    // message
-    [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"message\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+    req.HTTPBody = [self POSTBodyWithParams:params boundary:boundary];
+    [req setValue:@(req.HTTPBody.length).stringValue forHTTPHeaderField:@"Content-Length"];
     
-    [body appendData:[message dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    id res = [self sendRequest:req];
     
-    // key
-    [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"key\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[twitPicAPIKey dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    if ([res isKindOfClass:[NSError class]]) {
+        return res;
+    }
     
-    // picture
-    [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"media\"; filename=\"%@.%@\"\r\n",nonce,appropriateExtension] dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[[NSString stringWithFormat:@"Content-Type: image/%@\r\n",appropriateExtension] dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[@"Content-Transfer-Encoding: binary\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:imageData];
-    [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    id parsed = [[NSJSONSerialization JSONObjectWithData:res options:NSJSONReadingMutableContainers error:nil]removeNull];
     
-    [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    [req setHTTPBody:body];
-    
-    [req setValue:@(body.length).stringValue forHTTPHeaderField:@"Content-Length"];
-    
-    NSError *error = nil;
-    NSHTTPURLResponse *response = nil;
-    
-    NSData *responseData = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
-    
-    id res = [[NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil]removeNull];
+    NSError *error = [self checkError:parsed];
     
     if (error) {
         return error;
     }
     
-    if (response.statusCode >= 304) {
-        return error;
-    }
-    
-    if ([res isKindOfClass:[NSDictionary class]]) {
-        NSArray *errors = res[@"errors"];
-        if (errors.count > 0) {
-            if (errors.count > 1) {
-                return [NSError errorWithDomain:FHSErrorDomain code:1337 userInfo:@{NSLocalizedDescriptionKey: @"Multiple errors.", @"errors": errors, @"request": req}];
-            } else {
-                NSDictionary *error = errors.firstObject;
-                return [NSError errorWithDomain:FHSErrorDomain code:[error[@"code"] integerValue] userInfo:@{ NSLocalizedDescriptionKey: error[@"message"], @"request": req}];
-            }
-        }
-    }
-    
-    return res;
+    return parsed;
 }
 
 //
@@ -1315,7 +1287,7 @@
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil];
     
     id retobj = [self sendRequest:request];
     
@@ -1331,7 +1303,7 @@
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier];
+    [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier realm:nil];
     
     if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
@@ -1370,7 +1342,7 @@
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil];
     
     // generate the POST body...
     
