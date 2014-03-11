@@ -1,5 +1,5 @@
 //
-//  lol.m
+//  FHSOAuthModel.m
 //  FHSTwitterEngine
 //
 //  Created by Nathaniel Symer on 3/10/14.

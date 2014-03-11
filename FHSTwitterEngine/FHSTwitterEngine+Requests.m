@@ -1,13 +1,16 @@
 //
-//  FHSTwitterEngine+RequestGeneration.m
+//  FHSTwitterEngine+Requests.m
 //  FHSTwitterEngine
 //
 //  Created by Nathaniel Symer on 3/10/14.
 //  Copyright (c) 2014 Nathaniel Symer. All rights reserved.
 //
 
+#import <CommonCrypto/CommonCrypto.h>
+
 #import "FHSTwitterEngine+Requests.h"
 #import "FHSTwitterEngine.m"
+#import "NSURL+FHSTE.h"
 
 @implementation FHSTwitterEngine (Requests)
 
@@ -48,10 +51,10 @@
 
 - (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString {
     
-    NSString *consumerKey = [_consumer.key fhs_URLEncode];
+    NSString *consumerKey = _consumer.key.fhs_URLEncode;
     NSString *nonce = [NSString fhs_UUID];
     NSString *timestamp = [NSString stringWithFormat:@"%ld",time(nil)];
-    NSString *urlWithoutParams = [fhs_url_remove_params(request.URL) fhs_URLEncode];
+    NSString *urlWithoutParams = request.URL.absoluteStringWithoutParameters.fhs_URLEncode;
     
     // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
     // build a sorted array of both request parameters and OAuth header parameters
@@ -99,9 +102,9 @@
     // Sign request elements using HMAC-SHA1
     NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",request.HTTPMethod,urlWithoutParams,normalizedRequestParameters];
     
-    NSString *tokenSecretSantized = (tokenSecretString.length > 0)?[tokenSecretString fhs_URLEncode]:@""; // this way a nil token won't make a bad signature
+    NSString *tokenSecretSantized = (tokenSecretString.length > 0)?tokenSecretString.fhs_URLEncode:@""; // this way a nil token won't make a bad signature
     
-    NSString *secret = [NSString stringWithFormat:@"%@&%@",[_consumer.secret fhs_URLEncode],tokenSecretSantized];
+    NSString *secret = [NSString stringWithFormat:@"%@&%@",_consumer.secret.fhs_URLEncode,tokenSecretSantized];
     
     NSData *secretData = [secret dataUsingEncoding:NSUTF8StringEncoding];
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
@@ -161,7 +164,7 @@
             [paramPairs addObject:paramPair];
         }
         
-        *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?%@",fhs_url_remove_params(*url), [paramPairs componentsJoinedByString:@"&"]]];
+        *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?%@",(*url).absoluteStringWithoutParameters, [paramPairs componentsJoinedByString:@"&"]]];
     }
 }
 
@@ -171,11 +174,10 @@
     for (NSString *key in params.allKeys) {
         id obj = params[key];
         
-        [body appendData:[[NSString stringWithFormat:@"--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"--%@\r\n",boundary]dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n",key] dataUsingEncoding:NSUTF8StringEncoding]];
         
         NSData *data = nil;
-        
-        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n",key] dataUsingEncoding:NSUTF8StringEncoding]];
         
         if ([obj isKindOfClass:[NSData class]]) {
             [body appendData:[@"Content-Type: application/octet-stream\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
@@ -238,7 +240,7 @@
         return retobj;
     }
     
-    id parsed = removeNull([NSJSONSerialization JSONObjectWithData:(NSData *)retobj options:NSJSONReadingMutableContainers error:nil]);
+    id parsed = [[NSJSONSerialization JSONObjectWithData:(NSData *)retobj options:NSJSONReadingMutableContainers error:nil]removeNull];
     
     NSError *error = [self checkError:parsed];
     

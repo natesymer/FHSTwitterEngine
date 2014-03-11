@@ -27,5 +27,6 @@ typedef void(^LoginControllerBlock)(FHSTwitterEngineControllerResult result);
 @property (nonatomic, copy) LoginControllerBlock block;
 
 - (instancetype)initWithCompletionBlock:(LoginControllerBlock)block;
++ (FHSTwitterEngineController *)controllerWithCompletionBlock:(LoginControllerBlock)block;
 
 @end

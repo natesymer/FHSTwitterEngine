@@ -1,5 +1,5 @@
 //
-//  FHSTwitterEngine+RequestGeneration.h
+//  FHSTwitterEngine+Requests.h
 //  FHSTwitterEngine
 //
 //  Created by Nathaniel Symer on 3/10/14.

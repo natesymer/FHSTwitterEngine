@@ -30,40 +30,7 @@
 
 #import <Foundation/Foundation.h>
 #import "FHSOAuthModel.h"
-#import "FHSTwitterEngineController.h"
-
-// Image sizes
-typedef enum {
-    FHSTwitterEngineImageSizeMini, // 24px by 24px
-    FHSTwitterEngineImageSizeNormal, // 48x48
-    FHSTwitterEngineImageSizeBigger, // 73x73
-    FHSTwitterEngineImageSizeOriginal // original size of image
-} FHSTwitterEngineImageSize;
-
-typedef enum {
-    FHSTwitterEngineResultTypeMixed,
-    FHSTwitterEngineResultTypeRecent,
-    FHSTwitterEngineResultTypePopular
-} FHSTwitterEngineResultType;
-
-typedef void(^StreamBlock)(id result, BOOL *stop);
-typedef NSString *(^LoadAccessTokenBlock)(void);
-typedef void(^StoreAccessTokenBlock)(NSString *accessToken);
-
-// Remove NSNulls from NSDictionary and NSArray
-// Credit for this function goes to Conrad Kramer
-id removeNull(id rootObject);
-
-extern NSString * const FHSProfileBackgroundColorKey;
-extern NSString * const FHSProfileLinkColorKey;
-extern NSString * const FHSProfileSidebarBorderColorKey;
-extern NSString * const FHSProfileSidebarFillColorKey;
-extern NSString * const FHSProfileTextColorKey;
-
-extern NSString * const FHSProfileNameKey;
-extern NSString * const FHSProfileURLKey;
-extern NSString * const FHSProfileLocationKey;
-extern NSString * const FHSProfileDescriptionKey;
+#import "FHSDefines.h"
 
 @interface FHSTwitterEngine : NSObject
 
@@ -284,6 +251,13 @@ extern NSString * const FHSProfileDescriptionKey;
 //
 // Login and Auth
 //
+
+// OAuth
+- (id)getRequestToken;
+- (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken;
+
+// xAuth
+- (NSError *)authenticateWithUsername:(NSString *)username password:(NSString *)password;
 
 // Access Token Mangement
 - (void)clearAccessToken;

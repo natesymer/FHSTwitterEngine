@@ -28,7 +28,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 #import <CommonCrypto/CommonHMAC.h>
-#import <objc/runtime.h>
 #import <sys/socket.h>
 #import <netinet/in.h>
 #import <ifaddrs.h>
@@ -38,143 +37,7 @@
 #import "NSError+FHSTE.h"
 #import "NSData+FHSTE.h"
 #import "NSString+FHSTE.h"
-
-static NSURLRequestCachePolicy const cachePolicy = NSURLRequestReloadRevalidatingCacheData;
-
-static float const streamingTimeoutInterval = 30.0f;
-
-NSString * const FHSProfileBackgroundColorKey = @"profile_background_color";
-NSString * const FHSProfileLinkColorKey = @"profile_link_color";
-NSString * const FHSProfileSidebarBorderColorKey = @"profile_sidebar_border_color";
-NSString * const FHSProfileSidebarFillColorKey = @"profile_sidebar_fill_color";
-NSString * const FHSProfileTextColorKey = @"profile_text_color";
-
-NSString * const FHSProfileNameKey = @"name";
-NSString * const FHSProfileURLKey = @"url";
-NSString * const FHSProfileLocationKey = @"location";
-NSString * const FHSProfileDescriptionKey = @"description";
-
-
-
-static NSString * const authBlockKey = @"FHSTwitterEngineOAuthCompletion";
-
-//
-// URL constants
-//
-
-static NSString * const url_search_tweets = @"https://api.twitter.com/1.1/search/tweets.json";
-
-static NSString * const url_users_search = @"https://api.twitter.com/1.1/users/search.json";
-static NSString * const url_users_show = @"https://api.twitter.com/1.1/users/show.json";
-static NSString * const url_users_report_spam = @"https://api.twitter.com/1.1/users/report_spam.json";
-static NSString * const url_users_lookup = @"https://api.twitter.com/1.1/users/lookup.json";
-
-static NSString * const url_lists_create = @"https://api.twitter.com/1.1/lists/create.json";
-static NSString * const url_lists_show = @"https://api.twitter.com/1.1/lists/show.json";
-static NSString * const url_lists_update = @"https://api.twitter.com/1.1/lists/update.json";
-static NSString * const url_lists_members = @"https://api.twitter.com/1.1/lists/members.json";
-static NSString * const url_lists_members_destroy_all = @"https://api.twitter.com/1.1/lists/members/destroy_all.json";
-static NSString * const url_lists_members_create_all = @"https://api.twitter.com/1.1/lists/members/create_all.json";
-static NSString * const url_lists_statuses = @"https://api.twitter.com/1.1/lists/statuses.json";
-static NSString * const url_lists_list = @"https://api.twitter.com/1.1/lists/list.json";
-
-static NSString * const url_statuses_home_timeline = @"https://api.twitter.com/1.1/statuses/home_timeline.json";
-static NSString * const url_statuses_update = @"https://api.twitter.com/1.1/statuses/update.json";
-static NSString * const url_statuses_retweets_of_me = @"https://api.twitter.com/1.1/statuses/retweets_of_me.json";
-static NSString * const url_statuses_user_timeline = @"https://api.twitter.com/1.1/statuses/user_timeline.json";
-static NSString * const url_statuses_metions_timeline = @"https://api.twitter.com/1.1/statuses/mentions_timeline.json";
-static NSString * const url_statuses_update_with_media = @"https://api.twitter.com/1.1/statuses/update_with_media.json";
-static NSString * const url_statuses_destroy = @"https://api.twitter.com/1.1/statuses/destroy.json";
-static NSString * const url_statuses_show = @"https://api.twitter.com/1.1/statuses/show.json";
-
-static NSString * const url_blocks_exists = @"https://api.twitter.com/1.1/blocks/exists.json";
-static NSString * const url_blocks_blocking = @"https://api.twitter.com/1.1/blocks/blocking.json";
-static NSString * const url_blocks_blocking_ids = @"https://api.twitter.com/1.1/blocks/blocking/ids.json";
-static NSString * const url_blocks_destroy = @"https://api.twitter.com/1.1/blocks/destroy.json";
-static NSString * const url_blocks_create = @"https://api.twitter.com/1.1/blocks/create.json";
-
-static NSString * const url_help_languages = @"https://api.twitter.com/1.1/help/languages.json";
-static NSString * const url_help_configuration = @"https://api.twitter.com/1.1/help/configuration.json";
-static NSString * const url_help_privacy = @"https://api.twitter.com/1.1/help/privacy.json";
-static NSString * const url_help_tos = @"https://api.twitter.com/1.1/help/tos.json";
-static NSString * const url_help_test = @"https://api.twitter.com/1.1/help/test.json";
-
-static NSString * const url_direct_messages_show = @"https://api.twitter.com/1.1/direct_messages/show.json";
-static NSString * const url_direct_messages_new = @"https://api.twitter.com/1.1/direct_messages/new.json";
-static NSString * const url_direct_messages_sent = @"https://api.twitter.com/1.1/direct_messages/sent.json";
-static NSString * const url_direct_messages_destroy = @"https://api.twitter.com/1.1/direct_messages/destroy.json";
-static NSString * const url_direct_messages = @"https://api.twitter.com/1.1/direct_messages.json";
-
-static NSString * const url_friendships_no_retweets_ids = @"https://api.twitter.com/1.1/friendships/no_retweets/ids.json";
-static NSString * const url_friendships_update = @"https://api.twitter.com/1.1/friendships/update.json";
-static NSString * const url_friendships_outgoing = @"https://api.twitter.com/1.1/friendships/outgoing.json";
-static NSString * const url_friendships_incoming = @"https://api.twitter.com/1.1/friendships/incoming.json";
-static NSString * const url_friendships_lookup = @"https://api.twitter.com/1.1/friendships/lookup.json";
-static NSString * const url_friendships_destroy = @"https://api.twitter.com/1.1/friendships/destroy.json";
-static NSString * const url_friendships_create = @"https://api.twitter.com/1.1/friendships/create.json";
-
-static NSString * const url_account_verify_credentials = @"https://api.twitter.com/1.1/account/verify_credentials.json";
-static NSString * const url_account_update_profile_colors = @"https://api.twitter.com/1.1/account/update_profile_colors.json";
-static NSString * const url_account_update_profile_background_image = @"https://api.twitter.com/1.1/account/update_profile_background_image.json";
-static NSString * const url_account_update_profile_image = @"https://api.twitter.com/1.1/account/update_profile_image.json";
-static NSString * const url_account_settings = @"https://api.twitter.com/1.1/account/settings.json";
-static NSString * const url_account_update_profile = @"https://api.twitter.com/1.1/account/update_profile.json";
-
-static NSString * const url_favorites_list = @"https://api.twitter.com/1.1/favorites/list.json";
-static NSString * const url_favorites_create = @"https://api.twitter.com/1.1/favorites/create.json";
-static NSString * const url_favorites_destroy = @"https://api.twitter.com/1.1/favorites/destroy.json";
-
-static NSString * const url_application_rate_limit_status = @"https://api.twitter.com/1.1/application/rate_limit_status.json";
-
-static NSString * const url_followers_ids = @"https://api.twitter.com/1.1/followers/ids.json";
-static NSString * const url_followers_list = @"https://api.twitter.com/1.1/followers/list.json";
-
-static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/ids.json";
-static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends/list.json";
-
-
-NSString * fhs_url_remove_params(NSURL *url) {
-    if (url.absoluteString.length == 0) {
-        return nil;
-    }
-    
-    NSArray *parts = [url.absoluteString componentsSeparatedByString:@"?"];
-    return (parts.count == 0)?nil:parts[0];
-}
-
-id removeNull(id rootObject) {
-    if ([rootObject isKindOfClass:[NSDictionary class]]) {
-        NSMutableDictionary *sanitizedDictionary = [NSMutableDictionary dictionaryWithDictionary:rootObject];
-        [rootObject enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-            id sanitized = removeNull(obj);
-            if (!sanitized) {
-                [sanitizedDictionary setObject:@"" forKey:key];
-            } else {
-                [sanitizedDictionary setObject:sanitized forKey:key];
-            }
-        }];
-        return [NSMutableDictionary dictionaryWithDictionary:sanitizedDictionary];
-    }
-    
-    if ([rootObject isKindOfClass:[NSArray class]]) {
-        NSMutableArray *sanitizedArray = [NSMutableArray arrayWithArray:rootObject];
-        [rootObject enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-            id sanitized = removeNull(obj);
-            if (!sanitized) {
-                [sanitizedArray replaceObjectAtIndex:[sanitizedArray indexOfObject:obj] withObject:@""];
-            } else {
-                [sanitizedArray replaceObjectAtIndex:[sanitizedArray indexOfObject:obj] withObject:sanitized];
-            }
-        }];
-        return [NSMutableArray arrayWithArray:sanitizedArray];
-    }
-
-    if ([rootObject isKindOfClass:[NSNull class]]) {
-        return (id)nil;
-    } else {
-        return rootObject;
-    }
-}
+#import "NSObject+FHSTE.h"
 
 @interface FHSTwitterEngine ()
 
@@ -647,7 +510,7 @@ id removeNull(id rootObject) {
 
 - (id)listBlockedIDs {
     NSURL *baseURL = [NSURL URLWithString:url_blocks_blocking_ids];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"stringify_ids": @"true" }];
+    return [self sendGETRequestForURL:baseURL andParams:@{ @"stringify_ids":@"true" }];
 }
 
 - (id)getLanguages {
@@ -1112,6 +975,12 @@ id removeNull(id rootObject) {
 
 - (id)uploadImageToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
     
+    //
+    //
+    // TODO: DRY this up
+    //
+    //
+    
     NSString *appropriateExtension = [imageData appropriateFileExtension];
     
     if (appropriateExtension == nil) {
@@ -1196,7 +1065,7 @@ id removeNull(id rootObject) {
     
     NSData *responseData = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
     
-    id res = removeNull([NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil]);
+    id res = [[NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil]removeNull];
     
     if (error) {
         return error;
@@ -1210,10 +1079,10 @@ id removeNull(id rootObject) {
         NSArray *errors = res[@"errors"];
         if (errors.count > 0) {
             if (errors.count > 1) {
-                return [NSError errorWithDomain:@"Multiple Errors" code:1337 userInfo:@{@"request": req}];
+                return [NSError errorWithDomain:FHSErrorDomain code:1337 userInfo:@{NSLocalizedDescriptionKey: @"Multiple errors.", @"errors": errors, @"request": req}];
             } else {
                 NSDictionary *error = errors.firstObject;
-                return [NSError errorWithDomain:error[@"message"] code:[error[@"code"] integerValue] userInfo:@{@"request": req}];
+                return [NSError errorWithDomain:FHSErrorDomain code:[error[@"code"] integerValue] userInfo:@{ NSLocalizedDescriptionKey: error[@"message"], @"request": req}];
             }
         }
     }
@@ -1323,7 +1192,7 @@ id removeNull(id rootObject) {
     NSString *initialString = [array componentsJoinedByString:@","];
     
     if (array.count <= 100) {
-        return [NSArray arrayWithObjects:initialString, nil];
+        return @[initialString];
     }
     
     int offset = 0;
@@ -1363,14 +1232,7 @@ id removeNull(id rootObject) {
 //
 
 - (void)loadAccessToken {
-    NSString *savedHttpBody = nil;
-    
-    if (_loadAccessTokenBlock) {
-        savedHttpBody = _loadAccessTokenBlock();
-    } else {
-        savedHttpBody = [[NSUserDefaults standardUserDefaults]objectForKey:@"SavedAccessHTTPBody"];
-    }
-
+    NSString *savedHttpBody = _loadAccessTokenBlock?_loadAccessTokenBlock():[[NSUserDefaults standardUserDefaults]objectForKey:@"SavedAccessHTTPBody"];
     self.accessToken = [FHSToken tokenWithHTTPResponseBody:savedHttpBody];
 }
 
@@ -1417,10 +1279,6 @@ id removeNull(id rootObject) {
     self.consumer = [FHSConsumer consumerWithKey:consumerKey secret:consumerSecret];
 }
 
-- (UIViewController *)loginControllerWithBlock:(LoginControllerBlock)block {
-    return [[FHSTwitterEngineController alloc]initWithCompletionBlock:block];
-}
-
 + (BOOL)isConnectedToInternet {
     struct sockaddr_in zeroAddress;
     bzero(&zeroAddress, sizeof(zeroAddress));
@@ -1435,7 +1293,6 @@ id removeNull(id rootObject) {
         CFRelease(reachability);
         
         if (worked) {
-            
             if ((flags & kSCNetworkReachabilityFlagsReachable) == 0) {
                 return NO;
             }
@@ -1457,6 +1314,99 @@ id removeNull(id rootObject) {
         
     }
     return NO;
+}
+
+//
+// OAuth
+//
+
+- (id)getRequestToken {
+    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPShouldHandleCookies:NO];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil];
+    
+    id retobj = [self sendRequest:request];
+    
+    if ([retobj isKindOfClass:[NSData class]]) {
+        return [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
+    }
+    
+    return retobj;
+}
+
+- (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken {
+    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPShouldHandleCookies:NO];
+    [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier];
+    
+    if (_shouldClearConsumer) {
+        self.shouldClearConsumer = NO;
+        self.consumer = nil;
+    }
+    
+    id retobj = [self sendRequest:request];
+    
+    if ([retobj isKindOfClass:[NSError class]]) {
+        return NO;
+    }
+    
+    NSString *response = [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
+    
+    if (response.length == 0) {
+        return NO;
+    }
+    
+    [self storeAccessToken:response];
+    
+    return YES;
+}
+
+//
+// XAuth
+//
+
+- (NSError *)authenticateWithUsername:(NSString *)username password:(NSString *)password {
+    if (password.length == 0) {
+        return [NSError badRequestError];
+    } else if (username.length == 0) {
+        return [NSError badRequestError];
+    }
+    
+    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPShouldHandleCookies:NO];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil];
+    
+    // generate the POST body...
+    
+    NSString *bodyString = [NSString stringWithFormat:@"x_auth_mode=client_auth&x_auth_username=%@&x_auth_password=%@",username,password];
+    request.HTTPBody = [bodyString dataUsingEncoding:NSUTF8StringEncoding];
+    
+    if (_shouldClearConsumer) {
+        self.shouldClearConsumer = NO;
+        self.consumer = nil;
+    }
+    
+    id ret = [self sendRequest:request];
+    
+    if ([ret isKindOfClass:[NSError class]]) {
+        return ret;
+    } else if ([ret isKindOfClass:[NSData class]]) {
+        NSString *httpBody = [[NSString alloc]initWithData:(NSData *)ret encoding:NSUTF8StringEncoding];
+        
+        if (httpBody.length > 0) {
+            [self storeAccessToken:httpBody];
+        } else {
+            return [NSError errorWithDomain:FHSErrorDomain code:422 userInfo:@{NSLocalizedDescriptionKey:@"The request was well-formed but was unable to be followed due to semantic errors.", @"request":request}];
+        }
+    }
+    
+    return nil;
 }
 
 @end
