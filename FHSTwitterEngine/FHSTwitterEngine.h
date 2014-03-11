@@ -32,6 +32,12 @@
 #import "FHSOAuthModel.h"
 #import "FHSDefines.h"
 
+#import "NSError+FHSTE.h"
+#import "NSData+FHSTE.h"
+#import "NSString+FHSTE.h"
+#import "NSObject+FHSTE.h"
+#import "NSURL+FHSTE.h"
+
 @interface FHSTwitterEngine : NSObject
 
 //
@@ -278,8 +284,11 @@
 
 + (BOOL)isConnectedToInternet;
 
+@property (assign, nonatomic) BOOL shouldClearConsumer;
+
 @property (nonatomic, assign) BOOL includeEntities;
 @property (nonatomic, strong) FHSToken *accessToken;
+@property (strong, nonatomic) FHSConsumer *consumer;
 @property (nonatomic, strong) NSDateFormatter *dateFormatter;
 
 // Blocks to load the access token or store the access token

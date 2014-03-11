@@ -32,19 +32,9 @@
 #import <netinet/in.h>
 #import <ifaddrs.h>
 
+// These are internal
 #import "FHSStream.h"
 #import "FHSTwitterEngine+Requests.h"
-#import "NSError+FHSTE.h"
-#import "NSData+FHSTE.h"
-#import "NSString+FHSTE.h"
-#import "NSObject+FHSTE.h"
-
-@interface FHSTwitterEngine ()
-
-@property (strong, nonatomic) FHSConsumer *consumer;
-@property (assign, nonatomic) BOOL shouldClearConsumer;
-
-@end
 
 @implementation FHSTwitterEngine
 

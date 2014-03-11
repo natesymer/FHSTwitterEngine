@@ -16,6 +16,7 @@
     self.viewController = [[ViewController alloc]init];
     _window.rootViewController = _viewController;
     [_window makeKeyAndVisible];
+    NSLog(@"%@",@(time(nil)).stringValue);
     return YES;
 }
 

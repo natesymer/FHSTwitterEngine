@@ -6,17 +6,14 @@
 //  Copyright (c) 2014 Nathaniel Symer. All rights reserved.
 //
 
-#import <CommonCrypto/CommonCrypto.h>
-
 #import "FHSTwitterEngine+Requests.h"
-#import "FHSTwitterEngine.m"
-#import "NSURL+FHSTE.h"
+#import <CommonCrypto/CommonHMAC.h>
 
 @implementation FHSTwitterEngine (Requests)
 
 - (id)sendRequest:(NSURLRequest *)request {
     
-    if (_shouldClearConsumer) {
+    if (self.shouldClearConsumer) {
         self.shouldClearConsumer = NO;
         self.consumer = nil;
     }
@@ -46,12 +43,12 @@
 }
 
 - (void)signRequest:(NSMutableURLRequest *)request {
-    [self signRequest:request withToken:_accessToken.key tokenSecret:_accessToken.secret verifier:nil];
+    [self signRequest:request withToken:self.accessToken.key tokenSecret:self.accessToken.secret verifier:nil];
 }
 
 - (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString {
     
-    NSString *consumerKey = _consumer.key.fhs_URLEncode;
+    NSString *consumerKey = self.consumer.key.fhs_URLEncode;
     NSString *nonce = [NSString fhs_UUID];
     NSString *timestamp = [NSString stringWithFormat:@"%ld",time(nil)];
     NSString *urlWithoutParams = request.URL.absoluteStringWithoutParameters.fhs_URLEncode;
@@ -104,7 +101,7 @@
     
     NSString *tokenSecretSantized = (tokenSecretString.length > 0)?tokenSecretString.fhs_URLEncode:@""; // this way a nil token won't make a bad signature
     
-    NSString *secret = [NSString stringWithFormat:@"%@&%@",_consumer.secret.fhs_URLEncode,tokenSecretSantized];
+    NSString *secret = [NSString stringWithFormat:@"%@&%@",self.consumer.secret.fhs_URLEncode,tokenSecretSantized];
     
     NSData *secretData = [secret dataUsingEncoding:NSUTF8StringEncoding];
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
