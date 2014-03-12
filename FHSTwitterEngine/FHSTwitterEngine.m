@@ -969,49 +969,17 @@
 
 - (id)uploadImageDataToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
     
-    //
-    //
-    // TODO: DRY this up
-    //
-    //
-    
     NSString *appropriateExtension = [imageData appropriateFileExtension];
     
     if (appropriateExtension == nil) {
         return [NSError badRequestError];
     }
     
-    NSString *nonce = [NSString fhs_UUID];
-    NSString *timestamp = @(time(nil)).stringValue;
-    
-    NSMutableArray *parameterPairs = [NSMutableArray arrayWithCapacity:6];
-    [parameterPairs addObject:[NSString stringWithFormat:@"oauth_consumer_key=%@",_consumer.key.fhs_URLEncode]];
-    [parameterPairs addObject:@"oauth_signature_method=HMAC-SHA1"];
-    [parameterPairs addObject:[NSString stringWithFormat:@"oauth_nonce=%@",nonce.fhs_URLEncode]];
-    [parameterPairs addObject:[NSString stringWithFormat:@"oauth_timestamp=%@",timestamp.fhs_URLEncode]];
-    [parameterPairs addObject:@"oauth_version=1.0"];
-    [parameterPairs addObject:[NSString stringWithFormat:@"oauth_token=%@",_accessToken.key]];
-    
-    NSArray *sortedPairs = [parameterPairs sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
-    NSString *normalizedRequestParameters = [sortedPairs componentsJoinedByString:@"&"];
-    
-    NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@", @"GET", [@"https://api.twitter.com/1.1/account/verify_credentials.json" fhs_URLEncode],normalizedRequestParameters.fhs_URLEncode];
-    
-    NSString *secretForSigning = [NSString stringWithFormat:@"%@&%@", _consumer.secret.fhs_URLEncode, _accessToken.secret.fhs_URLEncode];
-    
-    NSData *secretData = [secretForSigning dataUsingEncoding:NSUTF8StringEncoding];
-    NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
-    unsigned char result[20];
-	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
-    NSString *signature = [[NSData dataWithBytes:result length:20]base64Encode];
-    
-    NSString *oauthHeaders = [NSString stringWithFormat:@"OAuth realm=\"%@\", oauth_consumer_key=\"%@\", oauth_token=\"%@\", oauth_signature_method=\"HMAC-SHA1\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"", @"http://api.twitter.com/".fhs_URLEncode, _consumer.key.fhs_URLEncode, _accessToken.key.fhs_URLEncode, signature.fhs_URLEncode, timestamp, nonce];
-    
-    
+    NSString *verifyURL = @"https://api.twitter.com/1.1/account/verify_credentials.json";
+
+    NSString *oauthHeaders = [self generateOAuthHeaderForURL:[NSURL URLWithString:verifyURL] HTTPMethod:@"GET" withToken:_accessToken.key tokenSecret:_accessToken.secret verifier:nil realm:@"http://api.twitter.com/".fhs_URLEncode];
     
     NSURL *url = [NSURL URLWithString:@"http://api.twitpic.com/2/upload.json"];
-
-    NSString *verifyURL = @"https://api.twitter.com/1.1/account/verify_credentials.json";
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
     [req setHTTPMethod:@"POST"];
     [req setValue:oauthHeaders forHTTPHeaderField:@"X-Verify-Credentials-Authorization"];
@@ -1026,7 +994,7 @@
                              @"key": twitPicAPIKey,
                              @"media": @{
                                           @"type": @"file",
-                                          @"filename": [NSString stringWithFormat:@"%@.%@",nonce,appropriateExtension],
+                                          @"filename": [NSString stringWithFormat:@"%@.%@",[NSString fhs_UUID],appropriateExtension],
                                           @"data": imageData,
                                           @"mimetype": [NSString stringWithFormat:@"image/%@",appropriateExtension]
                                         }

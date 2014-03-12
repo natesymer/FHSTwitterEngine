@@ -11,6 +11,8 @@
 #import "FHSTwitterEngineController.h"
 #import "FHSTwitterEngine+Requests.h"
 
+static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
+
 @interface ViewController () <UIAlertViewDelegate, UITableViewDataSource, UITableViewDelegate>
 
 @property (nonatomic, strong) UITableView *theTableView;
