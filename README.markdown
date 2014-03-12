@@ -129,6 +129,7 @@ You can [email](mailto:nate@natesymer.com) me with suggestions or open an [issue
 - Add license
 - Create a CocoaPod
 - Make demo universal
+- Improve demo for XAuth
 
 **Debugging 101 for outsource developers**
 
