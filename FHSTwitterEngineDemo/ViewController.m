@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "FHSTwitterEngine.h"
 #import "FHSTwitterEngineController.h"
+#import "FHSTwitterEngine+Requests.h"
 
 @interface ViewController () <UIAlertViewDelegate, UITableViewDataSource, UITableViewDelegate>
 

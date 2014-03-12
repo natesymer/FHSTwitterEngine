@@ -85,6 +85,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
                 dispatch_after(popTime, dispatch_get_main_queue(),^(void) {
                     @autoreleasepool {
                         [self dismissViewControllerAnimated:YES completion:^(void){
+                            NSLog(@"Error: %@",res);
                             if (_block) {
                                 _block(FHSTwitterEngineControllerResultFailed);
                             }
