@@ -280,6 +280,10 @@
 // never call -[FHSTwitterEngine init] directly.
 + (FHSTwitterEngine *)sharedEngine;
 
+// Singleton for a date formatter that
+// Is configured to parse Twitter's dates
++ (NSDateFormatter *)dateFormatter;
+
 + (BOOL)isConnectedToInternet;
 
 @property (assign, nonatomic) BOOL shouldClearConsumer;
@@ -287,7 +291,7 @@
 @property (nonatomic, assign) BOOL includeEntities;
 @property (nonatomic, strong) FHSToken *accessToken;
 @property (strong, nonatomic) FHSConsumer *consumer;
-@property (nonatomic, strong) NSDateFormatter *dateFormatter;
+//@property (nonatomic, strong) NSDateFormatter *dateFormatter;
 
 // Blocks to load the access token or store the access token
 @property (nonatomic, copy) StoreAccessTokenBlock storeAccessTokenBlock;

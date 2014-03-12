@@ -38,6 +38,12 @@
 
 @implementation FHSTwitterEngine
 
+//
+// Most of these methods are
+// implementations of the
+// Twitter API resources
+//
+
 - (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor {
     
     if (user.length == 0) {
@@ -92,12 +98,14 @@
     
     NSURL *baseURL = [NSURL URLWithString:url_search_tweets];
     
-    NSMutableDictionary *params = [@{ @"include_entities":(_includeEntities?@"true":@"false"), @"count":@(count).stringValue, @"q":q } mutableCopy];
+    NSMutableDictionary *params = @{ @"include_entities":(_includeEntities?@"true":@"false"), @"count":@(count).stringValue, @"q":q }.mutableCopy;
     
-    [_dateFormatter setDateFormat:@"YYYY-MM-DD"];
-    params[@"until"] = [_dateFormatter stringFromDate:untilDate];
-    [_dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss ZZZZ yyyy"];
-
+    if (untilDate) {
+        NSDateFormatter *formatter = FHSTwitterEngine.dateFormatter.copy;
+        formatter.dateFormat = @"YYYY-MM-DD";
+        params[@"until"] = [formatter stringFromDate:untilDate];
+    }
+    
     if (resultType == FHSTwitterEngineResultTypeMixed) {
         params[@"result_type"] = @"mixed";
     } else if (resultType == FHSTwitterEngineResultTypeRecent) {
@@ -967,6 +975,8 @@
     return [self uploadImageDataToTwitPic:UIImagePNGRepresentation(image) withMessage:message twitPicAPIKey:twitPicAPIKey];
 }
 
+// Works by generating auth for twitter
+// Then sending it to TwitPic
 - (id)uploadImageDataToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
     
     NSString *appropriateExtension = [imageData appropriateFileExtension];
@@ -1027,7 +1037,8 @@
 // check out the streaming parameters here:
 // https://dev.twitter.com/docs/streaming-apis/parameters
 
-- (NSString *)generateTrackParameter:(NSArray *)keywords {
+// This makes sure all track keywords are valid
+- (NSString *)sanitizeTrackParameter:(NSArray *)keywords {
     NSMutableArray *sanitized = [NSMutableArray arrayWithCapacity:keywords.count];
     
     for (NSString *string in keywords) {
@@ -1048,7 +1059,7 @@
     }
     
     if (keywords.count > 0) {
-        params[@"track"] = [self generateTrackParameter:keywords];
+        params[@"track"] = [self sanitizeTrackParameter:keywords];
     }
     
     if (locBox.count == 4) {
@@ -1076,7 +1087,7 @@
     }
     
     if (keywordsValid) {
-        params[@"track"] = [self generateTrackParameter:keywords];
+        params[@"track"] = [self sanitizeTrackParameter:keywords];
     }
     
     if (locBoxValid) {
@@ -1094,18 +1105,20 @@
     [[FHSStream streamWithURL:@"https://stream.twitter.com/1.1/statuses/firehose.json" httpMethod:@"GET" parameters:nil timeout:streamingTimeoutInterval block:block]start];
 }
 
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        // Twitter API datestamps are UTC
-        // Don't question this code.
-        self.dateFormatter = [[NSDateFormatter alloc]init];
-        _dateFormatter.locale = [[NSLocale alloc]initWithLocaleIdentifier:@"en_US"];
-        _dateFormatter.dateStyle = NSDateFormatterLongStyle;
-        _dateFormatter.formatterBehavior = NSDateFormatterBehavior10_4;
-        _dateFormatter.dateFormat = @"EEE MMM dd HH:mm:ss ZZZZ yyyy";
-    }
-    return self;
+// Twitter API datestamps are UTC
+// Set up the date formatter once. Allocating a
+// new one takes a _long_ time
++ (NSDateFormatter *)dateFormatter {
+    static NSDateFormatter *formatter = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        formatter = [[NSDateFormatter alloc]init];
+        formatter.locale = [[NSLocale alloc]initWithLocaleIdentifier:@"en_US"];
+        formatter.dateStyle = NSDateFormatterLongStyle;
+        formatter.formatterBehavior = NSDateFormatterBehavior10_4;
+        formatter.dateFormat = @"EEE MMM dd HH:mm:ss ZZZZ yyyy";
+    });
+    return formatter;
 }
 
 + (FHSTwitterEngine *)sharedEngine {
