@@ -34,7 +34,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     _theTableView.scrollIndicatorInsets = _theTableView.contentInset;
     [self.view addSubview:_theTableView];
     
-    UINavigationBar *bar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, 320, (UIDevice.currentDevice.systemVersion.floatValue >= 7.0f)?64:44)];
+    UINavigationBar *bar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, (UIDevice.currentDevice.systemVersion.floatValue >= 7.0f)?64:44)];
     bar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"FHSTwitterEngine"];
 	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"XAuth" style:UIBarButtonItemStylePlain target:self action:@selector(loginXAuth)];
