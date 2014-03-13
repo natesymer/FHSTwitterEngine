@@ -1276,6 +1276,10 @@
     [request setHTTPShouldHandleCookies:NO];
     
     [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil extraParameters:reverseAuth?@{@"x_auth_mode": @"reverse_auth"}:nil];
+
+    if (reverseAuth) {
+        request.HTTPBody = [@"x_auth_mode=reverse_auth" dataUsingEncoding:NSUTF8StringEncoding];
+    }
     
     id retobj = [self sendRequest:request];
     

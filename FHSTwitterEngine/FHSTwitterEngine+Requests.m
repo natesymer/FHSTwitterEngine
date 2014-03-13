@@ -49,8 +49,6 @@
     
     // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
     // build a sorted array of both request parameters and OAuth header parameters
-    
-    // Hashmaps like NSDictionary organize their keys alphabetically. SCORE!
     NSMutableDictionary *oauth = @{
                                    @"oauth_consumer_key": self.consumer.key.fhs_URLEncode,
                                    @"oauth_signature_method": @"HMAC-SHA1",
@@ -78,7 +76,7 @@
     NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:oauth.count+extraParams.count];
     
     [oauth enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
-        NSString *pair = [NSString stringWithFormat:@"%@=%@",key.fhs_URLEncode, obj.fhs_URLEncode];
+        NSString *pair = [NSString stringWithFormat:@"%@=%@",key, obj];
         [paramPairs addObject:pair];
     }];
     
@@ -88,12 +86,14 @@
     
     if (extraParams.count > 0) {
         [extraParams enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
-            NSString *pair = [NSString stringWithFormat:@"%@=%@",key.fhs_URLEncode, obj.fhs_URLEncode];
+            NSString *pair = [NSString stringWithFormat:@"%@=%@",key, obj];
             [paramPairs addObject:pair];
         }];
     }
     
     [paramPairs sortUsingSelector:@selector(compare:)];
+    
+    // Whew, that's over
 
     NSString *normalizedRequestParameters = [paramPairs componentsJoinedByString:@"&"].fhs_URLEncode;
 
