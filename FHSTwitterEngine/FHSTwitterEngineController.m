@@ -109,7 +109,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 }
 
 - (void)pasteboardChanged:(NSNotification *)note {
-	if (![note.userInfo objectForKey:UIPasteboardChangedTypesAddedKey]) {
+	if (!(note.userInfo)[UIPasteboardChangedTypesAddedKey]) {
         return;
     }
     

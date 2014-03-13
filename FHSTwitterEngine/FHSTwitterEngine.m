@@ -1145,7 +1145,7 @@
     NSMutableArray *reqStrs = [NSMutableArray array];
     
     for (int i = 1; i <= numberOfStrings; ++i) {
-        NSString *ninetyNinththItem = (NSString *)[array objectAtIndex:(i*100)-1];
+        NSString *ninetyNinththItem = (NSString *)array[(i*100)-1];
         NSRange range = [initialString rangeOfString:ninetyNinththItem];
         int endOffset = range.location+range.length;
         NSRange rangeOfAString = NSMakeRange(offset, endOffset-offset);

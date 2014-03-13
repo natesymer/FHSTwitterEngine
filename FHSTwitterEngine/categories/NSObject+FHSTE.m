@@ -25,9 +25,9 @@ id removeNull(id rootObject) {
         [rootObject enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             id sanitized = removeNull(obj);
             if (!sanitized) {
-                [sanitizedArray replaceObjectAtIndex:[sanitizedArray indexOfObject:obj] withObject:@""];
+                sanitizedArray[[sanitizedArray indexOfObject:obj]] = @"";
             } else {
-                [sanitizedArray replaceObjectAtIndex:[sanitizedArray indexOfObject:obj] withObject:sanitized];
+                sanitizedArray[[sanitizedArray indexOfObject:obj]] = sanitized;
             }
         }];
         return [NSMutableArray arrayWithArray:sanitizedArray];
