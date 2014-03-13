@@ -258,6 +258,7 @@
 
 // OAuth
 - (id)getRequestToken;
+- (id)getRequestTokenReverseAuth:(BOOL)reverseAuth; // for use with the iOS integrated twitter accounts
 - (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken;
 
 // xAuth
@@ -267,6 +268,7 @@
 - (void)clearAccessToken;
 - (void)loadAccessToken;
 - (BOOL)isAuthorized;
+- (void)storeAccessToken:(NSString *)accessTokenZ; // store your own HTTP body
 
 // API Key management
 - (void)clearConsumer;

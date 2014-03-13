@@ -10,6 +10,7 @@
 #import "FHSTwitterEngine.h"
 #import "FHSTwitterEngineController.h"
 #import "FHSTwitterEngine+Requests.h"
+#import "FHSTwitterEngine+iOS.h"
 
 static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 
@@ -195,11 +196,16 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 }
 
 - (void)loginXAuth {
-    UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"xAuth Login" message:@"Enter your Twitter login credentials:" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Login", nil];
+    /*UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"xAuth Login" message:@"Enter your Twitter login credentials:" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Login", nil];
     [av setAlertViewStyle:UIAlertViewStyleLoginAndPasswordInput];
     [[av textFieldAtIndex:0]setPlaceholder:@"Username"];
     [[av textFieldAtIndex:1]setPlaceholder:@"Password"];
-    [av show];
+    [av show];*/
+    [FHSTwitterEngine.sharedEngine reverseAuthWithAccountSelectionBlock:^ACAccount *(NSArray *accounts) {
+        return accounts.firstObject;
+    } completion:^(BOOL success) {
+        NSLog(@"Reverse auth %@",success?@"succeeded":@"failed");
+    }];
 }
 
 - (void)logout {

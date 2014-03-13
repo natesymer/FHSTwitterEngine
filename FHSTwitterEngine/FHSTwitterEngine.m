@@ -27,7 +27,9 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import <SystemConfiguration/SystemConfiguration.h>
-#import <CommonCrypto/CommonHMAC.h>
+//#import <CommonCrypto/CommonHMAC.h>
+#import <Twitter/Twitter.h>
+#import <Accounts/Accounts.h>
 #import <sys/socket.h>
 #import <netinet/in.h>
 #import <ifaddrs.h>
@@ -986,8 +988,8 @@
     }
     
     NSString *verifyURL = @"https://api.twitter.com/1.1/account/verify_credentials.json";
-
-    NSString *oauthHeaders = [self generateOAuthHeaderForURL:[NSURL URLWithString:verifyURL] HTTPMethod:@"GET" withToken:_accessToken.key tokenSecret:_accessToken.secret verifier:nil realm:@"http://api.twitter.com/".fhs_URLEncode];
+    
+    NSString *oauthHeaders = [self generateOAuthHeaderForURL:[NSURL URLWithString:verifyURL] HTTPMethod:@"GET" withToken:_accessToken.key tokenSecret:_accessToken.secret verifier:nil realm:@"http://api.twitter.com/".fhs_URLEncode extraParameters:nil];
     
     NSURL *url = [NSURL URLWithString:@"http://api.twitpic.com/2/upload.json"];
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
@@ -1264,11 +1266,15 @@
 //
 
 - (id)getRequestToken {
-    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"];
+    return [self getRequestTokenReverseAuth:NO];
+}
+
+- (id)getRequestTokenReverseAuth:(BOOL)reverseAuth {
+    NSURL *url = [NSURL URLWithString:url_oauth_request_token];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil extraParameters:reverseAuth?@{@"x_auth_mode": @"reverse_auth"}:nil];
     
     id retobj = [self sendRequest:request];
     
@@ -1280,11 +1286,11 @@
 }
 
 - (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken {
-    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
+    NSURL *url = [NSURL URLWithString:url_oauth_access_token];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier realm:nil];
+    [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier realm:nil extraParameters:nil];
     
     if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
@@ -1319,11 +1325,11 @@
         return [NSError badRequestError];
     }
     
-    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
+    NSURL *url = [NSURL URLWithString:url_oauth_access_token];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil extraParameters:nil];
     
     // generate the POST body...
     

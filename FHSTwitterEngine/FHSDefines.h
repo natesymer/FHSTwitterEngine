@@ -44,6 +44,9 @@ static NSString * const FHSProfileDescriptionKey = @"description";
 // URL constants
 //
 
+static NSString * const url_oauth_access_token = @"https://api.twitter.com/oauth/access_token";
+static NSString * const url_oauth_request_token = @"https://api.twitter.com/oauth/request_token";
+
 static NSString * const url_search_tweets = @"https://api.twitter.com/1.1/search/tweets.json";
 
 static NSString * const url_users_search = @"https://api.twitter.com/1.1/users/search.json";

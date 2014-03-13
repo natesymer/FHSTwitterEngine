@@ -42,11 +42,7 @@
     return data;
 }
 
-//
-// Write this out
-//
-
-- (NSString *)generateOAuthHeaderForURL:(NSURL *)URL HTTPMethod:(NSString *)httpMethod withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm {
+- (NSString *)generateOAuthHeaderForURL:(NSURL *)URL HTTPMethod:(NSString *)httpMethod withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm extraParameters:(NSDictionary *)extraParams {
     
     NSString *nonce = @"3t723qheoqn49q8cpnfhq89wprqc89nqy839qy8q2"; //[NSString fhs_UUID];
     NSString *urlWithoutParams = URL.absoluteStringWithoutParameters.fhs_URLEncode;
@@ -62,6 +58,10 @@
                                    @"oauth_nonce": nonce,
                                    @"oauth_version": @"1.0"
                                    }.mutableCopy;
+    
+    if (extraParams.count > 0) {
+        [oauth addEntriesFromDictionary:extraParams];
+    }
     
     if (realm.length > 0) {
         oauth[@"oauth_realm"] = realm;
@@ -120,11 +120,11 @@
 }
 
 - (void)signRequest:(NSMutableURLRequest *)request {
-    [self signRequest:request withToken:self.accessToken.key tokenSecret:self.accessToken.secret verifier:nil realm:nil];
+    [self signRequest:request withToken:self.accessToken.key tokenSecret:self.accessToken.secret verifier:nil realm:nil extraParameters:nil];
 }
 
-- (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm {
-    NSString *oauthHeaderAlt = [self generateOAuthHeaderForURL:request.URL HTTPMethod:request.HTTPMethod withToken:tokenString tokenSecret:tokenSecretString verifier:verifierString realm:realm];
+- (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm extraParameters:(NSDictionary *)extraParams {
+    NSString *oauthHeaderAlt = [self generateOAuthHeaderForURL:request.URL HTTPMethod:request.HTTPMethod withToken:tokenString tokenSecret:tokenSecretString verifier:verifierString realm:realm extraParameters:extraParams];
     [request setValue:oauthHeaderAlt forHTTPHeaderField:@"Authorization"];
 }
 

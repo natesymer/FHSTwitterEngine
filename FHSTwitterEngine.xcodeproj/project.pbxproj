@@ -25,6 +25,9 @@
 		F17DCD1618CE006F005382F4 /* FHSTwitterEngineController.m in Sources */ = {isa = PBXBuildFile; fileRef = F17DCD1518CE006F005382F4 /* FHSTwitterEngineController.m */; };
 		F17DCD1B18CE0196005382F4 /* NSString+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F17DCD1A18CE0196005382F4 /* NSString+FHSTE.m */; };
 		F1BF9D4E18CCD06200075337 /* FHSStream.m in Sources */ = {isa = PBXBuildFile; fileRef = F1BF9D4D18CCD06200075337 /* FHSStream.m */; };
+		F1E360E418D138E000CBF03D /* FHSTwitterEngine+iOS.m in Sources */ = {isa = PBXBuildFile; fileRef = F1E360E318D138E000CBF03D /* FHSTwitterEngine+iOS.m */; };
+		F1E360E818D1513F00CBF03D /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E360E718D1513F00CBF03D /* Accounts.framework */; };
+		F1E360EA18D157EC00CBF03D /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E360E918D157EC00CBF03D /* Social.framework */; };
 		F1E39F9916645C380049DAB1 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */; };
 /* End PBXBuildFile section */
 
@@ -63,6 +66,11 @@
 		F17DCD1A18CE0196005382F4 /* NSString+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+FHSTE.m"; sourceTree = "<group>"; };
 		F1BF9D4C18CCD06200075337 /* FHSStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FHSStream.h; sourceTree = "<group>"; };
 		F1BF9D4D18CCD06200075337 /* FHSStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FHSStream.m; sourceTree = "<group>"; };
+		F1E360E218D138E000CBF03D /* FHSTwitterEngine+iOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FHSTwitterEngine+iOS.h"; sourceTree = "<group>"; };
+		F1E360E318D138E000CBF03D /* FHSTwitterEngine+iOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FHSTwitterEngine+iOS.m"; sourceTree = "<group>"; };
+		F1E360E518D1513B00CBF03D /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
+		F1E360E718D1513F00CBF03D /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
+		F1E360E918D157EC00CBF03D /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
 		F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -71,6 +79,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F1E360E818D1513F00CBF03D /* Accounts.framework in Frameworks */,
+				F1E360EA18D157EC00CBF03D /* Social.framework in Frameworks */,
 				F1E39F9916645C380049DAB1 /* SystemConfiguration.framework in Frameworks */,
 				9B31B96015E56E34003FC89D /* UIKit.framework in Frameworks */,
 				9B31B96215E56E34003FC89D /* Foundation.framework in Frameworks */,
@@ -113,6 +123,8 @@
 				9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */,
 				F17DCD0E18CDF9A2005382F4 /* FHSTwitterEngine+Requests.h */,
 				F17DCD0F18CDF9A2005382F4 /* FHSTwitterEngine+Requests.m */,
+				F1E360E218D138E000CBF03D /* FHSTwitterEngine+iOS.h */,
+				F1E360E318D138E000CBF03D /* FHSTwitterEngine+iOS.m */,
 				F17DCD1118CDFA39005382F4 /* FHSOAuthModel.h */,
 				F17DCD1218CDFA39005382F4 /* FHSOAuthModel.m */,
 				F1BF9D4C18CCD06200075337 /* FHSStream.h */,
@@ -145,6 +157,9 @@
 		9B31B95E15E56E34003FC89D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F1E360E918D157EC00CBF03D /* Social.framework */,
+				F1E360E718D1513F00CBF03D /* Accounts.framework */,
+				F1E360E518D1513B00CBF03D /* Twitter.framework */,
 				F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */,
 				9B31B95F15E56E34003FC89D /* UIKit.framework */,
 				9B31B96115E56E34003FC89D /* Foundation.framework */,
@@ -246,6 +261,7 @@
 				F1BF9D4E18CCD06200075337 /* FHSStream.m in Sources */,
 				9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */,
 				F106B12718CEA634007F68B5 /* NSObject+FHSTE.m in Sources */,
+				F1E360E418D138E000CBF03D /* FHSTwitterEngine+iOS.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
