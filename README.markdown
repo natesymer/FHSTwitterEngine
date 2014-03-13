@@ -7,13 +7,13 @@ Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](http:/
 
 `FHSTwitterEngine` can:
 
-- Authenicate using OAuth and/or xAuth.
-- Make a request to just about every API endpoint.
+- Authenicate using OAuth, xAuth, and iOS Reverse auth.
+- Make a request to just about every API resource.
 
 Why you should use `FHSTwitterEngine`:
 
 - No 3rd party dependencies
-- Works with OAuth or iOS twitter accounts
+- Authentication options
 - Shared instance
 - Scientific
 
@@ -21,8 +21,9 @@ Why you should use `FHSTwitterEngine`:
 
 1. Add the `FHSTwitterEngine` folder to your project.
 2. `#import "FHSTwitterEngine.h"` where necessary
-3. Link against `SystemConfiguration.framework` and `Twitter.framework`
-4. Enable ARC for the `FHSTwitterEngine` folder
+3. Link against `SystemConfiguration.framework`
+4. Enable ARC for the `FHSTwitterEngine` folder (if necessary)
+5. Link against `Social.framework` and `Accounts.framework` if you're using the FHSTwitterEngine+iOS category for reverse auth.
 
 **Usage:**
 
@@ -33,14 +34,33 @@ Why you should use `FHSTwitterEngine`:
  
     [[FHSTwitterEngine sharedEngine]temporarilySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
          
-> Set access token delegate (see header)
+> Set access token loading/storing blocks
 
-    [[FHSTwitterEngine sharedEngine]setDelegate:myDelegate]; 
+	FHSTwitterEngine.sharedEngine.storeAccessTokenBlock = ^(NSString *accessToken) {
+    	// save access token  
+    };
+    
+    FHSTwitterEngine.sharedEngine.loadAccessTokenBlock = ^NSString *(void) {
+    	return @"<access_token>"; // you can load it from anywhere you want!
+    };
     
 > Login via OAuth:
-    
-    UIViewController *loginController = [[FHSTwitterEngine sharedEngine]loginControllerWithCompletionHandler:^(BOOL success) {
-        NSLog(success?@"L0L success":@"O noes!!! Loggen faylur!!!");
+
+	FHSTwitterEngineController *loginController = [FHSTwitterEngineController controllerWithCompletionBlock:^(FHSTwitterEngineControllerResult result) {
+        switch (result) {
+            case FHSTwitterEngineControllerResultCancelled:
+                NSLog(@"Login Controller Cancelled");
+                break;
+            case FHSTwitterEngineControllerResultFailed:
+                NSLog(@"Login Controller Failed");
+                break;
+            case FHSTwitterEngineControllerResultSucceeded:
+                NSLog(@"Login Controller Succeeded");
+                break;
+            default:
+                break;
+        }
+        [_theTableView reloadData];
     }];
     [self presentViewController:loginController animated:YES completion:nil];
     
@@ -48,7 +68,7 @@ Why you should use `FHSTwitterEngine`:
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     	@autoreleasepool {
-    		NSError *error = [[FHSTwitterEngine sharedEngine]getXAuthAccessTokenForUsername:@"<username>" password:@"<password>"];
+    		NSError *error = [[FHSTwitterEngine sharedEngine]authenticateWithUsername:@"<username>"" password:@"<password>""];
         	// Handle error
         	dispatch_sync(dispatch_get_main_queue(), ^{
     			@autoreleasepool {
@@ -79,7 +99,7 @@ Why you should use `FHSTwitterEngine`:
     dispatch_async((dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     	@autoreleasepool {
     		id twitterData = [[FHSTwitterEngine sharedEngine]postTweet:@"Hi!"];
-    		// Handle twitterData (see "About GET Requests")
+    		// Handle twitterData
     		dispatch_sync(dispatch_get_main_queue(), ^{
     			@autoreleasepool {
         			// Update UI
@@ -121,8 +141,8 @@ You can [email](mailto:nate@natesymer.com) me with suggestions or open an [issue
 - Tests
 - <strike>Add license</strike>
 - <strike>Create a CocoaPod</strike> Add podspec to cocoapods
-- Make demo universal
-- Clean up FHSTwitterEngine.{h,m}
+- <strike>Make demo universal</strike>
+- <strike>Split up FHSTwitterEngine.{h,m}</strike>
 
 **Debugging 101 for outsource developers**
 
