@@ -14,7 +14,7 @@
 
 static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 
-@interface ViewController () <UIAlertViewDelegate, UITableViewDataSource, UITableViewDelegate>
+@interface ViewController () <UIAlertViewDelegate, UITableViewDataSource, UITableViewDelegate, UIActionSheetDelegate>
 
 @property (nonatomic, strong) UITableView *theTableView;
 @property (nonatomic, assign) BOOL isStreaming;
@@ -38,9 +38,10 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     UINavigationBar *bar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, (UIDevice.currentDevice.systemVersion.floatValue >= 7.0f)?64:44)];
     bar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"FHSTwitterEngine"];
-	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"XAuth" style:UIBarButtonItemStylePlain target:self action:@selector(loginXAuth)];
-    navItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"OAuth" style:UIBarButtonItemStylePlain target:self action:@selector(loginOAuth)];
-	[bar pushNavigationItem:navItem animated:NO];
+	
+    navItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"Auth" style:UIBarButtonItemStylePlain target:self action:@selector(auth)];
+    
+    [bar pushNavigationItem:navItem animated:NO];
     [self.view addSubview:bar];
     
     [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"Xg3ACDprWAH8loEPjMzRg" andSecret:@"9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0"];
@@ -109,6 +110,25 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     return cell;
 }
 
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+    switch (buttonIndex) {
+        case 0: //OAuth
+            [self loginOAuth];
+            break;
+            
+        case 1:
+            [self loginIOS];
+            break;
+            
+        case 2:
+            [self loginXAuth];
+            break;
+            
+        default:
+            break;
+    }
+}
+
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if ([alertView.title isEqualToString:@"Tweet"]) {
         [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
@@ -175,6 +195,29 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     return [[NSUserDefaults standardUserDefaults]objectForKey:@"SavedAccessHTTPBody"];
 }
 
+
+- (void)auth {
+    UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:@"FHSTwitterEngine Auth Methods" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil  otherButtonTitles:@"OAuth", @"iOS Auth", @"XAuth", nil];
+    [sheet showInView:self.view];
+}
+
+- (void)loginIOS {
+    // Check if user has set up Twitter
+    if (![SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter]) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Twitter is no setup on this device, change this in Settings." delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles: nil];
+        [alert show];
+        return;
+    }
+    
+    [FHSTwitterEngine.sharedEngine reverseAuthWithAccountSelectionBlock:^ACAccount *(NSArray *accounts) {
+        return accounts.firstObject;
+    } completion:^(BOOL success) {
+        NSLog(@"Reverse auth %@",success?@"succeeded":@"failed");
+        [_theTableView reloadData];
+        NSLog(@"%@",FHSTwitterEngine.sharedEngine.accessToken.key);
+    }];
+}
+
 - (void)loginOAuth {
     FHSTwitterEngineController *loginController = [FHSTwitterEngineController controllerWithCompletionBlock:^(FHSTwitterEngineControllerResult result) {
         switch (result) {
@@ -196,18 +239,11 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 }
 
 - (void)loginXAuth {
-    /*UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"xAuth Login" message:@"Enter your Twitter login credentials:" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Login", nil];
+    UIAlertView *av = [[UIAlertView alloc]initWithTitle:@"xAuth Login" message:@"Enter your Twitter login credentials:" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Login", nil];
     [av setAlertViewStyle:UIAlertViewStyleLoginAndPasswordInput];
     [[av textFieldAtIndex:0]setPlaceholder:@"Username"];
     [[av textFieldAtIndex:1]setPlaceholder:@"Password"];
-    [av show];*/
-    [FHSTwitterEngine.sharedEngine reverseAuthWithAccountSelectionBlock:^ACAccount *(NSArray *accounts) {
-        return accounts.firstObject;
-    } completion:^(BOOL success) {
-        NSLog(@"Reverse auth %@",success?@"succeeded":@"failed");
-        [_theTableView reloadData];
-        NSLog(@"%@",FHSTwitterEngine.sharedEngine.accessToken.key);
-    }];
+    [av show];
 }
 
 - (void)logout {
