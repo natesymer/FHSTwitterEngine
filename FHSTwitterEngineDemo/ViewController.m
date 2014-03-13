@@ -112,12 +112,12 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
     switch (buttonIndex) {
-        case 0: //OAuth
+        case 0:
             [self loginOAuth];
             break;
             
         case 1:
-            [self loginIOS];
+            [self loginReverseAuth];
             break;
             
         case 2:
@@ -197,11 +197,11 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 
 
 - (void)auth {
-    UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:@"FHSTwitterEngine Auth Methods" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil  otherButtonTitles:@"OAuth", @"iOS Auth", @"XAuth", nil];
+    UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:@"FHSTwitterEngine Auth Methods" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil  otherButtonTitles:@"OAuth", @"Reverse Auth", @"XAuth", nil];
     [sheet showInView:self.view];
 }
 
-- (void)loginIOS {
+- (void)loginReverseAuth {
     // Check if user has set up Twitter
     if (![SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter]) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Twitter is no setup on this device, change this in Settings." delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles: nil];
@@ -209,12 +209,16 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
         return;
     }
     
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    
     [FHSTwitterEngine.sharedEngine reverseAuthWithAccountSelectionBlock:^ACAccount *(NSArray *accounts) {
         return accounts.firstObject;
     } completion:^(BOOL success) {
+        NSLog(@"%@",NSThread.isMainThread?@"main":@"no");
         NSLog(@"Reverse auth %@",success?@"succeeded":@"failed");
         [_theTableView reloadData];
         NSLog(@"%@",FHSTwitterEngine.sharedEngine.accessToken.key);
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     }];
 }
 

@@ -51,18 +51,22 @@
                                     req.account = accSelBlock(accounts);
                                     
                                     [req performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
-                                        if (error) {
-                                            completionBlock(NO);
-                                        } else {
-                                            NSString *httpBody = [[NSString alloc]initWithData:responseData encoding:NSUTF8StringEncoding];
-                                            
-                                            if (httpBody.length > 0) {
-                                                [self storeAccessToken:httpBody];
-                                                completionBlock(YES);
-                                            } else {
-                                                completionBlock(NO);
+                                        dispatch_sync(dispatch_get_main_queue(), ^{
+                                            @autoreleasepool {
+                                                if (error) {
+                                                    completionBlock(NO);
+                                                } else {
+                                                    NSString *httpBody = [[NSString alloc]initWithData:responseData encoding:NSUTF8StringEncoding];
+                                                    
+                                                    if (httpBody.length > 0) {
+                                                        [self storeAccessToken:httpBody];
+                                                        completionBlock(YES);
+                                                    } else {
+                                                        completionBlock(NO);
+                                                    }
+                                                }
                                             }
-                                        }
+                                        });
                                     }];
                                 }
                             });
