@@ -214,10 +214,8 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     [FHSTwitterEngine.sharedEngine reverseAuthWithAccountSelectionBlock:^ACAccount *(NSArray *accounts) {
         return accounts.firstObject;
     } completion:^(BOOL success) {
-        NSLog(@"%@",NSThread.isMainThread?@"main":@"no");
         NSLog(@"Reverse auth %@",success?@"succeeded":@"failed");
         [_theTableView reloadData];
-        NSLog(@"%@",FHSTwitterEngine.sharedEngine.accessToken.key);
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     }];
 }

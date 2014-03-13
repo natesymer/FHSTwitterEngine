@@ -24,6 +24,7 @@
     ACAccountType *twitterType = [self.accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
     
     [self.accountStore requestAccessToAccountsWithType:twitterType options:nil completion:^(BOOL granted, NSError *error) {
+        NSLog(@"%@",NSThread.isMainThread?@"main":@"bg");
         if (!granted) {
             completionBlock(NO);
         } else {
