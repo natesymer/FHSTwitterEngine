@@ -25,6 +25,7 @@
             id res = [FHSTwitterEngine.sharedEngine getRequestTokenReverseAuth:YES];
             
             if ([res isKindOfClass:[NSString class]]) {
+                NSLog(@"%@",res);
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     @autoreleasepool {
                         SLRequest *req = [SLRequest requestForServiceType:SLServiceTypeTwitter
@@ -55,8 +56,11 @@
                                         } else {
                                             NSString *httpBody = [[NSString alloc]initWithData:responseData encoding:NSUTF8StringEncoding];
                                             
+                                            NSLog(@"%@",httpBody);
+                                            
                                             if (httpBody.length > 0) {
                                                 [self storeAccessToken:httpBody];
+                                                completionBlock(YES);
                                             } else {
                                                 completionBlock(NO);
                                             }
@@ -68,6 +72,7 @@
                     }
                 });
             } else {
+                NSLog(@"Failed at specific spot: %@",res);
                 completionBlock(NO);
             }
         }

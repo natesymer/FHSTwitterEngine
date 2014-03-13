@@ -1274,6 +1274,7 @@
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
+    
     [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil extraParameters:reverseAuth?@{@"x_auth_mode": @"reverse_auth"}:nil];
     
     id retobj = [self sendRequest:request];

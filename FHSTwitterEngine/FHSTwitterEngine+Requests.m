@@ -44,7 +44,7 @@
 
 - (NSString *)generateOAuthHeaderForURL:(NSURL *)URL HTTPMethod:(NSString *)httpMethod withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm extraParameters:(NSDictionary *)extraParams {
     
-    NSString *nonce = @"3t723qheoqn49q8cpnfhq89wprqc89nqy839qy8q2"; //[NSString fhs_UUID];
+    NSString *nonce = [NSString fhs_UUID];
     NSString *urlWithoutParams = URL.absoluteStringWithoutParameters.fhs_URLEncode;
     
     // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
@@ -58,11 +58,7 @@
                                    @"oauth_nonce": nonce,
                                    @"oauth_version": @"1.0"
                                    }.mutableCopy;
-    
-    if (extraParams.count > 0) {
-        [oauth addEntriesFromDictionary:extraParams];
-    }
-    
+
     if (realm.length > 0) {
         oauth[@"oauth_realm"] = realm;
     }
@@ -74,10 +70,12 @@
             oauth[@"oauth_verifier"] = verifierString.fhs_URLEncode;
         }
     } else {
-        oauth[@"oauth_callback"] = @"oob";
+        if (extraParams.count == 0) {
+            oauth[@"oauth_callback"] = @"oob";
+        }
     }
     
-    NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:oauth.count];
+    NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:oauth.count+extraParams.count];
     
     [oauth enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
         NSString *pair = [NSString stringWithFormat:@"%@=%@",key.fhs_URLEncode, obj.fhs_URLEncode];
@@ -88,14 +86,21 @@
         [paramPairs addObjectsFromArray:[URL.query componentsSeparatedByString:@"&"]];
     }
     
+    if (extraParams.count > 0) {
+        [extraParams enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
+            NSString *pair = [NSString stringWithFormat:@"%@=%@",key.fhs_URLEncode, obj.fhs_URLEncode];
+            [paramPairs addObject:pair];
+        }];
+    }
+    
     [paramPairs sortUsingSelector:@selector(compare:)];
 
-    NSString *normalizedRequestParameters = [[paramPairs componentsJoinedByString:@"&"]fhs_URLEncode];
-    
+    NSString *normalizedRequestParameters = [paramPairs componentsJoinedByString:@"&"].fhs_URLEncode;
+
     // OAuth Spec, Section 9.1.2 "Concatenate Request Elements"
     // Sign request elements using HMAC-SHA1
     NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",httpMethod,urlWithoutParams,normalizedRequestParameters];
-
+    
     // this way a nil token won't make a bad signature
     NSString *tokenSecretSantized = (tokenSecretString.length > 0)?tokenSecretString.fhs_URLEncode:@""; // This is precicely the way that works. Don't question it.
     
@@ -105,9 +110,8 @@
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
     unsigned char result[20];
 	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
-    NSData *theData = [[[NSData dataWithBytes:result length:20]base64Encode]dataUsingEncoding:NSUTF8StringEncoding];
-    
-    oauth[@"oauth_signature"] = [[NSString alloc]initWithData:theData encoding:NSUTF8StringEncoding];
+
+    oauth[@"oauth_signature"] = [[NSData dataWithBytes:result length:20]base64Encode];
     
     NSMutableArray *oauthPairs = [NSMutableArray array];
     
@@ -115,6 +119,8 @@
         NSString *pair = [NSString stringWithFormat:@"%@=\"%@\"",key.fhs_URLEncode, obj.fhs_URLEncode];
         [oauthPairs addObject:pair];
     }];
+    
+    [oauthPairs sortUsingSelector:@selector(caseInsensitiveCompare:)];
     
     return [NSString stringWithFormat:@"OAuth %@",[oauthPairs componentsJoinedByString:@", "]];
 }
@@ -124,8 +130,9 @@
 }
 
 - (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm extraParameters:(NSDictionary *)extraParams {
-    NSString *oauthHeaderAlt = [self generateOAuthHeaderForURL:request.URL HTTPMethod:request.HTTPMethod withToken:tokenString tokenSecret:tokenSecretString verifier:verifierString realm:realm extraParameters:extraParams];
-    [request setValue:oauthHeaderAlt forHTTPHeaderField:@"Authorization"];
+    NSString *oauthHeader = [self generateOAuthHeaderForURL:request.URL HTTPMethod:request.HTTPMethod withToken:tokenString tokenSecret:tokenSecretString verifier:verifierString realm:realm extraParameters:extraParams];
+    NSLog(@"%@",oauthHeader);
+    [request setValue:oauthHeader forHTTPHeaderField:@"Authorization"];
 }
 
 - (int)parameterLengthForURL:(NSString *)url params:(NSMutableDictionary *)params {
