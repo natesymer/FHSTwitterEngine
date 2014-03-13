@@ -28,15 +28,26 @@
 // The synchronous Twitter engine that doesn’t suck!!
 //
 
+
+// Frameworks
 #import <Foundation/Foundation.h>
+
+// Models
 #import "FHSOAuthModel.h"
+
+// Constants
 #import "FHSDefines.h"
 
+// Categories
 #import "NSError+FHSTE.h"
 #import "NSData+FHSTE.h"
 #import "NSString+FHSTE.h"
 #import "NSObject+FHSTE.h"
 #import "NSURL+FHSTE.h"
+
+/**
+ Use `FHSTwitterEngine` to talk to the Twitter API.
+ */
 
 @interface FHSTwitterEngine : NSObject
 
@@ -47,15 +58,17 @@
 #pragma mark - Statuses/update
 
 /**
- Post a tweet.
- @param tweetString Tweet to post
+ Posts a tweet.
+ @param tweetString Tweet to post.
+ @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)postTweet:(NSString *)tweetString;
 
 /**
- Post a reply to a tweet.
- @param tweetString Reply
- @param inReplyToString tweet ID to reply to
+ Posts a reply to a tweet.
+ @param tweetString Reply.
+ @param inReplyToString Tweet ID to reply to
+ @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
 
@@ -63,12 +76,11 @@
 #pragma mark - Statuses/home_timeline
 
 /**
- Get timeline of tweets for authenticated user.
+ Gets a timeline of tweets for authenticated user.
  @param sinceID Timeline will return tweets with ID greater than this value (optional)
  @param count Number of tweets to retrieve
  @return Timeline of tweets
  */
-
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
 
 // help/test

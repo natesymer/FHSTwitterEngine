@@ -1,5 +1,5 @@
 //
-//  FHSOAuthLoginController.h
+//  FHSTwitterEngineController.h
 //  FHSTwitterEngine
 //
 //  Created by Nathaniel Symer on 3/10/14.
@@ -9,13 +9,17 @@
 #import <Foundation/Foundation.h>
 #import "FHSOAuthModel.h"
 
-typedef enum {
+typedef NS_ENUM(NSInteger, FHSTwitterEngineControllerResult) {
     FHSTwitterEngineControllerResultFailed,
     FHSTwitterEngineControllerResultSucceeded,
     FHSTwitterEngineControllerResultCancelled
-} FHSTwitterEngineControllerResult;
+};
 
 typedef void(^LoginControllerBlock)(FHSTwitterEngineControllerResult result);
+
+/**
+ `FHSTwitterEngineController` provides a view controller for `FHSTwitterEngine` to use OAuth.
+ */
 
 @interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate>
 
@@ -26,7 +30,42 @@ typedef void(^LoginControllerBlock)(FHSTwitterEngineControllerResult result);
 @property (nonatomic, strong) FHSToken *requestToken;
 @property (nonatomic, copy) LoginControllerBlock block;
 
+/**
+ Initializes `FHSTwitterEngineController.h` with `LoginControllerBlock` block.
+ @param block Block of type `LoginControllerBlock`
+ @return An instance of `FHSTwitterEngineController`
+ */
 - (instancetype)initWithCompletionBlock:(LoginControllerBlock)block;
+
+/**
+ TODO:
+ */
 + (FHSTwitterEngineController *)controllerWithCompletionBlock:(LoginControllerBlock)block;
 
 @end
+
+
+///----------------
+/// @name Constants
+///----------------
+
+/**
+ ## FHSTwitterEngineControllerResult
+ 
+ The following constants are provided by `FHSTwitterEngineController` as possible result.
+ 
+ enum {
+ FHSTwitterEngineControllerResultFailed,
+ FHSTwitterEngineControllerResultSucceeded,
+ FHSTwitterEngineControllerResultCancelled
+ }
+ 
+ `FHSTwitterEngineControllerResultFailed`
+ Failed authentication.
+ 
+ `FHSTwitterEngineControllerResultSucceeded`
+ Succeeded authentication.
+ 
+ `FHSTwitterEngineControllerResultCancelled`
+ Cancelled authentication.
+ */
