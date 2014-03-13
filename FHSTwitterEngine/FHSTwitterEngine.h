@@ -44,11 +44,31 @@
 // REST API
 //
 
-// statuses/update
+#pragma mark - Statuses/update
+
+/**
+ Post a tweet.
+ @param tweetString Tweet to post
+ */
 - (NSError *)postTweet:(NSString *)tweetString;
+
+/**
+ Post a reply to a tweet.
+ @param tweetString Reply
+ @param inReplyToString tweet ID to reply to
+ */
 - (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
 
-// statuses/home_timeline
+
+#pragma mark - Statuses/home_timeline
+
+/**
+ Get timeline of tweets for authenticated user.
+ @param sinceID Timeline will return tweets with ID greater than this value (optional)
+ @param count Number of tweets to retrieve
+ @return Timeline of tweets
+ */
+
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
 
 // help/test
