@@ -7,8 +7,9 @@
 //
 
 #import "FHSTwitterEngineController.h"
-#import "NSString+FHSTE.h"
 #import "FHSTwitterEngine.h"
+#import "FHSToken.h"
+#import "NSString+FHSTE.h"
 
 static NSString * const newPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
 static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";

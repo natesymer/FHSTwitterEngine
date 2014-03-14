@@ -38,6 +38,12 @@
 #import "FHSStream.h"
 #import "FHSTwitterEngine+Requests.h"
 
+@interface FHSTwitterEngine ()
+
+@property (assign, nonatomic) BOOL shouldClearConsumer;
+
+@end
+
 @implementation FHSTwitterEngine
 
 //
@@ -1192,7 +1198,7 @@
 }
 
 - (BOOL)isAuthorized {
-    if (!_consumer) {
+    if (!_consumerKey && !_consumerSecret) {
         return NO;
     }
     
@@ -1210,18 +1216,32 @@
 	self.accessToken = nil;
 }
 
+//
+// Consumer key pair manament
+//
+
 - (void)clearConsumer {
-    self.consumer = nil;
+    self.consumerKey = nil;
+    self.consumerSecret = nil;
+}
+
+- (void)clearConsumerIfNecessary {
+    if (_shouldClearConsumer) {
+        self.shouldClearConsumer = NO;
+        [self clearConsumer];
+    }
 }
 
 - (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret {
     self.shouldClearConsumer = NO;
-    self.consumer = [FHSConsumer consumerWithKey:consumerKey secret:consumerSecret];
+    self.consumerKey = consumerKey;
+    self.consumerSecret = consumerSecret;
 }
 
 - (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret {
     self.shouldClearConsumer = YES;
-    self.consumer = [FHSConsumer consumerWithKey:consumerKey secret:consumerSecret];
+    self.consumerKey = consumerKey;
+    self.consumerSecret = consumerSecret;
 }
 
 + (BOOL)isConnectedToInternet {
@@ -1299,7 +1319,7 @@
     
     if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
-        self.consumer = nil;
+        [self clearConsumer];
     }
     
     id retobj = [self sendRequest:request];
@@ -1343,7 +1363,7 @@
     
     if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
-        self.consumer = nil;
+        [self clearConsumer];
     }
     
     id ret = [self sendRequest:request];

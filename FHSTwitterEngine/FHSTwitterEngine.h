@@ -29,8 +29,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "FHSOAuthModel.h"
 #import "FHSDefines.h"
+#import "FHSToken.h"
 
 #import "NSError+FHSTE.h"
 #import "NSData+FHSTE.h"
@@ -272,6 +272,7 @@
 
 // API Key management
 - (void)clearConsumer;
+- (void)clearConsumerIfNecessary;
 - (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret; // key pair is used for one request
 - (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret; // key pair is used indefinitely
 
@@ -288,12 +289,10 @@
 
 + (BOOL)isConnectedToInternet;
 
-@property (assign, nonatomic) BOOL shouldClearConsumer;
-
 @property (nonatomic, assign) BOOL includeEntities;
 @property (nonatomic, strong) FHSToken *accessToken;
-@property (strong, nonatomic) FHSConsumer *consumer;
-//@property (nonatomic, strong) NSDateFormatter *dateFormatter;
+@property (nonatomic, strong) NSString *consumerKey;
+@property (nonatomic, strong) NSString *consumerSecret;
 
 // Blocks to load the access token or store the access token
 @property (nonatomic, copy) StoreAccessTokenBlock storeAccessTokenBlock;

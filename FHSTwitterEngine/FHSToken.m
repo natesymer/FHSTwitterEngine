@@ -1,29 +1,12 @@
 //
-//  FHSOAuthModel.m
+//  FHSToken.m
 //  FHSTwitterEngine
 //
-//  Created by Nathaniel Symer on 3/10/14.
+//  Created by Nathaniel Symer on 3/14/14.
 //  Copyright (c) 2014 Nathaniel Symer. All rights reserved.
 //
 
-#import "FHSOAuthModel.h"
-
-@implementation FHSConsumer
-
-+ (FHSConsumer *)consumerWithKey:(NSString *)key secret:(NSString *)secret {
-    return [[[self class]alloc]initWithKey:key secret:secret];
-}
-
-- (instancetype)initWithKey:(NSString *)key secret:(NSString *)secret {
-    self = [super init];
-    if (self) {
-        self.key = key;
-        self.secret = secret;
-    }
-    return self;
-}
-
-@end
+#import "FHSToken.h"
 
 @implementation FHSToken
 

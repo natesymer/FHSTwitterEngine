@@ -7,7 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "FHSOAuthModel.h"
+
+@class FHSToken;
 
 typedef enum {
     FHSTwitterEngineControllerResultFailed,

@@ -45,7 +45,7 @@
                                                                                 requestMethod:SLRequestMethodPOST
                                                                                           URL:[NSURL URLWithString:url_oauth_access_token]
                                                                                    parameters:@{
-                                                                                                @"x_reverse_auth_target": self.consumer.key,
+                                                                                                @"x_reverse_auth_target": self.consumerKey,
                                                                                                 @"x_reverse_auth_parameters": (NSString *)res
                                                                                                 }
                                                               ];

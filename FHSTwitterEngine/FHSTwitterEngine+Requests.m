@@ -12,11 +12,7 @@
 @implementation FHSTwitterEngine (Requests)
 
 - (id)sendRequest:(NSURLRequest *)request {
-    
-    if (self.shouldClearConsumer) {
-        self.shouldClearConsumer = NO;
-        self.consumer = nil;
-    }
+    [self clearConsumerIfNecessary];
     
     NSHTTPURLResponse *response = nil;
     NSError *error = nil;
@@ -50,7 +46,7 @@
     // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
     // build a sorted array of both request parameters and OAuth header parameters
     NSMutableDictionary *oauth = @{
-                                   @"oauth_consumer_key": self.consumer.key.fhs_URLEncode,
+                                   @"oauth_consumer_key": self.consumerKey.fhs_URLEncode,
                                    @"oauth_signature_method": @"HMAC-SHA1",
                                    @"oauth_timestamp": @(time(nil)).stringValue,
                                    @"oauth_nonce": nonce,
@@ -104,7 +100,7 @@
     // this way a nil token won't make a bad signature
     NSString *tokenSecretSantized = (tokenSecretString.length > 0)?tokenSecretString.fhs_URLEncode:@""; // This is precicely the way that works. Don't question it.
     
-    NSString *secret = [NSString stringWithFormat:@"%@&%@",self.consumer.secret.fhs_URLEncode,tokenSecretSantized];
+    NSString *secret = [NSString stringWithFormat:@"%@&%@",self.consumerSecret.fhs_URLEncode,tokenSecretSantized];
     
     NSData *secretData = [secret dataUsingEncoding:NSUTF8StringEncoding];
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
