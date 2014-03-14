@@ -1354,10 +1354,12 @@
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil extraParameters:nil];
-    
-    // generate the POST body...
-    
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil extraParameters:@{
+                                                                                                     @"x_auth_mode": @"client_auth",
+                                                                                                     @"x_auth_username": username,
+                                                                                                     @"x_auth_password": password
+                                                                                                     }];
+
     NSString *bodyString = [NSString stringWithFormat:@"x_auth_mode=client_auth&x_auth_username=%@&x_auth_password=%@",username,password];
     request.HTTPBody = [bodyString dataUsingEncoding:NSUTF8StringEncoding];
     

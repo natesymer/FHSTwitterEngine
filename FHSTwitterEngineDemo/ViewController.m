@@ -44,7 +44,11 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     [bar pushNavigationItem:navItem animated:NO];
     [self.view addSubview:bar];
     
-    [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"Xg3ACDprWAH8loEPjMzRg" andSecret:@"9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0"];
+    // This is if you want to use xAuth
+    // It uses the keys from Feathers (by Naklab) without the developer's permission.
+    [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"iD3JmMTXZ36MlISkfmkFvg" andSecret:@"B7HLYGJpwnyZr8fJeUGidW129i3cpgI2WsyGsHM2s"];
+    
+ //   [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"Xg3ACDprWAH8loEPjMzRg" andSecret:@"9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0"];
     [[FHSTwitterEngine sharedEngine]loadAccessToken];
 }
 
