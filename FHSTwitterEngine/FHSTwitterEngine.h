@@ -28,7 +28,6 @@
 // The synchronous Twitter engine that doesn’t suck!!
 //
 
-
 // Frameworks
 #import <Foundation/Foundation.h>
 
@@ -48,14 +47,59 @@
 /**
  Use `FHSTwitterEngine` to talk to the Twitter API.
  */
-
 @interface FHSTwitterEngine : NSObject
 
-//
-// REST API
-//
 
-#pragma mark - Statuses/update
+/**
+ A Boolean value indicating whether FHSTwitterEngine should clear the consumer key. 
+ */
+@property (assign, nonatomic) BOOL shouldClearConsumer;
+
+
+/**
+ A Boolean value indicating wheather FHSTwitterEngine should include Entities. See Twitter's documentation for more information:
+ https://dev.twitter.com/docs/entities
+ */
+@property (nonatomic, assign) BOOL includeEntities;
+
+
+/**
+ A `FHSToken` object representing the access token.
+ */
+@property (nonatomic, strong) FHSToken *accessToken;
+
+
+/**
+ A `FHSConsumer` object representing the consumer.
+ */
+@property (strong, nonatomic) FHSConsumer *consumer;
+
+
+#pragma mark Blocks
+
+///---------------------------------------
+/// @name Blocks
+///---------------------------------------
+
+/**
+ Blocks to store the access token.
+ */
+@property (nonatomic, copy) StoreAccessTokenBlock storeAccessTokenBlock;
+
+
+/**
+ Blocks to load the access token.
+ */
+@property (nonatomic, copy) LoadAccessTokenBlock loadAccessTokenBlock;
+
+
+#pragma mark - REST API
+
+///---------------------------------------
+/// @name REST API
+///---------------------------------------
+
+#pragma mark - Posting
 
 /**
  Posts a Tweet.
@@ -74,64 +118,107 @@
 - (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
 
 
-#pragma mark - Statuses/home_timeline
+// statuses/destroy
+- (NSError *)destroyTweet:(NSString *)identifier;
+
+// statuses/update_with_media
+- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
+- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
+
+// statuses/retweet
+- (NSError *)retweet:(NSString *)identifier;
+
+
+#pragma mark - Statuses
+#pragma mark Timeline
 
 /**
  Gets a timeline of Tweets for the authenticated user.
+ home_timeline
  @param sinceID Timeline will return Tweets with ID greater than this value (optional, set `sinceID` to `@""` if you do not wish to use this parameter).
  @param count Number of Tweets to retrieve (needs to be greater than zero).
  @return List of Tweets.
  */
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
 
+// statuses/user_timeline
+- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count;
+- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
-#pragma mark - Help/test
+#pragma mark Mentions
 
-/**
- Tests the Twitter service.
- */
-- (id)testService;
+// statuses/mentions_timeline
+- (id)getMentionsTimelineWithCount:(int)count;
+- (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+
+
+#pragma mark Retweet
+
+// statuses/retweets_of_me
+- (id)getRetweetedTimelineWithCount:(int)count;
+- (id)getRetweetedTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+
+// statuses/retweets
+- (id)getRetweetsForTweet:(NSString *)identifier count:(int)count;
+
+
+#pragma mark Misc.
+// statuses/show
+- (id)getDetailsForTweet:(NSString *)identifier;
 
 
 #pragma mark - Blocking
-#pragma mark Blocks/create
 
 /**
  Blocks the user with the given screen name.
+ blocks/create
  @param username Screen name of user to block.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)block:(NSString *)username;
 
 
-#pragma mark Blocks/destroy
 /**
  Unblocks the user with the given screen name.
+ nlocks/destroy
  @param username Screen name of user to block.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)unblock:(NSString *)username;
 
 
-#pragma mark - Users
-#pragma mark Users/lookup
+// blocks/blocking/ids
+- (id)listBlockedIDs;
+
+// blocks/blocking
+- (id)listBlockedUsers;
+
+// blocks/exists
+- (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID;
+
+
+#pragma mark - Search
 
 /**
  Looks up users.
+ users/lookup
  @param users List of users to look up.
- @param areIDs A boolean value that determines whether the list is of screen names or user IDs. If `YES`, `users` is a list of user IDs.
+ @param areIDs A Boolean value that determines whether the list is of screen names or user IDs. If `YES`, `users` is a list of user IDs.
  */
 - (id)lookupUsers:(NSArray *)users areIDs:(BOOL)areIDs;
 
 
-#pragma mark Users/search
-
 /**
  Searches users with the given query.
+ users/search
  @param q Query of search.
  @param count Count of query.
  */
 - (id)searchUsersWithQuery:(NSString *)q andCount:(int)count;
+
+
+// tweets/search
+- (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 
 #pragma mark - Account
@@ -194,7 +281,7 @@
 /**
  Sets the profile background image with an image.
  @param data Image data.
- @param tiled A boolean value that determines if the image is tiled. If `YES`, the image is tiled.
+ @param tiled A Boolean value that determines if the image is tiled. If `YES`, the image is tiled.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled;
@@ -203,7 +290,7 @@
 /**
  Sets the profile background image with an image file path.
  @param file File path of image.
- @param tiled A boolean value that determines if the image is tiled. If `YES`, the image is tiled.
+ @param tiled A Boolean value that determines if the image is tiled. If `YES`, the image is tiled.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled;
@@ -211,7 +298,7 @@
 
 /**
  Sets whether the profile uses a background image.
- @param shouldUseProfileBackgroundImage A boolean value that determines if whether the profile uses a background image.
+ @param shouldUseProfileBackgroundImage A Boolean value that determines if whether the profile uses a background image.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)setUseProfileBackgroundImage:(BOOL)shouldUseProfileBackgroundImage;
@@ -233,6 +320,14 @@
 - (NSError *)updateProfileColorsWithDictionary:(NSDictionary *)dictionary;
 
 
+#pragma mark Account/verify_credentials
+
+/**
+ Verifies credentials.
+ */
+- (id)verifyCredentials;
+
+
 #pragma mark - Application/rate_limit_status
 
 /**
@@ -247,7 +342,7 @@
 /**
  Marks or unmarks Tweet as favorite.
  @param tweetID ID of Tweet to mark or unmark as favorite.
- @param flag A boolean value that determines if the Tweet is to be marked or unmarked as favorite. If `YES`, the Tweet is marked as favorite.
+ @param flag A Boolean value that determines if the Tweet is to be marked or unmarked as favorite. If `YES`, the Tweet is marked as favorite.
  */
 - (NSError *)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag;
 
@@ -257,7 +352,7 @@
 /**
  Gets the favorite Tweets for a given user.
  @param user Screen name of user ID.
- @param isID A boolean that determines of `user` is a screen name or a user ID.
+ @param isID A Boolean that determines of `user` is a screen name or a user ID.
  @param count Number of Tweets to get.
  @return A list of Tweets favorited by the user.
  */
@@ -267,7 +362,7 @@
 /**
  Gets the Tweets favorited by a given user.
  @param user Screen name of user ID.
- @param isID A boolean that determines of `user` is a screen name or a user ID.
+ @param isID A Boolean that determines of `user` is a screen name or a user ID.
  @param count Specifies the number of records to retrieve. Must be less than or equal to 200. Defaults to 20.
  @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID. There are limits to the number of Tweets which can be accessed through the API. If the limit of Tweets has occured since the since_id, the since_id will be forced to the oldest ID available.
  @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
@@ -275,8 +370,9 @@
  */
 - (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
-// account/verify_credentials
-- (id)verifyCredentials;
+
+
+#pragma mark - Friendships
 
 // friendships/create
 - (NSError *)followUser:(NSString *)user isID:(BOOL)isID;
@@ -299,11 +395,29 @@
 // friendships/no_retweet_ids
 - (id)getNoRetweetIDs;
 
+
+#pragma mark - Help
+
+/**
+ Tests the Twitter service.
+ help/test
+ */
+- (id)testService;
+
 // help/tos
 - (id)getTermsOfService;
 
 // help/privacy
 - (id)getPrivacyPolicy;
+
+// help/configuration
+- (id)getConfiguration;
+
+// help/languages
+- (id)getLanguages;
+
+
+#pragma mark - Direct Messages (DM)
 
 // direct_messages
 - (id)getDirectMessages:(int)count;
@@ -320,55 +434,19 @@
 // direct_messages/show
 - (id)showDirectMessage:(NSString *)messageID;
 
+
+#pragma mark - Report spam
 // users/report_spam
 - (NSError *)reportUserAsSpam:(NSString *)user isID:(BOOL)isID;
 
-// help/configuration
-- (id)getConfiguration;
 
-// help/languages
-- (id)getLanguages;
-
-// blocks/blocking/ids
-- (id)listBlockedIDs;
-
-// blocks/blocking
-- (id)listBlockedUsers;
-
-// blocks/exists
-- (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID;
 
 // users/profile_image
 - (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
 - (id)getProfileImageURLStringForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
 
-// statuses/user_timeline
-- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count;
-- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
-// statuses/retweet
-- (NSError *)retweet:(NSString *)identifier;
-
-// statuses/show
-- (id)getDetailsForTweet:(NSString *)identifier;
-
-// statuses/destroy
-- (NSError *)destroyTweet:(NSString *)identifier;
-
-// statuses/update_with_media
-- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
-- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
-
-// statuses/mentions_timeline
-- (id)getMentionsTimelineWithCount:(int)count;
-- (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
-
-// statuses/retweets_of_me
-- (id)getRetweetedTimelineWithCount:(int)count;
-- (id)getRetweetedTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
-
-// statuses/retweets
-- (id)getRetweetsForTweet:(NSString *)identifier count:(int)count;
+#pragma mark - Lists
 
 // lists/list
 - (id)getListsForUser:(NSString *)user isID:(BOOL)isID;
@@ -400,8 +478,8 @@
 // lists/create
 - (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
 
-// tweets/search
-- (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+
+#pragma mark - Following
 
 // followers/ids
 - (id)getFollowersIDs;
@@ -409,16 +487,23 @@
 // followers/list
 - (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
 
+
+#pragma mark - Friends
+
 // friends/ids
 - (id)getFriendsIDs;
 
 // friends/list
 - (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
 
-// TwitPic
+
+#pragma mark - TwitPic (photo upload)
+
 - (id)uploadImageToTwitPic:(UIImage *)image withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 - (id)uploadImageDataToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 
+
+#pragma mark - Streaming
 //
 // Streaming
 //
@@ -428,6 +513,8 @@
 - (void)streamSampleStatusesWithBlock:(StreamBlock)block;
 - (void)streamFirehoseWithBlock:(StreamBlock)block;
 
+
+#pragma mark - Login and Auth
 //
 // Login and Auth
 //
@@ -439,38 +526,48 @@
 // xAuth
 - (NSError *)authenticateWithUsername:(NSString *)username password:(NSString *)password;
 
-// Access Token Mangement
+
+#pragma mark - Access Token Management
+
 - (void)clearAccessToken;
 - (void)loadAccessToken;
 - (BOOL)isAuthorized;
 
-// API Key management
+
+#pragma mark - API Key Management
+
 - (void)clearConsumer;
 - (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret; // key pair is used for one request
 - (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret; // key pair is used indefinitely
 
-// id/username concatenator - returns an array of concatenated id/username lists
-// 100 ids/usernames per concatenated string
+
+#pragma mark - Misc.
+
+/**
+ Generates a request string:
+ id/username concatenator - returns an array of concatenated id/username lists
+ 100 ids/usernames per concatenated string
+ */
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array;
 
-// never call -[FHSTwitterEngine init] directly.
+
+/**
+ Initializes `FHSTwitterEngine`.
+ @warning Never call -[FHSTwitterEngine init] directly.
+ */
 + (FHSTwitterEngine *)sharedEngine;
 
-// Singleton for a date formatter that
-// Is configured to parse Twitter's dates
+
+/**
+ Singleton for a date formatter that is configured to parse Twitter's dates.
+ */
 + (NSDateFormatter *)dateFormatter;
 
+
+/**
+ Checks whether the client is connected to the internet.
+ */
 + (BOOL)isConnectedToInternet;
 
-@property (assign, nonatomic) BOOL shouldClearConsumer;
-
-@property (nonatomic, assign) BOOL includeEntities;
-@property (nonatomic, strong) FHSToken *accessToken;
-@property (strong, nonatomic) FHSConsumer *consumer;
-//@property (nonatomic, strong) NSDateFormatter *dateFormatter;
-
-// Blocks to load the access token or store the access token
-@property (nonatomic, copy) StoreAccessTokenBlock storeAccessTokenBlock;
-@property (nonatomic, copy) LoadAccessTokenBlock loadAccessTokenBlock;
 
 @end
