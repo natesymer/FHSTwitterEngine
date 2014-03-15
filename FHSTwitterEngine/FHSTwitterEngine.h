@@ -45,7 +45,8 @@
 #import "NSURL+FHSTE.h"
 
 /**
- Use `FHSTwitterEngine` to talk to the Twitter API.
+ Use `FHSTwitterEngine` to talk to the Twitter API. See Twitter's documentation for more information:
+ https://dev.twitter.com/docs/api/1.1
  */
 @interface FHSTwitterEngine : NSObject
 
@@ -77,10 +78,6 @@
 
 #pragma mark Blocks
 
-///---------------------------------------
-/// @name Blocks
-///---------------------------------------
-
 /**
  Blocks to store the access token.
  */
@@ -93,13 +90,107 @@
 @property (nonatomic, copy) LoadAccessTokenBlock loadAccessTokenBlock;
 
 
-#pragma mark - REST API
+#pragma mark - REST API v1.1
+
+#pragma mark - Timelines
 
 ///---------------------------------------
-/// @name REST API
+/// @name Timelines
 ///---------------------------------------
+
+/**
+ Gets the most recent mentions (Tweets containing a users's @screen_name) for the authenticating user. 
+ @param count Number of Tweets to retrieve.
+ */
+// GET statuses/mentions_timeline
+- (id)getMentionsTimelineWithCount:(int)count;
+
+
+/**
+ Gets the most recent mentions (Tweets containing a users's @screen_name) for the authenticating user.
+ @param count Number of Tweets to retrieve.
+ @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
+ @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
+ */
+// GET statuses/mentions_timeline
+- (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+
+
+/**
+ Gets the home timeline for the authenticated user (list of the most recent Tweets and retweets posted by the authenticating user and the users they follow).
+ @param sinceID Timeline will return Tweets with ID greater than this value (optional, set `sinceID` to `@""` if you do not wish to use this parameter).
+ @param count Number of Tweets to retrieve (needs to be greater than zero).
+ @return A list of Tweets.
+ */
+// GET statuses/home_timeline
+- (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
+
+
+/**
+ Gets the timeline for a given user.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @param count Number of Tweets to get.
+ @return A list of Tweets.
+ */
+// GET statuses/user_timeline
+- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count;
+
+
+/**
+ Gets the timeline for a given user.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @param count Number of Tweets to get.
+ @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
+ @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
+ @return A list of Tweets.
+ */
+// GET statuses/user_timeline
+- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+
+
+/**
+ Gets the most recent tweets authored by the authenticating user that have been retweeted by others. 
+ @param count Number of Tweets to get.
+ @return A list of Tweets.
+ */
+// GET statuses/retweets_of_me
+- (id)getRetweetedTimelineWithCount:(int)count;
+
+
+/**
+ Gets the most recent tweets authored by the authenticating user that have been retweeted by others.
+ @param count Number of Tweets to get.
+ @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
+ @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
+ @return A list of Tweets.
+ */
+// GET statuses/retweets_of_me
+- (id)getRetweetedTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+
+
+//TODO: below
+#pragma mark - Tweets
+#pragma mark - Search
+#pragma mark - Streaming
+#pragma mark - Direct Messages
+#pragma mark - Friends & Followers
+#pragma mark - Users
+#pragma mark - Suggested Users
+#pragma mark - Favorites
+#pragma mark - Lists
+#pragma mark - Saved Searches
+#pragma mark - Trends
+#pragma mark - Spam Reporting
+#pragma mark - OAuth
+#pragma mark - Help
 
 #pragma mark - Posting
+
+///---------------------------------------
+/// @name Posting
+///---------------------------------------
 
 /**
  Posts a Tweet.
@@ -130,33 +221,14 @@
 
 
 #pragma mark - Statuses
-#pragma mark Timeline
 
-/**
- Gets a timeline of Tweets for the authenticated user.
- home_timeline
- @param sinceID Timeline will return Tweets with ID greater than this value (optional, set `sinceID` to `@""` if you do not wish to use this parameter).
- @param count Number of Tweets to retrieve (needs to be greater than zero).
- @return List of Tweets.
- */
-- (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
 
-// statuses/user_timeline
-- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count;
-- (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
-#pragma mark Mentions
 
-// statuses/mentions_timeline
-- (id)getMentionsTimelineWithCount:(int)count;
-- (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 
 #pragma mark Retweet
 
-// statuses/retweets_of_me
-- (id)getRetweetedTimelineWithCount:(int)count;
-- (id)getRetweetedTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 // statuses/retweets
 - (id)getRetweetsForTweet:(NSString *)identifier count:(int)count;
@@ -352,7 +424,7 @@
 /**
  Gets the favorite Tweets for a given user.
  @param user Screen name of user ID.
- @param isID A Boolean that determines of `user` is a screen name or a user ID.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
  @param count Number of Tweets to get.
  @return A list of Tweets favorited by the user.
  */
@@ -364,7 +436,7 @@
  @param user Screen name of user ID.
  @param isID A Boolean that determines of `user` is a screen name or a user ID.
  @param count Specifies the number of records to retrieve. Must be less than or equal to 200. Defaults to 20.
- @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID. There are limits to the number of Tweets which can be accessed through the API. If the limit of Tweets has occured since the since_id, the since_id will be forced to the oldest ID available.
+ @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
  @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
  @return A list of Tweets.
  */
