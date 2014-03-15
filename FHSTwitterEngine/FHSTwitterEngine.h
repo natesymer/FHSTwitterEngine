@@ -101,6 +101,7 @@
 /**
  Gets the most recent mentions (Tweets containing a users's @screen_name) for the authenticating user. 
  @param count Number of Tweets to retrieve.
+ @return A list of Tweets.
  */
 // GET statuses/mentions_timeline
 - (id)getMentionsTimelineWithCount:(int)count;
@@ -111,6 +112,7 @@
  @param count Number of Tweets to retrieve.
  @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
  @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
+ @return A list of Tweets.
  */
 // GET statuses/mentions_timeline
 - (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
