@@ -45,8 +45,7 @@
 #import "NSURL+FHSTE.h"
 
 /**
- Use `FHSTwitterEngine` to talk to the Twitter API. See Twitter's documentation for more information:
- https://dev.twitter.com/docs/api/1.1
+ Use `FHSTwitterEngine` to authenticate with Twitter and make a request to just about every Twitter API endpoint.
  */
 @interface FHSTwitterEngine : NSObject
 
@@ -92,11 +91,14 @@
 
 #pragma mark - REST API v1.1
 
-#pragma mark - Timelines
+/**
+ See Twitter's documentation for more information:
+ https://dev.twitter.com/docs/api/1.1
+ */
 
-///---------------------------------------
+
+#pragma mark - Timelines
 /// @name Timelines
-///---------------------------------------
 
 /**
  Gets the most recent mentions (Tweets containing a users's @screen_name) for the authenticating user. 
@@ -172,8 +174,93 @@
 - (id)getRetweetedTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 
-//TODO: below
 #pragma mark - Tweets
+/// @name Tweets
+
+/**
+ Gets the most recent retweets of the tweet specified by the Tweet ID.
+ @param identifier Tweet ID.
+ @param count Number of Tweets to get.
+ @return A list of Tweets.
+ */
+// GET statuses/retweets
+- (id)getRetweetsForTweet:(NSString *)identifier count:(int)count;
+
+
+/**
+ Gets a single Tweet with the given Tweet ID.
+ @param identifier Tweet ID.
+ @return Detail for the Tweet.
+ */
+// GET statuses/show
+- (id)getDetailsForTweet:(NSString *)identifier;
+
+
+/**
+ Destroys (deletes) the status specified by the Tweet ID. The authenticating user must be the author of the specified status.
+ @param identifier Tweet ID.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST statuses/destroy
+- (NSError *)destroyTweet:(NSString *)identifier;
+
+
+/**
+ Posts a Tweet. To upload an image, use `postTweet:withImageData:`.
+ @param tweetString Tweet to post.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST statuses/update
+- (NSError *)postTweet:(NSString *)tweetString;
+
+
+/**
+ Posts a reply to a Tweet.
+ @param tweetString Reply.
+ @param inReplyToString Tweet ID to reply to.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST statuses/update
+- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
+
+
+/**
+ Retweets a Tweet with the given Tweet ID.
+ @param identifier Tweet ID.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST statuses/retweet
+- (NSError *)retweet:(NSString *)identifier;
+
+
+/*
+ Posts a Tweet with an image.
+ @param tweetString Tweet to post.
+ @param theData Image data.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST statuses/update_with_media
+- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
+
+
+/*
+ Posts a Tweet with an image.
+ @param tweetString Tweet to post.
+ @param theData Image data.
+ @param inReplyToString Tweet ID to reply to.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST statuses/update_with_media
+
+- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
+
+
+//TODO: GET statuses/oembed
+//TODO: GET statuses/retweeters/ids
+
+
+//TODO: below
+
 #pragma mark - Search
 #pragma mark - Streaming
 #pragma mark - Direct Messages
@@ -188,38 +275,6 @@
 #pragma mark - OAuth
 #pragma mark - Help
 
-#pragma mark - Posting
-
-///---------------------------------------
-/// @name Posting
-///---------------------------------------
-
-/**
- Posts a Tweet.
- @param tweetString Tweet to post.
- @return If an error occurs, returns an NSError object that describes the problem.
- */
-- (NSError *)postTweet:(NSString *)tweetString;
-
-
-/**
- Posts a reply to a Tweet.
- @param tweetString Reply.
- @param inReplyToString Tweet ID to reply to.
- @return If an error occurs, returns an NSError object that describes the problem.
- */
-- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
-
-
-// statuses/destroy
-- (NSError *)destroyTweet:(NSString *)identifier;
-
-// statuses/update_with_media
-- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
-- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
-
-// statuses/retweet
-- (NSError *)retweet:(NSString *)identifier;
 
 
 #pragma mark - Statuses
@@ -232,13 +287,9 @@
 #pragma mark Retweet
 
 
-// statuses/retweets
-- (id)getRetweetsForTweet:(NSString *)identifier count:(int)count;
 
 
 #pragma mark Misc.
-// statuses/show
-- (id)getDetailsForTweet:(NSString *)identifier;
 
 
 #pragma mark - Blocking
