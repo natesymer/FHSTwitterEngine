@@ -60,7 +60,6 @@ Why you should use `FHSTwitterEngine`:
             default:
                 break;
         }
-        [_theTableView reloadData];
     }];
     [self presentViewController:loginController animated:YES completion:nil];
     
@@ -136,7 +135,6 @@ Most methods return `id`. The returned object can be a(n):
 You can [email](mailto:nate@natesymer.com) me with suggestions or open an [issue](https://github.com/fhsjaagshs/FHSTwitterEngine/issues).
 
 - OS X compatibility
-- Custom objects for profile settings
 - Tag releases
 - Tests
 - <strike>Add license</strike>
