@@ -259,9 +259,27 @@
 //TODO: GET statuses/retweeters/ids
 
 
+#pragma mark - Search
+/// @name Search
+
+/**
+ Search for relevant Tweets matching a specified query.
+ @param q Search query.
+ @param count Number of Tweets to get, must be greater than 0.
+ @param resultType Use enum for mixed, recent or popular
+ @param unil Returns tweets generated before the given date. Date should be formatted as YYYY-MM-DD.
+ @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
+ @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
+ @return A list of Tweets.
+ */
+// GET search/tweets
+//TODO: rename unil to until
+- (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+
+
 //TODO: below
 
-#pragma mark - Search
+
 #pragma mark - Streaming
 #pragma mark - Direct Messages
 #pragma mark - Friends & Followers
@@ -342,8 +360,6 @@
 - (id)searchUsersWithQuery:(NSString *)q andCount:(int)count;
 
 
-// tweets/search
-- (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 
 #pragma mark - Account
