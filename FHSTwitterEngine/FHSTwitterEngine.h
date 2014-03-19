@@ -309,7 +309,7 @@
 
 /**
   Streams messages for users.
- @param with List of users the authenticated is following (optional).
+ @param with List of users the authenticated user is following (optional).
  @param replies A Boolean to determine whether the stream includes replies (this is not implemented at the moment).
  @param keywords List of keywords of additional Tweets to stream (optional).
  @param locBox A comma-separated list of longitude, latitude pairs specifying a set of bounding boxes to filter Tweets by (optional).
