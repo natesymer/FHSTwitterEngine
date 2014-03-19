@@ -325,6 +325,46 @@
 #pragma mark - Direct Messages
 /// @name Direct Messages
 
+/**
+ Get the most recent direct messages sent to the authenticating user. Includes detailed information about the sender and recipient user. You can request up to 200 direct messages per call, up to a maximum of 800 incoming DMs. Important: This method requires an access token with RWD.
+ @param count Number of messages to get, must be greater than 0.
+ */
+// GET direct_messages
+- (id)getDirectMessages:(int)count;
+
+
+/**
+ Destroys (deletes) the direct message specified in the required ID parameter. The authenticating user must be the recipient of the specified direct message. Important: This method requires an access token with RWD.
+ @param messageID ID of message.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST direct_messages/destroy
+- (NSError *)deleteDirectMessage:(NSString *)messageID;
+
+
+/**
+ Returns the 20 most recent direct messages sent by the authenticating user. Includes detailed information about the sender and recipient user. You can request up to 200 direct messages per call, up to a maximum of 800 outgoing DMs. Important: This method requires an access token with RWD (read,...
+ */
+// GET direct_messages/sent
+- (id)getSentDirectMessages:(int)count;
+
+
+/*
+ GET direct_messages/show
+ Returns a single direct message, specified by an id parameter. Like the /1.1/direct_messages.format request, this method will include the user objects of the sender and recipient. Important: This method requires an access token with RWD (read, write...
+ 
+ 
+ POST direct_messages/new
+ Sends a new direct message to the specified user from the authenticating user. Requires both the user and text parameters and must be a POST. Returns the sent message in the requested format if successful.
+ */
+
+
+// direct_messages/new
+- (NSError *)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID;
+
+// direct_messages/show
+- (id)showDirectMessage:(NSString *)messageID;
+
 
 
 
@@ -607,24 +647,6 @@
 
 // help/languages
 - (id)getLanguages;
-
-
-#pragma mark - Direct Messages (DM)
-
-// direct_messages
-- (id)getDirectMessages:(int)count;
-
-// direct_messages/destroy
-- (NSError *)deleteDirectMessage:(NSString *)messageID;
-
-// direct_messages/sent
-- (id)getSentDirectMessages:(int)count;
-
-// direct_messages/new
-- (NSError *)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID;
-
-// direct_messages/show
-- (id)showDirectMessage:(NSString *)messageID;
 
 
 #pragma mark - Report spam
