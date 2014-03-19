@@ -277,11 +277,62 @@
 - (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 
+#pragma mark - Streaming
+/// @name Streaming
+
+/**
+ Returns public statuses that match one or more filter predicates (`follow`, `track`, `locations`).
+ @param users List of users, at least one is required (`follow`).
+ @param keywords List of keywords, at least one is required (filter (`track`).
+ @param locBox A comma-separated list of longitude, latitude pairs specifying a set of bounding boxes to filter Tweets by, must be exactly 4 (`locations`).
+ @param block Stream block: it contains a return stream and a *stop Boolean.
+ */
+// POST statuses/filter
+- (void)streamPublicStatusesForUsers:(NSArray *)users keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block;
+
+
+/**
+ Returns a small random sample of all public statuses.
+ @param block Stream block: it contains a return stream and a *stop Boolean.
+ */
+// GET statuses/sample
+- (void)streamSampleStatusesWithBlock:(StreamBlock)block;
+
+
+/**
+ Returns all public statuses. This endpoint requires special permission to access.
+ @param block Stream block: it contains a return stream and a *stop Boolean.
+ */
+// GET statuses/firehose
+- (void)streamFirehoseWithBlock:(StreamBlock)block;
+
+
+/**
+  Streams messages for users.
+ @param with List of users the authenticated is following (optional).
+ @param replies A Boolean to determine whether the stream includes replies (this is not implemented at the moment).
+ @param keywords List of keywords of additional Tweets to stream (optional).
+ @param locBox A comma-separated list of longitude, latitude pairs specifying a set of bounding boxes to filter Tweets by (optional).
+ @param block Stream block: it contains a return stream and a *stop Boolean.
+ */
+// GET user
+- (void)streamUserMessagesWith:(NSArray *)with replies:(BOOL)replies keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block;
+
+
+// TODO: GET site
+
+
+#pragma mark - Direct Messages
+/// @name Direct Messages
+
+
+
+
 //TODO: below
 
 
-#pragma mark - Streaming
-#pragma mark - Direct Messages
+
+
 #pragma mark - Friends & Followers
 #pragma mark - Users
 #pragma mark - Suggested Users
@@ -644,15 +695,7 @@
 - (id)uploadImageDataToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 
 
-#pragma mark - Streaming
-//
-// Streaming
-//
 
-- (void)streamUserMessagesWith:(NSArray *)with replies:(BOOL)replies keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block;
-- (void)streamPublicStatusesForUsers:(NSArray *)users keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block;
-- (void)streamSampleStatusesWithBlock:(StreamBlock)block;
-- (void)streamFirehoseWithBlock:(StreamBlock)block;
 
 
 #pragma mark - Login and Auth
