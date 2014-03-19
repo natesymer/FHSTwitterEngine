@@ -283,8 +283,8 @@
 /**
  Returns public statuses that match one or more filter predicates (`follow`, `track`, `locations`).
  @param users List of users, at least one is required (`follow`).
- @param keywords List of keywords, at least one is required (filter (`track`).
- @param locBox A comma-separated list of longitude, latitude pairs specifying a set of bounding boxes to filter Tweets by, must be exactly 4 (`locations`).
+ @param keywords List of keywords, at least one is required (`track`).
+ @param locBox A comma-separated list of longitude, latitude pairs (must be exactly four) specifying a location bounding box to filter Tweets by (`locations`).
  @param block Stream block: it contains a return stream and a *stop Boolean.
  */
 // POST statuses/filter
@@ -312,7 +312,7 @@
  @param with List of users the authenticated user is following (optional).
  @param replies A Boolean to determine whether the stream includes replies (this is not implemented at the moment).
  @param keywords List of keywords of additional Tweets to stream (optional).
- @param locBox A comma-separated list of longitude, latitude pairs specifying a set of bounding boxes to filter Tweets by (optional).
+ @param locBox A comma-separated list of longitude, latitude pairs specifying a location bounding box to filter Tweets by (optional).
  @param block Stream block: it contains a return stream and a *stop Boolean.
  */
 // GET user
