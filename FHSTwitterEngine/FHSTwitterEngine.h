@@ -323,18 +323,34 @@
 
 
 #pragma mark - Direct Messages
-/// @name Direct Messages
+/// @name Direct Messages (DMs)
 
 /**
- Get the most recent direct messages sent to the authenticating user. Includes detailed information about the sender and recipient user. You can request up to 200 direct messages per call, up to a maximum of 800 incoming DMs. Important: This method requires an access token with RWD.
- @param count Number of messages to get, must be greater than 0.
+ Gets the most recent direct messages sent to the authenticating user. This method requires an access token with RWD.
+ @param count Number of Messages to get, must be greater than 0 and less than 200.
  */
 // GET direct_messages
 - (id)getDirectMessages:(int)count;
 
 
 /**
- Destroys (deletes) the direct message specified in the required ID parameter. The authenticating user must be the recipient of the specified direct message. Important: This method requires an access token with RWD.
+ Gets the most recent direct messages sent by the authenticating user. This method requires an access token with RWD.
+ @param count Number of Messages to get, must be greater than 0 and less than 200.
+ */
+// GET direct_messages/sent
+- (id)getSentDirectMessages:(int)count;
+
+
+/**
+ Shows a single direct message, specified by an id parameter. This method requires an access token with RWD (read, write...
+ @param messageID ID of message.
+ */
+//GET direct_messages/show
+- (id)showDirectMessage:(NSString *)messageID;
+
+
+/**
+ Destroys (deletes) the direct message specified in the required ID parameter. The authenticating user must be the recipient of the specified direct message. This method requires an access token with RWD.
  @param messageID ID of message.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
@@ -343,29 +359,18 @@
 
 
 /**
- Returns the 20 most recent direct messages sent by the authenticating user. Includes detailed information about the sender and recipient user. You can request up to 200 direct messages per call, up to a maximum of 800 outgoing DMs. Important: This method requires an access token with RWD (read,...
+ Sends a new direct message to the specified user from the authenticating user.
+ @param body Message body (required).
+ @param user Message recipient (required).
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @return If an error occurs, returns an NSError object that describes the problem.
  */
-// GET direct_messages/sent
-- (id)getSentDirectMessages:(int)count;
-
-
-/*
- GET direct_messages/show
- Returns a single direct message, specified by an id parameter. Like the /1.1/direct_messages.format request, this method will include the user objects of the sender and recipient. Important: This method requires an access token with RWD (read, write...
- 
- 
- POST direct_messages/new
- Sends a new direct message to the specified user from the authenticating user. Requires both the user and text parameters and must be a POST. Returns the sent message in the requested format if successful.
- */
-
-
-// direct_messages/new
+// POST direct_messages/new
 - (NSError *)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID;
 
-// direct_messages/show
-- (id)showDirectMessage:(NSString *)messageID;
 
-
+#pragma mark - Friends & Followers
+/// @name Friends & Followers
 
 
 //TODO: below
@@ -373,7 +378,7 @@
 
 
 
-#pragma mark - Friends & Followers
+
 #pragma mark - Users
 #pragma mark - Suggested Users
 #pragma mark - Favorites
