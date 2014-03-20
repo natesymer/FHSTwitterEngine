@@ -51,7 +51,7 @@
 
 
 /**
- A Boolean value indicating whether FHSTwitterEngine should clear the consumer key. 
+ A Boolean value indicating whether FHSTwitterEngine should clear the consumer key.
  */
 @property (assign, nonatomic) BOOL shouldClearConsumer;
 
@@ -101,7 +101,7 @@
 /// @name Timelines
 
 /**
- Gets the most recent mentions (Tweets containing a users's @screen_name) for the authenticating user. 
+ Gets the most recent mentions (Tweets containing a users's @screen_name) for the authenticating user.
  @param count Number of Tweets to retrieve.
  @return A list of Tweets.
  */
@@ -155,7 +155,7 @@
 
 
 /**
- Gets the most recent tweets authored by the authenticating user that have been retweeted by others. 
+ Gets the most recent tweets authored by the authenticating user that have been retweeted by others.
  @param count Number of Tweets to get.
  @return A list of Tweets.
  */
@@ -308,7 +308,7 @@
 
 
 /**
-  Streams messages for users.
+ Streams messages for users.
  @param with List of users the authenticated user is following (optional).
  @param replies A Boolean to determine whether the stream includes replies (this is not implemented at the moment).
  @param keywords List of keywords of additional Tweets to stream (optional).
@@ -373,8 +373,7 @@
 /// @name Friends & Followers
 
 /**
- Gets user IDs that the currently authenticated user does not want to receive retweets from.
- TODO: Use POST friendships/update to set the "no retweets" status for a given user account on behalf of the current user.
+ Gets user IDs that the currently authenticated user does not want to receive retweets from. Use `enableRetweets:andDeviceNotifs:forUser:isID` to set the "no retweets" status for a given user account on behalf of the current user.
  @return List of user IDs.
  */
 // GET friendships/no_retweets/ids
@@ -393,87 +392,99 @@
  Gets a list of user IDs following the authenticated user.
  @return List of user IDs.
  */
- // GET followers/ids
+// GET followers/ids
 - (id)getFollowersIDs;
 
 
 /**
  Gets a list of user IDs for every user who has a pending request to follow the authenticating user.
+ @return List of user IDs.
  */
- // GET friendships/incoming
+// GET friendships/incoming
 - (id)getPendingIncomingFollowers;
 
 
+/**
+ Gets a list of user IDs for every protected user for whom the authenticating user has a pending follow request.
+ @return List of user IDs.
+ */
+// GET friendships/outgoing
+- (id)getPendingOutgoingFollowers;
 
 
+/**
+ Follows the specified user.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST friendships/create
+- (NSError *)followUser:(NSString *)user isID:(BOOL)isID;
 
-// friends/list
+
+/**
+ Unfollows the specified user.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST friendships/destroy
+- (NSError *)unfollowUser:(NSString *)user isID:(BOOL)isID;
+
+
+/**
+ Allows one to enable or disable retweets and device notifications from the specified user.
+ @param enableRTs A Boolean value to determine whether to enable or disable retweets.
+ @param devNotifs A Boolean value to determine whether to enable or disable device notifications.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST friendships/update
+- (NSError *)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID;
+
+
+/**
+ Returns detailed information about the relationship between two arbitrary users.
+ */
+//TODO: GET friendships/show
+
+
+/**
+ Gets a friends list for an user.
+ of user IDs following a specified user.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @param cursor Cursor position of the list.
+ @return A list of user IDs.
+ */
+// GET friends/list
 - (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
 
 
-
-// followers/list
+/**
+ Gets a list of followers for an user.
+ Returns a cursored collection of user objects for users following the specified user. At this time, results are ordered with the most recent following first — however, this ordering is subject to unannounced change and eventual consistency issues. Results are given in groups of 20 users and...
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @param cursor Cursor position of the list.
+ @return A list of user IDs.
+ */
+// GET followers/list
 - (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
 
 
-
-/*
- 
-// GET friendships/outgoing
- Returns a collection of numeric IDs for every protected user for whom the authenticating user has a pending follow request.
- 
-// POST friendships/create
- Allows the authenticating users to follow the user specified in the ID parameter. Returns the befriended user in the requested format when successful. Returns a string describing the failure condition when unsuccessful. If you are already friends with the user a HTTP 403 may be returned, though for...
- 
- // POST friendships/destroy
- Allows the authenticating user to unfollow the user specified in the ID parameter. Returns the unfollowed user in the requested format when successful. Returns a string describing the failure condition when unsuccessful. Actions taken in this method are asynchronous and changes will be eventually...
- 
-// POST friendships/update
- Allows one to enable or disable retweets and device notifications from the specified user.
- 
- 
- // GET friendships/show
- Returns detailed information about the relationship between two arbitrary users.
- 
-// GET friends/list
- Returns a cursored collection of user objects for every user the specified user is following (otherwise known as their "friends"). At this time, results are ordered with the most recent following first — however, this ordering is subject to unannounced change and eventual consistency issues...
- 
-// GET followers/list
- Returns a cursored collection of user objects for users following the specified user. At this time, results are ordered with the most recent following first — however, this ordering is subject to unannounced change and eventual consistency issues. Results are given in groups of 20 users and...
- 
-// GET friendships/lookup
- Returns the relationships of the authenticating user to the comma-separated list of up to 100 screen_names or user_ids provided. Values for connections can be: following, following_requested, followed_by, none, blocking.
+/**
+ Gets the relationships of the authenticating user to the comma-separated list of up to 100 screen_names or user_ids provided. Values for connections can be: following, following_requested, followed_by, none, blocking.
+ @param users List of users.
+ @param isID A Boolean that determines if `users` are screen names or user IDs.
  */
-
-
-
-
-
-
-
-// friendships/create
-- (NSError *)followUser:(NSString *)user isID:(BOOL)isID;
-
-// friendships/destroy
-- (NSError *)unfollowUser:(NSString *)user isID:(BOOL)isID;
-
-// friendships/lookup
+// GET friendships/lookup
 - (id)lookupFriendshipStatusForUsers:(NSArray *)users areIDs:(BOOL)areIDs;
-
-
-// friendships/outgoing
-- (id)getPendingOutgoingFollowers;
-
-// friendships/update
-- (NSError *)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID;
 
 
 
 //TODO: below
-
-
-
-
 
 #pragma mark - Users
 #pragma mark - Suggested Users
