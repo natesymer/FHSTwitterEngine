@@ -372,6 +372,102 @@
 #pragma mark - Friends & Followers
 /// @name Friends & Followers
 
+/**
+ Gets user IDs that the currently authenticated user does not want to receive retweets from.
+ TODO: Use POST friendships/update to set the "no retweets" status for a given user account on behalf of the current user.
+ @return List of user IDs.
+ */
+// GET friendships/no_retweets/ids
+- (id)getNoRetweetIDs;
+
+
+/**
+ Gets a list of user IDs the authenticated user is following.
+ @return List of user IDs.
+ */
+// GET friends/ids
+- (id)getFriendsIDs;
+
+
+/**
+ Gets a list of user IDs following the authenticated user.
+ @return List of user IDs.
+ */
+ // GET followers/ids
+- (id)getFollowersIDs;
+
+
+/**
+ Gets a list of user IDs for every user who has a pending request to follow the authenticating user.
+ */
+ // GET friendships/incoming
+- (id)getPendingIncomingFollowers;
+
+
+
+
+
+// friends/list
+- (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
+
+
+
+// followers/list
+- (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
+
+
+
+/*
+ 
+// GET friendships/outgoing
+ Returns a collection of numeric IDs for every protected user for whom the authenticating user has a pending follow request.
+ 
+// POST friendships/create
+ Allows the authenticating users to follow the user specified in the ID parameter. Returns the befriended user in the requested format when successful. Returns a string describing the failure condition when unsuccessful. If you are already friends with the user a HTTP 403 may be returned, though for...
+ 
+ // POST friendships/destroy
+ Allows the authenticating user to unfollow the user specified in the ID parameter. Returns the unfollowed user in the requested format when successful. Returns a string describing the failure condition when unsuccessful. Actions taken in this method are asynchronous and changes will be eventually...
+ 
+// POST friendships/update
+ Allows one to enable or disable retweets and device notifications from the specified user.
+ 
+ 
+ // GET friendships/show
+ Returns detailed information about the relationship between two arbitrary users.
+ 
+// GET friends/list
+ Returns a cursored collection of user objects for every user the specified user is following (otherwise known as their "friends"). At this time, results are ordered with the most recent following first — however, this ordering is subject to unannounced change and eventual consistency issues...
+ 
+// GET followers/list
+ Returns a cursored collection of user objects for users following the specified user. At this time, results are ordered with the most recent following first — however, this ordering is subject to unannounced change and eventual consistency issues. Results are given in groups of 20 users and...
+ 
+// GET friendships/lookup
+ Returns the relationships of the authenticating user to the comma-separated list of up to 100 screen_names or user_ids provided. Values for connections can be: following, following_requested, followed_by, none, blocking.
+ */
+
+
+
+
+
+
+
+// friendships/create
+- (NSError *)followUser:(NSString *)user isID:(BOOL)isID;
+
+// friendships/destroy
+- (NSError *)unfollowUser:(NSString *)user isID:(BOOL)isID;
+
+// friendships/lookup
+- (id)lookupFriendshipStatusForUsers:(NSArray *)users areIDs:(BOOL)areIDs;
+
+
+// friendships/outgoing
+- (id)getPendingOutgoingFollowers;
+
+// friendships/update
+- (NSError *)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID;
+
+
 
 //TODO: below
 
@@ -609,28 +705,6 @@
 
 
 
-#pragma mark - Friendships
-
-// friendships/create
-- (NSError *)followUser:(NSString *)user isID:(BOOL)isID;
-
-// friendships/destroy
-- (NSError *)unfollowUser:(NSString *)user isID:(BOOL)isID;
-
-// friendships/lookup
-- (id)lookupFriendshipStatusForUsers:(NSArray *)users areIDs:(BOOL)areIDs;
-
-// friendships/incoming
-- (id)getPendingIncomingFollowers;
-
-// friendships/outgoing
-- (id)getPendingOutgoingFollowers;
-
-// friendships/update
-- (NSError *)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID;
-
-// friendships/no_retweet_ids
-- (id)getNoRetweetIDs;
 
 
 #pragma mark - Help
@@ -698,22 +772,6 @@
 - (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
 
 
-#pragma mark - Following
-
-// followers/ids
-- (id)getFollowersIDs;
-
-// followers/list
-- (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
-
-
-#pragma mark - Friends
-
-// friends/ids
-- (id)getFriendsIDs;
-
-// friends/list
-- (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor;
 
 
 #pragma mark - TwitPic (photo upload)
