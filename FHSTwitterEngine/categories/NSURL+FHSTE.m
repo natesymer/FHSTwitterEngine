@@ -15,12 +15,13 @@
 }
 
 - (NSDictionary *)queryDictionary {
-    NSMutableDictionary *params = [NSMutableDictionary dictionary];
-    
-    for (NSString *param in [self.query componentsSeparatedByString:@"&"]) {
+    NSArray *paramPairs = [self.query componentsSeparatedByString:@"&"];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:paramPairs.count];
+
+    for (NSString *param in paramPairs) {
         NSArray *parts = [param componentsSeparatedByString:@"="];
         if (parts.count < 2) continue;
-        params[parts[1]] = parts.firstObject;
+        params[parts[1]] = parts[0];
     }
     
     return params;

@@ -9,10 +9,9 @@
 #import <Foundation/Foundation.h>
 
 @interface NSString (FHSTwitterEngine)
++ (NSString *)fhs_UUID;
 - (NSString *)fhs_URLEncode;
 - (NSString *)fhs_truncatedToLength:(int)length;
-- (NSString *)fhs_trimForTwitter;
 - (NSString *)fhs_stringWithRange:(NSRange)range;
-+ (NSString *)fhs_UUID;
 - (BOOL)fhs_isNumeric;
 @end

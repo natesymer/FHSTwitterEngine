@@ -8,8 +8,6 @@
 
 #import "NSObject+FHSTE.h"
 
-// Remove NSNulls from NSDictionary and NSArray
-// Credit for this function goes to Conrad Kramer (@conradev)
 id removeNull(id rootObject) {
     if ([rootObject isKindOfClass:[NSDictionary class]]) {
         NSMutableDictionary *sanitizedDictionary = [NSMutableDictionary dictionaryWithDictionary:rootObject];
@@ -24,13 +22,9 @@ id removeNull(id rootObject) {
         NSMutableArray *sanitizedArray = [NSMutableArray arrayWithArray:rootObject];
         [rootObject enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             id sanitized = removeNull(obj);
-            if (!sanitized) {
-                sanitizedArray[[sanitizedArray indexOfObject:obj]] = @"";
-            } else {
-                sanitizedArray[[sanitizedArray indexOfObject:obj]] = sanitized;
-            }
+            sanitizedArray[idx] = sanitized?sanitized:@"";
         }];
-        return [NSMutableArray arrayWithArray:sanitizedArray];
+        return sanitizedArray;
     }
     
     if ([rootObject isKindOfClass:[NSNull class]]) {

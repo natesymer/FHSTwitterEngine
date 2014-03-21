@@ -25,12 +25,7 @@
 
 #import "FHSTwitterEngine.h"
 
-#import <QuartzCore/QuartzCore.h>
 #import <SystemConfiguration/SystemConfiguration.h>
-//#import <CommonCrypto/CommonHMAC.h>
-#import <Twitter/Twitter.h>
-#import <Accounts/Accounts.h>
-#import <sys/socket.h>
 #import <netinet/in.h>
 #import <ifaddrs.h>
 
@@ -559,7 +554,7 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_direct_messages_new];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"text": [body fhs_trimForTwitter], (isID?@"user_id":@"screen_name"):user}];
+    return [self sendPOSTRequestForURL:baseURL andParams:@{@"text": [body fhs_truncatedToLength:140], (isID?@"user_id":@"screen_name"):user}];
 }
 
 - (id)getSentDirectMessages:(int)count {
