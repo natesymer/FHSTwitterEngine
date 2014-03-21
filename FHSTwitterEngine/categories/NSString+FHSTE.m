@@ -12,7 +12,7 @@
 
 - (NSString *)fhs_URLEncode {
     CFStringRef url = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)self, NULL, CFSTR("!*'();:@&=+$,/?%#[]"), kCFStringEncodingUTF8);
-	return (__bridge NSString *)url;
+	return (__bridge_transfer NSString *)url;
 }
 
 - (NSString *)fhs_truncatedToLength:(int)length {
