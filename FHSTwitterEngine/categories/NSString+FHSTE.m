@@ -34,17 +34,18 @@
         CFUUIDRef theUUID = CFUUIDCreate(kCFAllocatorDefault);
         CFStringRef string = CFUUIDCreateString(kCFAllocatorDefault, theUUID);
         CFRelease(theUUID);
-        NSString *uuid = [NSString stringWithString:(__bridge NSString *)string];
-        CFRelease(string);
-        return uuid;
+        return [NSString stringWithString:(__bridge_transfer NSString *)string];
     }
 }
 
 - (BOOL)fhs_isNumeric {
-	const char *raw = (const char *)[self UTF8String];
+	const char *raw = self.UTF8String;
     
-	for (int i = 0; i < strlen(raw); i++) {
-		if (raw[i] < '0' || raw[i] > '9') {
+    unsigned long length = strlen(raw);
+    
+	for (int i = 0; i < length; i++) {
+        char current_char = raw[i];
+		if (current_char < '0' || current_char > '9') {
             return NO;
         }
 	}
@@ -52,4 +53,3 @@
 }
 
 @end
-

@@ -76,10 +76,6 @@
         [paramPairs addObject:pair];
     }];
     
-    if ([httpMethod isEqualToString:@"GET"]) {
-        [paramPairs addObjectsFromArray:[URL.query componentsSeparatedByString:@"&"]];
-    }
-    
     if (extraParams.count > 0) {
         [extraParams enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
             NSString *pair = [NSString stringWithFormat:@"%@=%@",key, obj];
@@ -98,9 +94,9 @@
     NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",httpMethod,urlWithoutParams,normalizedRequestParameters];
     
     // this way a nil token won't make a bad signature
-    NSString *tokenSecretSantized = (tokenSecretString.length > 0)?tokenSecretString.fhs_URLEncode:@""; // This is precicely the way that works. Don't question it.
+    NSString *tokenSecretSantized = (tokenSecretString.length > 0)?tokenSecretString:@""; // This is precicely the way that works. Don't question it.
     
-    NSString *secret = [NSString stringWithFormat:@"%@&%@",self.consumerSecret.fhs_URLEncode,tokenSecretSantized];
+    NSString *secret = [NSString stringWithFormat:@"%@&%@",self.consumerSecret.fhs_URLEncode,tokenSecretSantized.fhs_URLEncode];
     
     NSData *secretData = [secret dataUsingEncoding:NSUTF8StringEncoding];
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
@@ -134,10 +130,11 @@
     int length = url.length;
     
     for (NSString *key in params) {
-        length += [key fhs_URLEncode].length;
+        length += key.fhs_URLEncode.length;
         length += [params[key] fhs_URLEncode].length;
-        length += 1; // for the equal sign
     }
+    
+    length += params.count*2; // accounts for equal sign & ampersands and the question mark
     
     return length;
 }
@@ -177,44 +174,47 @@
 }
 
 - (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
-    NSMutableData *body = [NSMutableData dataWithLength:0];
+    NSMutableData *body = [NSMutableData data];
     
-    for (NSString *key in params.allKeys) {
-        id obj = params[key];
-        
+    NSData *cRetAndNlineData = [@"\r\n" dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *boundaryData = [[NSString stringWithFormat:@"--%@\r\n",boundary]dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *cTypeOctetStreamData = [@"Content-Type: application/octet-stream\r\n" dataUsingEncoding:NSUTF8StringEncoding];
+    
+    [params enumerateKeysAndObjectsUsingBlock:^(NSString *key, id obj, BOOL *stop) {
         // start the parameter
-        [body appendData:[[NSString stringWithFormat:@"--%@\r\n",boundary]dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:boundaryData];
         
         if ([obj isKindOfClass:[NSDictionary class]]) {
             NSDictionary *dict = [NSDictionary dictionaryWithDictionary:(NSDictionary *)obj];
-            
+
             if ([dict[@"type"]isEqualToString:@"file"]) {
-                [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"media\"; filename=\"%@\"\r\n",dict[@"filename"]] dataUsingEncoding:NSUTF8StringEncoding]];
+                [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n",key,dict[@"filename"]] dataUsingEncoding:NSUTF8StringEncoding]];
                 [body appendData:[[NSString stringWithFormat:@"Content-Type: %@\r\n",dict[@"mimetype"]] dataUsingEncoding:NSUTF8StringEncoding]];
                 [body appendData:[@"Content-Transfer-Encoding: binary\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
                 [body appendData:dict[@"data"]];
             }
+            
         } else {
             [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n",key] dataUsingEncoding:NSUTF8StringEncoding]];
             
             NSData *data = nil;
             
             if ([obj isKindOfClass:[NSData class]]) {
-                [body appendData:[@"Content-Type: application/octet-stream\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+                [body appendData:cTypeOctetStreamData];
                 data = (NSData *)obj;
             } else if ([obj isKindOfClass:[NSString class]]) {
                 data = [(NSString *)obj dataUsingEncoding:NSUTF8StringEncoding];
             }
             
             if (data.length > 0) {
-                [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+                [body appendData:cRetAndNlineData];
                 [body appendData:data];
             }
         }
-
+        
         // end the parameter
-        [body appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    }
+        [body appendData:cRetAndNlineData];
+    }];
     
     [body appendData:[[NSString stringWithFormat:@"--%@--\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
     return body;
