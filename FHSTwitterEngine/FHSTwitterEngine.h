@@ -516,162 +516,11 @@
 - (NSError *)updateSettingsWithDictionary:(NSDictionary *)settings;
 
 
-
-/** 
- POST account/update_delivery_device	 
+/**
  Sets which device Twitter delivers updates to for the authenticating user. Sending none as the device parameter will disable SMS updates.
- 
- POST account/update_profile	 
- Sets values that users are able to set under the "Account" tab of their settings page. Only the parameters specified will be updated.
- 
- POST account/update_profile_background_image	 
- Updates the authenticating user's profile background image. This method can also be used to enable or disable the profile background image. Although each parameter is marked as optional, at least one of image, tile or use must be provided when making this request.
- 
- POST account/update_profile_colors	 
- Sets one or more hex values that control the color scheme of the authenticating user's profile page on twitter.com. Each parameter's value must be a valid hexidecimal value, and may be either three or six characters (ex: #fff or #ffffff).
- 
- POST account/update_profile_image	 
- Updates the authenticating user's profile image. Note that this method expects raw multipart data, not a URL to an image. This method asynchronously processes the uploaded file before updating the user's profile image URL. You can either update your local cache the next time you request the user's...
- 
- GET blocks/list	 
- Returns a collection of user objects that the authenticating user is blocking. Important On October 15, 2012 this method will become cursored by default, altering the default response format. See Using cursors to navigate collections for more details on how cursoring works.
- 
- GET blocks/ids	 
- Returns an array of numeric user ids the authenticating user is blocking. Important On October 15, 2012 this method will become cursored by default, altering the default response format. See Using cursors to navigate collections for more details on how cursoring works.
- 
- POST blocks/create	 
- Blocks the specified user from following the authenticating user. In addition the blocked user will not show in the authenticating users mentions or timeline (unless retweeted by another user). If a follow or friend relationship exists it is destroyed.
- 
- POST blocks/destroy	 
- Un-blocks the user specified in the ID parameter for the authenticating user. Returns the un-blocked user in the requested format when successful. If relationships existed before the block was instated, they will not be restored.
- 
- GET users/lookup	 
- Returns fully-hydrated user objects for up to 100 users per request, as specified by comma-separated values passed to the user_id and/or screen_name parameters. This method is especially useful when used in conjunction with collections of user IDs returned from GET friends/ids and GET followers/...
- 
- GET users/show	 
- Returns a variety of information about the user specified by the required user_id or screen_name parameter. The author's most recent Tweet will be returned inline when possible. GET users/lookup is used to retrieve a bulk collection of user objects.
- 
- GET users/search	 
- Provides a simple, relevance-based search interface to public user accounts on Twitter. Try querying by topical interest, full name, company name, location, or other criteria. Exact match searches are not supported. Only the first 1,000 matching results are available.
- 
- GET users/contributees	 
- Returns a collection of users that the specified user can "contribute" to.
- 
- GET users/contributors	 
- Returns a collection of users who can contribute to the specified account.
- 
- POST account/remove_profile_banner	 
- Removes the uploaded profile banner for the authenticating user. Returns HTTP 200 upon success.
- 
- POST account/update_profile_banner	 
- Uploads a profile banner on behalf of the authenticating user. For best results, upload an
- 
- GET users/profile_banner	 
- Returns a map of the available size variations of the specified user's profile banner. If the user has not uploaded a profile banner, a HTTP 404 will be served instead. This method can be used instead of string manipulation on the profile_banner_url returned in user objects as described in User...
  */
-//TODO: below
+// TODO: POST account/update_delivery_device
 
-
-#pragma mark - Suggested Users
-#pragma mark - Favorites
-#pragma mark - Lists
-#pragma mark - Saved Searches
-#pragma mark - Trends
-#pragma mark - Spam Reporting
-#pragma mark - OAuth
-#pragma mark - Help
-
-
-
-#pragma mark - Statuses
-
-
-
-
-
-
-#pragma mark Retweet
-
-
-
-
-#pragma mark Misc.
-
-
-#pragma mark - Blocking
-
-/**
- Blocks the user with the given screen name.
- blocks/create
- @param username Screen name of user to block.
- @return If an error occurs, returns an NSError object that describes the problem.
- */
-- (NSError *)block:(NSString *)username;
-
-
-/**
- Unblocks the user with the given screen name.
- nlocks/destroy
- @param username Screen name of user to block.
- @return If an error occurs, returns an NSError object that describes the problem.
- */
-- (NSError *)unblock:(NSString *)username;
-
-
-// blocks/blocking/ids
-- (id)listBlockedIDs;
-
-// blocks/blocking
-- (id)listBlockedUsers;
-
-// blocks/exists
-- (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID;
-
-
-#pragma mark - Search
-
-/**
- Looks up users.
- users/lookup
- @param users List of users to look up.
- @param areIDs A Boolean value that determines whether the list is of screen names or user IDs. If `YES`, `users` is a list of user IDs.
- */
-- (id)lookupUsers:(NSArray *)users areIDs:(BOOL)areIDs;
-
-
-/**
- Searches users with the given query.
- users/search
- @param q Query of search.
- @param count Count of query.
- */
-- (id)searchUsersWithQuery:(NSString *)q andCount:(int)count;
-
-
-
-
-#pragma mark - Account
-#pragma mark Account/update_profile_image
-
-/**
- Sets the profile image with an image file path.
- @param file File path of image.
- @return If an error occurs, returns an NSError object that describes the problem.
- */
-- (NSError *)setProfileImageWithImageAtPath:(NSString *)file;
-
-
-/**
- Sets the profile image with an image.
- @param data Image data.
- @return If an error occurs, returns an NSError object that describes the problem.
- */
-- (NSError *)setProfileImageWithImageData:(NSData *)data;
-
-
-
-
-#pragma mark Account/update_profile
 
 /**
  Updates the profile for the authenticated user.
@@ -682,42 +531,33 @@
  `description` (160 characters maximum).
  @return If an error occurs, returns an NSError object that describes the problem.
  */
+// POST account/update_profile
 - (NSError *)updateUserProfileWithDictionary:(NSDictionary *)settings;
 
 
-#pragma mark Account/update_profile_background_image
-
 /**
- Sets the profile background image with an image.
+ Sets the authenticated user's profile background image with an image.
  @param data Image data.
  @param tiled A Boolean value that determines if the image is tiled. If `YES`, the image is tiled.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
+// POST account/update_profile_background_image
 - (NSError *)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled;
 
 
 /**
- Sets the profile background image with an image file path.
+ Sets the authenticated user's profile background image with an image.
  @param file File path of image.
  @param tiled A Boolean value that determines if the image is tiled. If `YES`, the image is tiled.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
+// POST account/update_profile_background_image
 - (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled;
 
 
 /**
- Sets whether the profile uses a background image.
- @param shouldUseProfileBackgroundImage A Boolean value that determines if whether the profile uses a background image.
- @return If an error occurs, returns an NSError object that describes the problem.
- */
-- (NSError *)setUseProfileBackgroundImage:(BOOL)shouldUseProfileBackgroundImage;
-
-
-#pragma mark Account/update_profile_colors
-
-/**
  Sets the profile colors for the authenticated user.
- @param dictionary Dictionary with the following keys (values are hex colors in string format):
+ @param dictionary Dictionary with the following keys (values are hex colors in string format, either three or six characters):
  `profile_background_color`,
  `profile_link_color`,
  `profile_sidebar_border_color`,
@@ -726,8 +566,146 @@
  If the dictionary is nil, FHSTwitterEngine resets the values.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
+// POST account/update_profile_colors
 - (NSError *)updateProfileColorsWithDictionary:(NSDictionary *)dictionary;
 
+
+/**
+ Sets the profile image with an image file path.
+ @param file File path of image.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST account/update_profile_image
+- (NSError *)setProfileImageWithImageAtPath:(NSString *)file;
+
+
+/**
+ Sets the profile image with an image.
+ @param data Image data.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST account/update_profile_image
+- (NSError *)setProfileImageWithImageData:(NSData *)data;
+
+
+/**
+ Sets whether the profile uses a background image.
+ @param shouldUseProfileBackgroundImage A Boolean value that determines if whether the profile uses a background image.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST account/update_profile_image
+- (NSError *)setUseProfileBackgroundImage:(BOOL)shouldUseProfileBackgroundImage;
+
+
+/**
+ Returns a collection of users that the authenticating user is blocking.
+ */
+// GET blocks/list
+- (id)listBlockedIDs;
+
+
+/**
+ Returns a collection of IDs that the authenticating user is blocking.
+ */
+// GET blocks/ids
+- (id)listBlockedUsers;
+
+
+/**
+ Blocks the specified user from following the authenticating user. In addition the blocked user will not show in the authenticating users mentions or timeline (unless retweeted by another user). If a follow or friend relationship exists it is destroyed.
+ @param username Screen name of user to block.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST blocks/create
+- (NSError *)block:(NSString *)username;
+
+
+/**
+ Un-blocks the user specified user for the authenticating user. If relationships existed before the block was instated, they will not be restored.
+ @param username Screen name of user to block.
+ @return If an error occurs, returns an NSError object that describes the problem. 
+ */
+// POST blocks/destroy
+- (NSError *)unblock:(NSString *)username;
+
+
+/**
+ Returns if the authenticating user is blocking a target user.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// GET  blocks/exists
+- (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID;
+
+
+
+/**
+ Looks up users (up to 100 users).
+ @param users List of users to look up.
+ @param areIDs A Boolean value that determines whether the list is of screen names or user IDs. If `YES`, `users` is a list of user IDs.
+ */
+// GET users/lookup
+- (id)lookupUsers:(NSArray *)users areIDs:(BOOL)areIDs;
+
+
+/**
+ Returns a variety of information about the user specified by the required user_id or screen_name parameter. The author's most recent Tweet will be returned inline when possible. GET users/lookup is used to retrieve a bulk collection of user objects.
+ */
+// TODO: GET users/show
+
+
+/**
+ Searches users with the given query.
+ @param q Query of search.
+ @param count Count of query.
+ */
+// GET users/search
+- (id)searchUsersWithQuery:(NSString *)q andCount:(int)count;
+
+
+/**
+ Returns a collection of users that the specified user can "contribute" to.
+*/
+// TODO: GET users/contributees
+
+
+/**
+ Returns a collection of users who can contribute to the specified account.
+ */
+// TODO: GET users/contributors
+
+
+/**
+ Removes the uploaded profile banner for the authenticating user. Returns HTTP 200 upon success.
+ */
+//TODO: POST account/remove_profile_banner
+
+
+/**
+ Uploads a profile banner on behalf of the authenticating user. For best results, upload an
+ */
+//TODO: POST account/update_profile_banner
+
+
+/**
+ Returns a map of the available size variations of the specified user's profile banner. If the user has not uploaded a profile banner, a HTTP 404 will be served instead. This method can be used instead of string manipulation on the profile_banner_url returned in user objects as described in User...
+ */
+//TODO: GET users/profile_banner
+
+
+#pragma mark - Suggested Users
+/// @name Suggested Users
+//TODO: below
+
+
+#pragma mark - Favorites
+#pragma mark - Lists
+#pragma mark - Saved Searches
+#pragma mark - Trends
+#pragma mark - Spam Reporting
+#pragma mark - OAuth
+#pragma mark - Help
 
 
 
@@ -755,7 +733,7 @@
 
 /**
  Gets the favorite Tweets for a given user.
- @param user Screen name of user ID.
+ @param user The user ID or screen name.
  @param isID A Boolean that determines if `user` is a screen name or a user ID.
  @param count Number of Tweets to get.
  @return A list of Tweets favorited by the user.
@@ -765,7 +743,7 @@
 
 /**
  Gets the Tweets favorited by a given user.
- @param user Screen name of user ID.
+ @param user The user ID or screen name.
  @param isID A Boolean that determines of `user` is a screen name or a user ID.
  @param count Specifies the number of records to retrieve. Must be less than or equal to 200. Defaults to 20.
  @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
