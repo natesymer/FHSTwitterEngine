@@ -696,11 +696,53 @@
 
 #pragma mark - Suggested Users
 /// @name Suggested Users
-//TODO: below
+
+/**
+ Access the users in a given category of the Twitter suggested user list. It is recommended that applications cache this data for no more than one hour.
+ */
+// TODO: GET users/suggestions/:slug
+
+/**
+ Access to Twitter's suggested user list. This returns the list of suggested user categories. The category can be used in GET users/suggestions/:slug to get the users in that category.
+ */
+// TODO: GET users/suggestions
+ 
+/**
+ Access the users in a given category of the Twitter suggested user list and return their most recent status if they are not a protected user.
+ */
+// TODO: GET users/suggestions/:slug/members
+
 
 
 #pragma mark - Favorites
+/// @name Favorites
+
+/**
+ Gets the favorite Tweets for a given user.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @param count Number of Tweets to get.
+ @return A list of Tweets favorited by the user.
+ */
+// GET favorites/list
+- (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count;
+
+
+/**
+ Marks or unmarks Tweet as favorite for the authenticating user.
+ @param tweetID ID of Tweet to mark or unmark as favorite.
+ @param flag A Boolean value that determines if the Tweet is to be marked or unmarked as favorite. If `YES`, the Tweet is marked as favorite.
+ @return If an error occurs, returns an NSError object that describes the problem. 
+ */
+// POST favorites/destroy
+// POST favorites/create
+- (NSError *)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag;
+
+
 #pragma mark - Lists
+/// @name Lists
+
+//TODO: below
 #pragma mark - Saved Searches
 #pragma mark - Trends
 #pragma mark - Spam Reporting
@@ -718,27 +760,9 @@
 - (id)getRateLimitStatus;
 
 
-#pragma mark - Favorites
-#pragma mark Favorites/create, favorites/destroy
-
-/**
- Marks or unmarks Tweet as favorite.
- @param tweetID ID of Tweet to mark or unmark as favorite.
- @param flag A Boolean value that determines if the Tweet is to be marked or unmarked as favorite. If `YES`, the Tweet is marked as favorite.
- */
-- (NSError *)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag;
 
 
-#pragma mark Favorites/list
 
-/**
- Gets the favorite Tweets for a given user.
- @param user The user ID or screen name.
- @param isID A Boolean that determines if `user` is a screen name or a user ID.
- @param count Number of Tweets to get.
- @return A list of Tweets favorited by the user.
- */
-- (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count;
 
 
 /**
