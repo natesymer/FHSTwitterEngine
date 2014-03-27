@@ -836,45 +836,143 @@
 // TODO: POST lists/subscribers/destroy
 
 
-
-
-
-// lists/members/create_all
+/**
+ Adds multiple members to a list, by specifying a comma-separated list of member ids or screen names. The authenticated user must own the list to be able to add members to it. Note that lists can't have more than 5,000 members.
+ @param listID The ID of the list.
+ @param users List of user screen names (at least 1 user, maximum of 100 users).
+ @return If an error occurs, returns an NSError object that describes the problem. 
+ */
+// POST lists/members/create_all
 - (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;
 
-// lists/members/destroy_all
-- (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
-
-// lists/members
-- (id)listUsersInListWithID:(NSString *)listID;
-
-// lists/update
-- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name;
-- (NSError *)updateListWithID:(NSString *)listID description:(NSString *)description;
-- (NSError *)updateListWithID:(NSString *)listID mode:(BOOL)isPrivate;
-- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name description:(NSString *)description mode:(BOOL)isPrivate;
-
-// lists/show
-- (id)getListWithID:(NSString *)listID;
-
-// lists/create
-- (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
 
 /**
- POST lists/members/create_all	 Adds multiple members to a list, by specifying a comma-separated list of member ids or screen names. The authenticated user must own the list to be able to add members to it. Note that lists can't have more than 5,000 members, and you are limited to adding up to 100 members to a list at a time with...
- GET lists/members/show	 Check if the specified user is a member of the specified list.
- GET lists/members	 Returns the members of the specified list. Private list members will only be shown if the authenticated user owns the specified list.
- POST lists/members/create	 Add a member to a list. The authenticated user must own the list to be able to add members to it. Note that lists cannot have more than 5,000 members.
- POST lists/destroy	 Deletes the specified list. The authenticated user must own the list to be able to destroy it.
- POST lists/update	 Updates the specified list. The authenticated user must own the list to be able to update it.
- POST lists/create	 Creates a new list for the authenticated user. Note that you can't create more than 20 lists per account.
- GET lists/show	 Returns the specified list. Private lists will only be shown if the authenticated user owns the specified list.
- GET lists/subscriptions	 Obtain a collection of the lists the specified user is subscribed to, 20 lists per page by default. Does not include the user's own lists.
- POST lists/members/destroy_all	 Removes multiple members from a list, by specifying a comma-separated list of member ids or screen names. The authenticated user must own the list to be able to remove members from it. Note that lists can't have more than 500 members, and you are limited to removing up to 100 members to a list at a...
- GET lists/ownerships	 Returns the lists owned by the specified Twitter user. Private lists will only be shown if the authenticated user is also the owner of the lists.
+ Check if the specified user is a member of the specified list.
  */
-//TODO: below
+// TODO: GET lists/members/show
+
+
+/**
+ Returns the members of the specified list. Private list members will only be shown if the authenticated user owns the specified list.
+ @param listID The ID of the list.
+ @return A list of users.
+ */
+// GET lists/members
+- (id)listUsersInListWithID:(NSString *)listID;
+
+
+/**
+ Add a member to a list. The authenticated user must own the list to be able to add members to it. Note that lists cannot have more than 5,000 members.
+ */
+// TODO: POST lists/members/create
+
+
+/**
+ Deletes the specified list. The authenticated user must own the list to be able to destroy it.
+ */
+// TODO: POST lists/destroy
+
+
+/**
+ Updates the name of specified list. The authenticated user must own the list to be able to update it.
+ @param listID The ID of the list.
+ @param name The name of the list (cannot be empty).
+ @return If an error occurs, returns an NSError object that describes the problem. 
+ */
+// POST lists/update
+- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name;
+
+
+/**
+ Updates the description of specified list. The authenticated user must own the list to be able to update it.
+ @param listID The ID of the list.
+ @param description The description of the list.
+ @return If an error occurs, returns an NSError object that describes the problem. 
+ */
+// POST lists/update
+- (NSError *)updateListWithID:(NSString *)listID description:(NSString *)description;
+
+
+/**
+ Updates the privacy of specified list. The authenticated user must own the list to be able to update it.
+ @param listID The ID of the list.
+ @param isPrivate A Boolean that specifies if the list is private.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST lists/update
+- (NSError *)updateListWithID:(NSString *)listID mode:(BOOL)isPrivate;
+
+
+/**
+ Updates the privacy of specified list. The authenticated user must own the list to be able to update it.
+ @param listID The ID of the list.
+ @param name The name of the list (cannot be empty).
+ @param description The description of the list.
+ @param isPrivate A Boolean that specifies if the list is private.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST lists/update
+- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name description:(NSString *)description mode:(BOOL)isPrivate;
+
+
+/**
+ Creates a new list for the authenticated user. Note that you can't create more than 20 lists per account.
+ @param name The name of the list (cannot be empty).
+ @param isPrivate A Boolean that specifies if the list is private.
+ @param description The description of the list (optional).
+ @return If an error occurs, returns an NSError object that describes the problem. 
+ */
+// POST lists/create
+- (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
+
+
+/**
+ Returns the specified list. Private lists will only be shown if the authenticated user owns the specified list.
+ @param listID The ID of the list.
+ @return A list with its attributes (name, created_at, see https://dev.twitter.com/docs/api/1.1/get/lists/show for more info).
+ */
+// GET lists/show
+- (id)getListWithID:(NSString *)listID;
+
+
+/**
+ Obtain a collection of the lists the specified user is subscribed to, 20 lists per page by default. Does not include the user's own lists.
+ */
+// TODO: GET lists/subscriptions
+
+
+/**
+ Removes multiple members from a list, by specifying a comma-separated list of  screen names. The authenticated user must own the list to be able to remove members from it.
+ @param listID The ID of the list.
+ @param users List of user screen names (at least 1 user, maximum of 100 users).
+ @return If an error occurs, returns an NSError object that describes the problem. 
+ */
+// POST lists/members/destroy_all
+- (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
+
+
+/**
+ Returns the lists owned by the specified Twitter user. Private lists will only be shown if the authenticated user is also the owner of the lists.
+ */
+// TODO: GET lists/ownerships
+
+
 #pragma mark - Saved Searches
+/// @name Saved Searches
+
+/**
+ Returns the authenticated user's saved search queries.
+ */
+// GET saved_searches/list
+
+/**
+ GET saved_searches/show/:id	 Retrieve the information for the saved search represented by the given id. The authenticating user must be the owner of saved search ID being requested.
+ POST saved_searches/create	 Create a new saved search for the authenticated user. A user may only have 25 saved searches.
+ POST saved_searches/destroy/:id	 Destroys a saved search for the authenticating user. The authenticating user must be the owner of saved search id being destroyed.
+ */
+
+//TODO: below
+
 #pragma mark - Trends
 #pragma mark - Spam Reporting
 #pragma mark - OAuth
