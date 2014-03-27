@@ -742,6 +742,137 @@
 #pragma mark - Lists
 /// @name Lists
 
+/**
+ Gets all lists the specified user subscribes to, including their own. 
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @return Twitter lists.
+ */
+//  GET lists/list
+- (id)getListsForUser:(NSString *)user isID:(BOOL)isID;
+
+
+/**
+ Returns a timeline of tweets authored by members of the specified list.
+ @param listID The list ID.
+ @param count Number of Tweets to get.
+ @return A list of Tweets.
+ */
+// GET lists/statuses
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count;
+
+
+/**
+ Returns a timeline of tweets authored by members of the specified list.
+ @param listID The list ID.
+ @param count Number of Tweets to get.
+ @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
+ @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
+ @return A list of Tweets.
+ */
+// GET lists/statuses
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+
+
+/**
+ Returns a timeline of tweets authored by members of the specified list.
+ @param listID The list ID.
+ @param count Number of Tweets to get.
+ @param excludeRetweets A Boolean that specifies whether to return retweets.
+ @param excludeReplies A Boolean that specifies whether to return replies.
+ @return A list of Tweets.
+ */
+// GET lists/statuses
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count excludeRetweets:(BOOL)excludeRetweets excludeReplies:(BOOL)excludeReplies;
+
+
+/**
+ Returns a timeline of tweets authored by members of the specified list.
+ @param listID The list ID.
+ @param count Number of Tweets to get.
+ @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
+ @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
+ @param excludeRetweets A Boolean that specifies whether to return retweets.
+ @param excludeReplies A Boolean that specifies whether to return replies.
+ @return A list of Tweets.
+ */
+// GET lists/statuses
+- (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID excludeRetweets:(BOOL)excludeRetweets excludeReplies:(BOOL)excludeReplies;
+
+
+/**
+ Removes the specified member from the list. The authenticated user must be the list's owner to remove members from the list.
+ */
+// TODO: POST lists/members/destroy
+
+
+/**
+ Returns the lists the specified user has been added to. If user_id or screen_name are not provided the memberships for the authenticating user are returned.
+ */
+// TODO: GET lists/memberships
+
+
+/**
+ Returns the subscribers of the specified list. Private list subscribers will only be shown if the authenticated user owns the specified list.
+ */
+// TODO: GET lists/subscribers
+
+
+/**
+ Subscribes the authenticated user to the specified list.
+ */
+// TODO: POST lists/subscribers/create
+
+
+/**
+ Check if the specified user is a subscriber of the specified list. Returns the user if they are subscriber.
+ */
+// TODO: GET lists/subscribers/show
+
+
+/**
+ Unsubscribes the authenticated user from the specified list.
+ */
+// TODO: POST lists/subscribers/destroy
+
+
+
+
+
+// lists/members/create_all
+- (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;
+
+// lists/members/destroy_all
+- (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
+
+// lists/members
+- (id)listUsersInListWithID:(NSString *)listID;
+
+// lists/update
+- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name;
+- (NSError *)updateListWithID:(NSString *)listID description:(NSString *)description;
+- (NSError *)updateListWithID:(NSString *)listID mode:(BOOL)isPrivate;
+- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name description:(NSString *)description mode:(BOOL)isPrivate;
+
+// lists/show
+- (id)getListWithID:(NSString *)listID;
+
+// lists/create
+- (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
+
+/**
+ POST lists/members/create_all	 Adds multiple members to a list, by specifying a comma-separated list of member ids or screen names. The authenticated user must own the list to be able to add members to it. Note that lists can't have more than 5,000 members, and you are limited to adding up to 100 members to a list at a time with...
+ GET lists/members/show	 Check if the specified user is a member of the specified list.
+ GET lists/members	 Returns the members of the specified list. Private list members will only be shown if the authenticated user owns the specified list.
+ POST lists/members/create	 Add a member to a list. The authenticated user must own the list to be able to add members to it. Note that lists cannot have more than 5,000 members.
+ POST lists/destroy	 Deletes the specified list. The authenticated user must own the list to be able to destroy it.
+ POST lists/update	 Updates the specified list. The authenticated user must own the list to be able to update it.
+ POST lists/create	 Creates a new list for the authenticated user. Note that you can't create more than 20 lists per account.
+ GET lists/show	 Returns the specified list. Private lists will only be shown if the authenticated user owns the specified list.
+ GET lists/subscriptions	 Obtain a collection of the lists the specified user is subscribed to, 20 lists per page by default. Does not include the user's own lists.
+ POST lists/members/destroy_all	 Removes multiple members from a list, by specifying a comma-separated list of member ids or screen names. The authenticated user must own the list to be able to remove members from it. Note that lists can't have more than 500 members, and you are limited to removing up to 100 members to a list at a...
+ GET lists/ownerships	 Returns the lists owned by the specified Twitter user. Private lists will only be shown if the authenticated user is also the owner of the lists.
+ */
 //TODO: below
 #pragma mark - Saved Searches
 #pragma mark - Trends
@@ -811,38 +942,6 @@
 - (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
 - (id)getProfileImageURLStringForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
 
-
-#pragma mark - Lists
-
-// lists/list
-- (id)getListsForUser:(NSString *)user isID:(BOOL)isID;
-
-// lists/statuses
-- (id)getTimelineForListWithID:(NSString *)listID count:(int)count;
-- (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
-- (id)getTimelineForListWithID:(NSString *)listID count:(int)count excludeRetweets:(BOOL)excludeRetweets excludeReplies:(BOOL)excludeReplies;
-- (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID excludeRetweets:(BOOL)excludeRetweets excludeReplies:(BOOL)excludeReplies;
-
-// lists/members/create_all
-- (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;
-
-// lists/members/destroy_all
-- (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
-
-// lists/members
-- (id)listUsersInListWithID:(NSString *)listID;
-
-// lists/update
-- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name;
-- (NSError *)updateListWithID:(NSString *)listID description:(NSString *)description;
-- (NSError *)updateListWithID:(NSString *)listID mode:(BOOL)isPrivate;
-- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name description:(NSString *)description mode:(BOOL)isPrivate;
-
-// lists/show
-- (id)getListWithID:(NSString *)listID;
-
-// lists/create
-- (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
 
 
 
