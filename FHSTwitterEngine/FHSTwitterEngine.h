@@ -729,6 +729,19 @@
 
 
 /**
+ Gets the favorite Tweets for a given user.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines of `user` is a screen name or a user ID.
+ @param count Specifies the number of records to retrieve. Must be less than or equal to 200. Defaults to 20.
+ @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
+ @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
+ @return A list of Tweets.
+ */
+// GET favorites/list
+- (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
+
+
+/**
  Marks or unmarks Tweet as favorite for the authenticating user.
  @param tweetID ID of Tweet to mark or unmark as favorite.
  @param flag A Boolean value that determines if the Tweet is to be marked or unmarked as favorite. If `YES`, the Tweet is marked as favorite.
@@ -963,124 +976,254 @@
 /**
  Returns the authenticated user's saved search queries.
  */
-// GET saved_searches/list
+// TODO: GET saved_searches/list
+
 
 /**
- GET saved_searches/show/:id	 Retrieve the information for the saved search represented by the given id. The authenticating user must be the owner of saved search ID being requested.
- POST saved_searches/create	 Create a new saved search for the authenticated user. A user may only have 25 saved searches.
- POST saved_searches/destroy/:id	 Destroys a saved search for the authenticating user. The authenticating user must be the owner of saved search id being destroyed.
+ Retrieve the information for the saved search represented by the given id. The authenticating user must be the owner of saved search ID being requested.
  */
+// TODO: GET saved_searches/show/:id
 
-//TODO: below
+
+/**
+Create a new saved search for the authenticated user. A user may only have 25 saved searches.
+ */
+// TODO: POST saved_searches/create
+
+
+/**
+ Destroys a saved search for the authenticating user. The authenticating user must be the owner of saved search id being destroyed.
+ */
+// TODO: POST saved_searches/destroy/:id
+
 
 #pragma mark - Trends
-#pragma mark - Spam Reporting
-#pragma mark - OAuth
-#pragma mark - Help
-
-
-
-
-#pragma mark - Application/rate_limit_status
+/// @name Trends
 
 /**
- Gets the rate limit status.
+Returns the top 10 trending topics for a specific WOEID, if trending information is available for it. The response is an array of "trend" objects that encode the name of the trending topic, the query parameter that can be used to search for the topic on Twitter Search, and the Twitter Search URL....
  */
+// TODO: GET trends/place
+
+
+/**
+ Returns the locations that Twitter has trending topic information for. The response is an array of "locations" that encode the location's WOEID and some other human-readable information such as a canonical name and country the location belongs in. A WOEID is a Yahoo! Where On Earth ID.
+ */
+// TODO: GET trends/available
+
+
+/**
+ Returns the locations that Twitter has trending topic information for, closest to a specified location. The response is an array of "locations" that encode the location's WOEID and some other human-readable information such as a canonical name and country the location belongs in. A WOEID is a Yahoo...
+ */
+// TODO: GET trends/closest
+
+
+#pragma mark - Spam Reporting
+/// @name Spam Reporting
+
+/**
+ Reports the specified user as a spam account to Twitter (additionally blocks the user).
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @return If an error occurs, returns an NSError object that describes the problem.
+ */
+// POST users/report_spam
+- (NSError *)reportUserAsSpam:(NSString *)user isID:(BOOL)isID;
+
+
+#pragma mark - OAuth
+/// @name OAuth
+
+/**
+ Allows a Consumer application to use an OAuth request_token to request user authorization. This method is a replacement of Section 6.2 of the OAuth 1.0 authentication flow for applications using the callback authentication flow. The method will use the currently logged in user as the account for...
+ */
+// TODO: GET oauth/authenticate
+
+
+/**
+ Allows a Consumer application to use an OAuth Request Token to request user authorization. This method fulfills Section 6.2 of the OAuth 1.0 authentication flow. Desktop applications must use this method (and cannot use GET oauth/authenticate). Please use HTTPS for this method, and all other OAuth...
+ */
+// TODO: GET oauth/authorize
+
+
+/**
+ Allows a Consumer application to exchange the OAuth Request Token for an OAuth Access Token. This method fulfills Section 6.3 of the OAuth 1.0 authentication flow. The OAuth access token may also be used for xAuth operations. Please use HTTPS for this method, and all other OAuth token negotiation...
+ */
+// TODO: POST oauth/access_token
+
+
+/**
+ Allows a Consumer application to obtain an OAuth Request Token to request user authorization.
+ */
+// POST oauth/request_token
+- (id)getRequestToken;
+
+
+/**
+ Allows a registered application to obtain an OAuth 2 Bearer Token, which can be used to make API requests on an application's own behalf, without a user context. This is called Application-only authentication. A Bearer Token may be invalidated using oauth2/invalidate_token. Once a Bearer Token has...
+ */
+// TODO: POST oauth2/token
+
+/**
+ Allows a registered application to revoke an issued OAuth 2 Bearer Token by presenting its client credentials. Once a Bearer Token has been invalidated, new creation attempts will yield a different Bearer Token and usage of the invalidated token will no longer be allowed. As with all API v1.1...
+ */
+// TODO: POST oauth2/invalidate_token
+
+
+#pragma mark - Help
+/// @name Help
+
+/**
+ Returns the current configuration used by Twitter including twitter.com slugs which are not usernames, maximum photo resolutions, and t.co URL lengths. It is recommended applications request this endpoint when they are loaded, but no more than once a day.
+ */
+// GET help/configuration
+- (id)getConfiguration;
+
+
+/**
+ Returns the list of languages supported by Twitter along with their ISO 639-1 code. The ISO 639-1 code is the two letter value to use if you include lang with any of your requests.
+ */
+// GET help/languages
+- (id)getLanguages;
+
+
+/**
+ Returns Twitter's Privacy Policy.
+ */
+// GET help/privacy
+- (id)getPrivacyPolicy;
+
+
+/**
+ Returns the Twitter Terms of Service.
+ */
+//GET help/tos
+- (id)getTermsOfService;
+
+
+/**
+ Gets the rate limit status. See https://dev.twitter.com/docs/api/1.1/get/application/rate_limit_status for more information.
+ */
+// GET application/rate_limit_status
 - (id)getRateLimitStatus;
 
 
+#pragma mark - Non-API
+/// @name Non-API
 
 
-
-
-
-/**
- Gets the Tweets favorited by a given user.
- @param user The user ID or screen name.
- @param isID A Boolean that determines of `user` is a screen name or a user ID.
- @param count Specifies the number of records to retrieve. Must be less than or equal to 200. Defaults to 20.
- @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
- @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
- @return A list of Tweets.
- */
-- (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
-
-
-
-
-
-#pragma mark - Help
-
+#pragma mark Test
 /**
  Tests the Twitter service.
  help/test
  */
 - (id)testService;
 
-// help/tos
-- (id)getTermsOfService;
 
-// help/privacy
-- (id)getPrivacyPolicy;
-
-// help/configuration
-- (id)getConfiguration;
-
-// help/languages
-- (id)getLanguages;
-
-
-#pragma mark - Report spam
-// users/report_spam
-- (NSError *)reportUserAsSpam:(NSString *)user isID:(BOOL)isID;
-
-
-
+#pragma mark Get profile image
+/**
+ Gets profile image.
+ @param username Twitter user name.
+ @param size Size of image using `FHSTwitterEngineImageSize` (for example: `FHSTwitterEngineImageSizeMini` for 24px)
+ @return Profile image.
+ */
 // users/profile_image
 - (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
+
+
+/**
+ Gets profile image URL String.
+ @param username Twitter user name.
+ @param size Size of image using `FHSTwitterEngineImageSize` (for example: `FHSTwitterEngineImageSizeMini` for 24px)
+ @return URL String to profile image.
+ */
+// users/profile_image
 - (id)getProfileImageURLStringForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
 
 
+#pragma mark TwitPic (photo upload)
 
-
-
-#pragma mark - TwitPic (photo upload)
-
+/**
+ Posts a Tweet with an image using TwitPic.
+ @param image Image to post.
+ @param message Message to post (optional).
+ @param twitPicAPIKey TwitPic API key.
+ */
 - (id)uploadImageToTwitPic:(UIImage *)image withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
+
+
+/**
+ Posts a Tweet with an image using TwitPic.
+ @param imageData Image data of image to post.
+ @param message Message to post (optional).
+ @param twitPicAPIKey TwitPic API key.
+ */
 - (id)uploadImageDataToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 
 
+#pragma mark Login and Auth
 
-
-
-#pragma mark - Login and Auth
-//
-// Login and Auth
-//
-
-// OAuth
-- (id)getRequestToken;
+/**
+ OAuth
+ @param reqToken Request token `FHSToken`
+ @return A Boolean that specifies whether the request was successful.
+ */
 - (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken;
 
-// xAuth
+
+/**
+ Authenticates using xAuth.
+ @param username
+ @param password
+ */
 - (NSError *)authenticateWithUsername:(NSString *)username password:(NSString *)password;
 
 
-#pragma mark - Access Token Management
+#pragma mark Access Token Management
 
+/**
+ Clears the access token.
+ */
 - (void)clearAccessToken;
+
+
+/**
+ Loads the access token.
+ */
 - (void)loadAccessToken;
+
+
+/**
+ Returns whether the library is authorized with Twitter.
+ */
 - (BOOL)isAuthorized;
 
 
-#pragma mark - API Key Management
+#pragma mark API Key Management
 
+/**
+ Clears the consumer.
+ */
 - (void)clearConsumer;
-- (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret; // key pair is used for one request
-- (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret; // key pair is used indefinitely
 
 
-#pragma mark - Misc.
+/**
+ Uses the consumer key pair for one request.
+ @param consumerKey Consumer key.
+ @param consumerSecret Consumer secret.
+ */
+- (void)temporarilySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
+
+
+/**
+ Uses the consumer key pair indefinitely.
+ @param consumerKey Consumer key.
+ @param consumerSecret Consumer secret.
+ */
+- (void)permanentlySetConsumerKey:(NSString *)consumerKey andSecret:(NSString *)consumerSecret;
+
+
+#pragma mark Misc.
 
 /**
  Generates a request string:
