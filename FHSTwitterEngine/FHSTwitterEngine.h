@@ -101,11 +101,10 @@
 /// @name Timelines
 
 /**
- Gets the most recent mentions (Tweets containing a users's @screen_name) for the authenticating user.
+ Gets the most recent mentions (Tweets containing a users's @screen_name) for the authenticating user. See https://dev.twitter.com/docs/api/1.1/get/statuses/mentions_timeline for more information.
  @param count Number of Tweets to retrieve.
  @return A list of Tweets.
  */
-// GET statuses/mentions_timeline
 - (id)getMentionsTimelineWithCount:(int)count;
 
 
