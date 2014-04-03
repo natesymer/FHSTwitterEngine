@@ -6,19 +6,23 @@
 //  Copyright (c) 2014 Nathaniel Symer. All rights reserved.
 //
 
+/**
+ Constant definitions.
+ */
+
 // Image sizes
-typedef enum {
+typedef NS_ENUM(NSInteger, FHSTwitterEngineImageSize) {
     FHSTwitterEngineImageSizeMini, // 24px by 24px
     FHSTwitterEngineImageSizeNormal, // 48x48
     FHSTwitterEngineImageSizeBigger, // 73x73
     FHSTwitterEngineImageSizeOriginal // original size of image
-} FHSTwitterEngineImageSize;
+};
 
-typedef enum {
+typedef NS_ENUM(NSInteger, FHSTwitterEngineResultType) {
     FHSTwitterEngineResultTypeMixed,
     FHSTwitterEngineResultTypeRecent,
     FHSTwitterEngineResultTypePopular
-} FHSTwitterEngineResultType;
+};
 
 typedef void(^StreamBlock)(id result, BOOL *stop);
 typedef NSString *(^LoadAccessTokenBlock)(void);
