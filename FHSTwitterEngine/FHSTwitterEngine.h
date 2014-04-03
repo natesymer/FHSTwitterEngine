@@ -46,7 +46,7 @@
 @interface FHSTwitterEngine : NSObject
 
 /**
- A Boolean value indicating wheather FHSTwitterEngine should include Entities. See Twitter's documentation for more information:
+ A Boolean value indicating whether FHSTwitterEngine should include Entities. See Twitter's documentation for more information:
  https://dev.twitter.com/docs/entities
  */
 @property (nonatomic, assign) BOOL includeEntities;
@@ -57,23 +57,29 @@
  */
 @property (nonatomic, strong) FHSToken *accessToken;
 
-/**
- Two strings representing the consumer key and secret.
- */
 
+/**
+ String representing the consumer key.
+ */
 @property (nonatomic, strong) NSString *consumerKey;
+
+
+/**
+ String representing the consumer secret.
+ */
 @property (nonatomic, strong) NSString *consumerSecret;
+
 
 #pragma mark Blocks
 
 /**
- Blocks to store the access token.
+ Block to store the access token.
  */
 @property (nonatomic, copy) StoreAccessTokenBlock storeAccessTokenBlock;
 
 
 /**
- Blocks to load the access token.
+ Block to load the access token.
  */
 @property (nonatomic, copy) LoadAccessTokenBlock loadAccessTokenBlock;
 
@@ -228,7 +234,15 @@
 - (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
 
 
+/**
+ Returns information allowing the creation of an embedded representation of a Tweet on third party sites. See the oEmbed specification for information about the response format. API endpoint: GET statuses/oembed.
+*/
 //TODO: GET statuses/oembed
+
+
+/**
+ Returns a collection of up to 100 user IDs belonging to users who have retweeted the tweet specified by the id parameter. This method offers similar data to GET statuses/retweets/:id and replaces API v1's GET statuses/:id/retweeted_by/ids method. API endpoint: GET statuses/retweeters/ids.
+ */
 //TODO: GET statuses/retweeters/ids
 
 
@@ -246,6 +260,7 @@
  @return A list of Tweets.
  */
 //TODO: rename unil to until
+//TODO: rename q to query (one letter is too short)
 - (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID;
 
 
@@ -287,6 +302,9 @@
 - (void)streamUserMessagesWith:(NSArray *)with replies:(BOOL)replies keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block;
 
 
+/**
+ Streams messages for a set of users, as described in Site streams. See https://dev.twitter.com/docs/streaming-apis/streams/site for more information. API endpoint: GET site.
+ */
 // TODO: GET site
 
 
@@ -1153,9 +1171,11 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
  */
 + (NSDateFormatter *)dateFormatter;
 
+
 /**
  Checks whether the client is connected to the internet.
  */
 + (BOOL)isConnectedToInternet;
+
 
 @end
