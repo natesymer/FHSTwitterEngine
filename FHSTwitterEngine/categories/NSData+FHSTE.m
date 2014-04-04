@@ -31,6 +31,10 @@ static char const Encode[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx
 }
 
 - (NSString *)base64Encode {
+    if ([self respondsToSelector:@selector(base64EncodedStringWithOptions:)]) {
+        return [self base64EncodedStringWithOptions:0];
+    }
+    
     int outLength = ((((self.length*4)/3)/4)*4)+(((self.length*4)/3)%4?4:0);
     const char *inputBuffer = self.bytes;
     char *outputBuffer = malloc(outLength+1);
