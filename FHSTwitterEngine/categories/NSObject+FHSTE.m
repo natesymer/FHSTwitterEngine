@@ -29,9 +29,9 @@ id removeNull(id rootObject) {
     
     if ([rootObject isKindOfClass:[NSNull class]]) {
         return (id)nil;
-    } else {
-        return rootObject;
     }
+    
+    return rootObject;
 }
 
 @implementation NSObject (RemoveNull)
