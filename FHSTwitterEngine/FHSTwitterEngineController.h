@@ -18,37 +18,68 @@ typedef NS_ENUM(NSInteger, FHSTwitterEngineControllerResult) {
 
 typedef void(^LoginControllerBlock)(FHSTwitterEngineControllerResult result);
 
+
 /**
  `FHSTwitterEngineController` provides a view controller for `FHSTwitterEngine` to use OAuth.
  */
 
 @interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate>
 
+/**
+ The controller navigation bar.
+ */
 @property (nonatomic, strong) UINavigationBar *navBar;
-@property (nonatomic, strong) UIWebView *theWebView;
-@property (nonatomic, strong) UILabel *loadingText;
-@property (nonatomic, strong) UIActivityIndicatorView *spinner;
-@property (nonatomic, strong) FHSToken *requestToken;
-@property (nonatomic, copy) LoginControllerBlock block;
+
 
 /**
- Initializes `FHSTwitterEngineController.h` with `LoginControllerBlock` block.
+ The controller web view.
+ */
+@property (nonatomic, strong) UIWebView *theWebView;
+
+
+/**
+ The label with the loading text. The default is set to "Please Wait...".
+ */
+@property (nonatomic, strong) UILabel *loadingText;
+
+
+/**
+ The loading spinner used with `loadingText`.
+ */
+@property (nonatomic, strong) UIActivityIndicatorView *spinner;
+
+
+/**
+ The request token.
+ */
+@property (nonatomic, strong) FHSToken *requestToken;
+
+
+/**
+ The `LoginControllerBlock` block which returns a `FHSTwitterEngineControllerResult`.
+ */
+@property (nonatomic, copy) LoginControllerBlock block;
+
+
+/**
+ Initializes `FHSTwitterEngineController` with `LoginControllerBlock` block.
  @param block Block of type `LoginControllerBlock`
  @return An instance of `FHSTwitterEngineController`
  */
 - (instancetype)initWithCompletionBlock:(LoginControllerBlock)block;
 
+
 /**
- TODO:
+ Gets an instance of `FHSTwitterEngineController` with `LoginControllerBlock` block.
+ @param block Block of type `LoginControllerBlock`
  */
 + (FHSTwitterEngineController *)controllerWithCompletionBlock:(LoginControllerBlock)block;
 
 @end
 
 
-///----------------
+#pragma mark - Constants
 /// @name Constants
-///----------------
 
 /**
  ## FHSTwitterEngineControllerResult
