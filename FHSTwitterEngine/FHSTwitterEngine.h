@@ -254,7 +254,7 @@
  @param q Search query.
  @param count Number of Tweets to get, must be greater than 0.
  @param resultType Use enum for mixed, recent or popular
- @param unil Returns tweets generated before the given date. Date should be formatted as YYYY-MM-DD.
+ @param untilDate Returns tweets generated before the given date. Date should be formatted as YYYY-MM-DD.
  @param sinceID Returns results with an ID greater than (that is, more recent than) the specified ID.
  @param maxID Returns results with an ID less than (that is, older than) or equal to the specified ID.
  @return A list of Tweets.
@@ -446,7 +446,7 @@
 /**
  Gets the relationships of the authenticating user to the comma-separated list of up to 100 screen_names or user_ids provided. Values for connections can be: following, following_requested, followed_by, none, blocking. API endpoint: GET friendships/lookup.
  @param users List of users.
- @param isID A Boolean that determines if `users` are screen names or user IDs.
+ @param areIDs A Boolean that determines if `users` are screen names or user IDs.
  */
 - (id)lookupFriendshipStatusForUsers:(NSArray *)users areIDs:(BOOL)areIDs;
 
@@ -502,7 +502,7 @@
 /**
  Sets the authenticated user's profile background image with an image. API endpoint: POST account/update_profile_background_image.
  @param data Image data.
- @param tiled A Boolean value that determines if the image is tiled. If `YES`, the image is tiled.
+ @param isTiled A Boolean value that determines if the image is tiled. If `YES`, the image is tiled.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled;
@@ -511,7 +511,7 @@
 /**
  Sets the authenticated user's profile background image with an image. API endpoint: POST account/update_profile_background_image.
  @param file File path of image.
- @param tiled A Boolean value that determines if the image is tiled. If `YES`, the image is tiled.
+ @param isTiled A Boolean value that determines if the image is tiled. If `YES`, the image is tiled.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled;
@@ -1088,8 +1088,8 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
 #pragma mark Login and Auth
 
 /**
- OAuth
- @param reqToken Request token `FHSToken`
+ OAuth.
+ @param reqToken Request token `FHSToken`.
  @return A Boolean that specifies whether the request was successful.
  */
 - (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken;
@@ -1097,8 +1097,8 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
 
 /**
  Authenticates using xAuth.
- @param username
- @param password
+ @param username Username for xAuth.
+ @param password Password for xAuth.
  */
 - (NSError *)authenticateWithUsername:(NSString *)username password:(NSString *)password;
 
@@ -1155,13 +1155,14 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
  Generates a request string:
  id/username concatenator - returns an array of concatenated id/username lists
  100 ids/usernames per concatenated string
+ @param array Request string Array.
  */
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array;
 
 
 /**
  Initializes `FHSTwitterEngine`.
- @warning Never call -[FHSTwitterEngine init] directly.
+ Never call -[FHSTwitterEngine init] directly.
  */
 + (FHSTwitterEngine *)sharedEngine;
 
