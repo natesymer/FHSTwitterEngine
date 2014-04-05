@@ -11,8 +11,7 @@
 #import "FHSToken.h"
 #import "NSString+FHSTE.h"
 
-static NSString * const newPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) { var d2 = d.getElementsByTagName('code'); if (d2.length > 0) d2[0].innerHTML; }";
-static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'); if (d == null) d = document.getElementById('oauth_pin'); if (d) d = d.innerHTML; d;";
+static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||document.getElementById('oauth_pin');if(d){var d2=d.getElementsByTagName('code');d2.length>0?d2[0].innerHTML:d.innerHTML}";
 
 @implementation FHSTwitterEngineController
 
@@ -86,7 +85,6 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
                 dispatch_after(popTime, dispatch_get_main_queue(),^(void) {
                     @autoreleasepool {
                         [self dismissViewControllerAnimated:YES completion:^(void){
-                            NSLog(@"Error: %@",res);
                             if (_block) {
                                 _block(FHSTwitterEngineControllerResultFailed);
                             }
@@ -124,39 +122,33 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
 }
 
 - (NSString *)locatePin {
-	NSString *pin = [[_theWebView stringByEvaluatingJavaScriptFromString:newPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString *pin = [[_theWebView stringByEvaluatingJavaScriptFromString:pinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	
 	if (pin.length == 7 && pin.fhs_isNumeric) {
 		return pin;
-	} else {
-		pin = [[_theWebView stringByEvaluatingJavaScriptFromString:oldPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-		
-		if (pin.length == 7 && pin.fhs_isNumeric) {
-			return pin;
-		}
 	}
-	return nil;
+    return nil;
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     _theWebView.userInteractionEnabled = YES;
     NSString *authPin = [self locatePin];
     
+    [[webView stringByEvaluatingJavaScriptFromString:@"document.documentElement.innerHTML"]writeToFile:@"/Users/nathaniel/Desktop/twitter_auth.html" atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    
     if (authPin.length > 0) {
         [self gotPin:authPin];
         return;
     }
     
-    NSString *formCount = [webView stringByEvaluatingJavaScriptFromString:@"document.forms.length"];
+    int formCount = [webView stringByEvaluatingJavaScriptFromString:@"document.forms.length"].intValue;
     
-    if ([formCount isEqualToString:@"0"]) {
+    if (formCount == 0) {
         _navBar.topItem.title = @"Select and Copy the PIN";
     }
 	
-	[UIView beginAnimations:nil context:nil];
     _spinner.hidden = YES;
     _loadingText.hidden = YES;
-	[UIView commitAnimations];
 	
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     
@@ -178,7 +170,7 @@ static NSString * const oldPinJS = @"var d = document.getElementById('oauth-pin'
     }
     
     NSData *data = request.HTTPBody;
-	char *raw = data?(char *)[data bytes]:"";
+	char *raw = data?(char *)[data bytes]:NULL;
 	
 	if (raw && (strstr(raw, "cancel=") || strstr(raw, "deny="))) {
         [self close];
