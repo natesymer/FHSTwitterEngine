@@ -35,12 +35,6 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    self.navBar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, (UIDevice.currentDevice.systemVersion.floatValue >= 7.0f)?64:44)];
-    _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
-    UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"Twitter Login"];
-	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
-	[_navBar pushNavigationItem:navItem animated:NO];
-    
     self.theWebView = [[UIWebView alloc]initWithFrame:CGRectMake(0, _navBar.bounds.size.height, self.view.bounds.size.width, self.view.bounds.size.height-_navBar.bounds.size.height)];
     _theWebView.hidden = YES;
     _theWebView.delegate = self;
@@ -49,6 +43,12 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
     _theWebView.scrollView.clipsToBounds = NO;
     _theWebView.backgroundColor = [UIColor lightGrayColor];
     [self.view addSubview:_theWebView];
+    
+    self.navBar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, (UIDevice.currentDevice.systemVersion.floatValue >= 7.0f)?64:44)];
+    _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"Twitter Login"];
+	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
+	[_navBar pushNavigationItem:navItem animated:NO];
     [self.view addSubview:_navBar];
     
     self.loadingText = [[UILabel alloc]initWithFrame:CGRectMake((self.view.bounds.size.width/2)-40, (self.view.bounds.size.height/2)-10-7.5, 100, 15)];
@@ -134,8 +134,6 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
     _theWebView.userInteractionEnabled = YES;
     NSString *authPin = [self locatePin];
     
-    [[webView stringByEvaluatingJavaScriptFromString:@"document.documentElement.innerHTML"]writeToFile:@"/Users/nathaniel/Desktop/twitter_auth.html" atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    
     if (authPin.length > 0) {
         [self gotPin:authPin];
         return;
@@ -149,22 +147,21 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
 	
     _spinner.hidden = YES;
     _loadingText.hidden = YES;
+    _theWebView.hidden = NO;
 	
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-    
-    _theWebView.hidden = NO;
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     _theWebView.userInteractionEnabled = NO;
-    [_theWebView setHidden:YES];
+    _theWebView.hidden = YES;
     _spinner.hidden = NO;
     _loadingText.hidden = NO;
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-    if (strstr([request.URL.absoluteString UTF8String], "denied=")) {
+    if (strstr(request.URL.absoluteString.UTF8String, "denied=")) {
 		[self dismissViewControllerAnimated:YES completion:nil];
         return NO;
     }
