@@ -364,7 +364,7 @@
 
     NSURL *baseURL = [NSURL URLWithString:url_statuses_update_with_media];
     
-    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:3];
     params[@"status"] = tweetString;
     params[@"media[]"] = theData;
     

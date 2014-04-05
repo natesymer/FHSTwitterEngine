@@ -32,7 +32,7 @@
         self.timeout = timeout;
         self.URL = url;
         self.HTTPMethod = httpMethod;
-        self.params = (params == nil)?[NSMutableDictionary dictionary]:params.mutableCopy;
+        self.params = (params == nil)?[NSMutableDictionary dictionaryWithCapacity:2]:params.mutableCopy;
         _params[@"delimited"] = @"length"; // absolutely necessary
         _params[@"stall_warnings"] = @"true";
         self.block = block;
