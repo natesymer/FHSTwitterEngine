@@ -626,8 +626,8 @@
         return nil;
     }
     
-    NSMutableArray *returnedDictionaries = [NSMutableArray array];
     NSArray *reqStrings = [self generateRequestStringsFromArray:users];
+    NSMutableArray *returnedDictionaries = [NSMutableArray arrayWithCapacity:reqStrings.count];
     
     NSURL *baseURL = [NSURL URLWithString:url_friendships_lookup];
     
@@ -1145,7 +1145,7 @@
     int remainder = fmod(array.count, 100);
     int numberOfStrings = (array.count-remainder)/100;
     
-    NSMutableArray *reqStrs = [NSMutableArray array];
+    NSMutableArray *reqStrs = [NSMutableArray arrayWithCapacity:numberOfStrings];
     
     for (int i = 1; i <= numberOfStrings; ++i) {
         NSString *ninetyNinththItem = (NSString *)array[(i*100)-1];

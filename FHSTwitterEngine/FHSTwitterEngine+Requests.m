@@ -105,7 +105,7 @@
 
     oauth[@"oauth_signature"] = [[NSData dataWithBytes:result length:20]base64Encode];
     
-    NSMutableArray *oauthPairs = [NSMutableArray array];
+    NSMutableArray *oauthPairs = [NSMutableArray arrayWithCapacity:oauth.count];
     
     [oauth enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
         NSString *pair = [NSString stringWithFormat:@"%@=\"%@\"",key.fhs_URLEncode, obj.fhs_URLEncode];
