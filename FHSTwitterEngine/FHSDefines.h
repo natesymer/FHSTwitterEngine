@@ -43,6 +43,9 @@ static NSString * const FHSProfileURLKey = @"url";
 static NSString * const FHSProfileLocationKey = @"location";
 static NSString * const FHSProfileDescriptionKey = @"description";
 
+static NSString * const kGET = @"GET";
+static NSString * const kPOST = @"POST";
+
 
 //
 // URL constants

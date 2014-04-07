@@ -11,17 +11,14 @@
 //
 // NOTE
 // You should never find yourself using this
-// Category.
+// Category. (Unless you're implementing endpoints
+// or doing something fancy and/or hacky)
 //
 
 @interface FHSTwitterEngine (Requests)
 
 // send requests
 - (id)sendRequest:(NSURLRequest *)request;
-
-// Just here so I don't have to change a bunch of code
-- (NSError *)sendPOSTRequestForURL:(NSURL *)url andParams:(NSDictionary *)params;
-- (id)sendGETRequestForURL:(NSURL *)url andParams:(NSDictionary *)params;
 
 // The heart of FHSTwitterEngine
 - (id)sendRequestWithHTTPMethod:(NSString *)httpmethod URL:(NSURL *)url params:(NSDictionary *)params;

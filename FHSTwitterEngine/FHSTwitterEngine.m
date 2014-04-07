@@ -48,14 +48,18 @@
 //
 
 - (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor {
-    
     if (user.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_followers_list];
     
-    return [self sendGETRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"include_entities":(_includeEntities?@"true":@"false"), (isID?@"user_id":@"screen_name"):user, @"cursor":cursor }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     @"skip_status": @"true",
+                                                                     @"include_entities": (_includeEntities?@"true":@"false"),
+                                                                     (isID?@"user_id":@"screen_name"): user,
+                                                                     @"cursor": cursor
+                                                                     }];
 }
 
 - (id)listFriendsForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor {
@@ -65,7 +69,12 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_friends_list];
-    return [self sendGETRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"include_entities":(_includeEntities?@"true":@"false"), (isID?@"user_id":@"screen_name"):user, @"cursor":cursor }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     @"skip_status": @"true",
+                                                                     @"include_entities": (_includeEntities?@"true":@"false"),
+                                                                     (isID?@"user_id":@"screen_name"): user,
+                                                                     @"cursor": cursor
+                                                                     }];
 }
 
 - (id)searchUsersWithQuery:(NSString *)q andCount:(int)count {
@@ -82,7 +91,11 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_users_search];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"include_entities":(_includeEntities?@"true":@"false"), @"count":@(count).stringValue, @"q":q }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     @"include_entities": (_includeEntities?@"true":@"false"),
+                                                                     @"count": @(count).stringValue,
+                                                                     @"q": q
+                                                                     }];
 }
 
 - (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
@@ -100,8 +113,12 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_search_tweets];
-    
-    NSMutableDictionary *params = @{ @"include_entities":(_includeEntities?@"true":@"false"), @"count":@(count).stringValue, @"q":q }.mutableCopy;
+
+    NSMutableDictionary *params = @{
+                                    @"include_entities": (_includeEntities?@"true":@"false"),
+                                    @"count": @(count).stringValue,
+                                    @"q": q
+                                    }.mutableCopy;
     
     if (untilDate) {
         NSDateFormatter *formatter = FHSTwitterEngine.dateFormatter.copy;
@@ -109,12 +126,18 @@
         params[@"until"] = [formatter stringFromDate:untilDate];
     }
     
-    if (resultType == FHSTwitterEngineResultTypeMixed) {
-        params[@"result_type"] = @"mixed";
-    } else if (resultType == FHSTwitterEngineResultTypeRecent) {
-        params[@"result_type"] = @"recent";
-    } else if (resultType == FHSTwitterEngineResultTypePopular) {
-        params[@"result_type"] = @"popular";
+    switch (resultType) {
+        case FHSTwitterEngineResultTypeMixed:
+            params[@"result_type"] = @"mixed";
+            break;
+        case FHSTwitterEngineResultTypeRecent:
+            params[@"result_type"] = @"recent";
+            break;
+        case FHSTwitterEngineResultTypePopular:
+            params[@"result_type"] = @"popular";
+            break;
+        default:
+            break;
     }
     
     if (maxID.length > 0) {
@@ -125,7 +148,7 @@
         params[@"since_id"] = sinceID;
     }
     
-    return [self sendGETRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
 - (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description {
@@ -136,13 +159,16 @@
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_create];
     
-    NSMutableDictionary *params = [@{@"name": name, @"mode":isPrivate?@"private":@"public"} mutableCopy];
+    NSMutableDictionary *params = @{
+                                    @"name": name,
+                                    @"mode": isPrivate?@"private":@"public"
+                                    }.mutableCopy;
 
     if (description.length > 0) {
         params[@"description"] = description;
     }
     
-    return [self sendPOSTRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
 - (id)getListWithID:(NSString *)listID {
@@ -152,7 +178,7 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_show];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"list_id": listID }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ @"list_id": listID }];
 }
 
 - (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name {
@@ -163,7 +189,7 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_update];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"list_id": listID, @"name": name}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"list_id": listID, @"name": name}];
 }
 
 - (NSError *)updateListWithID:(NSString *)listID description:(NSString *)description {
@@ -171,12 +197,11 @@
         return [NSError badRequestError];
     }
     
-    if (description == nil) {
-        description = @"";
-    }
-    
     NSURL *baseURL = [NSURL URLWithString:url_lists_update];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"list_id": listID, @"description": description}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{
+                                                                      @"list_id": listID,
+                                                                      @"description": description?description:@""
+                                                                      }];
 }
 
 - (NSError *)updateListWithID:(NSString *)listID mode:(BOOL)isPrivate {
@@ -185,7 +210,10 @@
     }
 
     NSURL *baseURL = [NSURL URLWithString:url_lists_update];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"list_id": listID, @"mode": isPrivate?@"private":@"public"}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{
+                                                                      @"list_id": listID,
+                                                                      @"mode": isPrivate?@"private":@"public"
+                                                                      }];
 }
 
 - (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name description:(NSString *)description mode:(BOOL)isPrivate {
@@ -195,26 +223,25 @@
         return [NSError badRequestError];
     }
     
-    if (description == nil) {
-        description = @"";
-    }
-    
     NSURL *baseURL = [NSURL URLWithString:url_lists_update];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"list_id": listID, @"name": name, @"description": description, @"mode": isPrivate?@"private":@"public"}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{
+                                                                      @"list_id": listID,
+                                                                      @"name": name,
+                                                                      @"description": description?description:@"",
+                                                                      @"mode": isPrivate?@"private":@"public"
+                                                                      }];
 }
 
 - (id)listUsersInListWithID:(NSString *)listID {
-    
     if (listID.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_members];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"list_id": listID }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ @"list_id": listID }];
 }
 
 - (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users {
-    
     if (users.count > 100 || users.count == 0) {
         return [NSError badRequestError];
     } else if (listID.length == 0) {
@@ -222,11 +249,10 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_members_destroy_all];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"screen_name": [users componentsJoinedByString:@","]}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"screen_name": [users componentsJoinedByString:@","]}];
 }
 
 - (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users {
-    
     if (users.count > 100 || users.count == 0) {
         return [NSError badRequestError];
     } else if (listID.length == 0) {
@@ -234,7 +260,7 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_members_create_all];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"screen_name": [users componentsJoinedByString:@","]}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"screen_name": [users componentsJoinedByString:@","]}];
 }
 
 - (id)getTimelineForListWithID:(NSString *)listID count:(int)count {
@@ -250,17 +276,19 @@
 }
 
 - (id)getTimelineForListWithID:(NSString *)listID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID excludeRetweets:(BOOL)excludeRetweets excludeReplies:(BOOL)excludeReplies {
-    
     if (count == 0) {
         return nil;
-    }
-    
-    if (listID.length == 0) {
+    } else if (listID.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_statuses];
-    NSMutableDictionary *params = [@{ @"count":@(count).stringValue, @"exclude_replies":(excludeReplies?@"true":@"false"), @"include_rts":(excludeRetweets?@"false":@"true"),@"list_id":listID } mutableCopy];
+    NSMutableDictionary *params = @{
+                                    @"count": @(count).stringValue,
+                                    @"exclude_replies": (excludeReplies?@"true":@"false"),
+                                    @"include_rts": (excludeRetweets?@"false":@"true"),
+                                    @"list_id": listID
+                                    }.mutableCopy;
 
     if (sinceID.length > 0) {
         params[@"since_id"] = sinceID;
@@ -270,31 +298,27 @@
         params[@"max_id"] = maxID;
     }
     
-    return [self sendGETRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
 - (id)getListsForUser:(NSString *)user isID:(BOOL)isID {
-    
     if (user.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_list];
-    return [self sendGETRequestForURL:baseURL andParams:@{ (isID?@"user_id":@"screen_name"): user }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{(isID?@"user_id":@"screen_name"): user}];
 }
 
 - (id)getRetweetsForTweet:(NSString *)identifier count:(int)count {
-    
     if (count == 0) {
-        return nil;
-    }
-    
-    if (identifier.length == 0) {
+        return @[].mutableCopy;
+    } else if (identifier.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/statuses/retweets/%@.json",identifier]];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"count":@(count).stringValue }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{@"count": @(count).stringValue}];
 }
 
 - (id)getRetweetedTimelineWithCount:(int)count {
@@ -302,13 +326,16 @@
 }
 
 - (id)getRetweetedTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
-    
     if (count == 0) {
-        return nil;
+        return @[].mutableCopy;
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_statuses_retweets_of_me];
-    NSMutableDictionary *params = [@{ @"count":@(count).stringValue, @"exclude_replies":@"false", @"include_rts":@"true"} mutableCopy];
+    NSMutableDictionary *params = @{
+                                    @"count": @(count).stringValue,
+                                    @"exclude_replies": @"false",
+                                    @"include_rts": @"true"
+                                    }.mutableCopy;
     
     if (sinceID.length > 0) {
         params[@"since_id"] = sinceID;
@@ -318,7 +345,7 @@
         params[@"max_id"] = maxID;
     }
     
-    return [self sendGETRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
 - (id)getMentionsTimelineWithCount:(int)count {
@@ -326,14 +353,17 @@
 }
 
 - (id)getMentionsTimelineWithCount:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
-    
     if (count == 0) {
-        return nil;
+        return @[].mutableCopy;
     }
 
     NSURL *baseURL = [NSURL URLWithString:url_statuses_metions_timeline];
     
-    NSMutableDictionary *params = [@{ @"count":@(count).stringValue, @"exclude_replies":@"false", @"include_rts":@"true" } mutableCopy];
+    NSMutableDictionary *params = @{
+                                     @"count": @(count).stringValue,
+                                     @"exclude_replies": @"false",
+                                     @"include_rts": @"true"
+                                     }.mutableCopy;
     
     if (sinceID.length > 0) {
         params[@"since_id"] = sinceID;
@@ -343,7 +373,7 @@
         params[@"max_id"] = maxID;
     }
     
-    return [self sendGETRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
 - (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData {
@@ -351,7 +381,6 @@
 }
 
 - (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt {
-    
     if (tweetString.length == 0) {
         return [NSError badRequestError];
     } else if (theData.length == 0) {
@@ -371,38 +400,37 @@
     if (irt.length > 0) {
         params[@"in_reply_to_status_id"] = irt;
     }
-    
-    return [self sendPOSTRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
 - (NSError *)destroyTweet:(NSString *)identifier {
-    
     if (identifier.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_statuses_destroy];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"id": identifier}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"id": identifier}];
 }
 
 - (id)getDetailsForTweet:(NSString *)identifier {
-    
     if (identifier.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_statuses_show];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"id":identifier, @"include_my_retweet":@"true" }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     @"id": identifier,
+                                                                     @"include_my_retweet": @"true"
+                                                                     }];
 }
 
 - (NSError *)retweet:(NSString *)identifier {
-    
     if (identifier.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1.1/statuses/retweet/%@.json",identifier]];
-    return [self sendPOSTRequestForURL:baseURL andParams:nil];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:nil];
 }
 
 - (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count {
@@ -410,7 +438,6 @@
 }
 
 - (id)getTimelineForUser:(NSString *)user isID:(BOOL)isID count:(int)count sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
-    
     if (count == 0) {
         return nil;
     }
@@ -420,7 +447,12 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_statuses_user_timeline];
-    NSMutableDictionary *params = [@{ @"count":@(count).stringValue, (isID?@"user_id":@"screen_name"):user, @"exclude_replies":@"false", @"include_rts":@"true" } mutableCopy];
+    NSMutableDictionary *params = @{
+                                    @"count": @(count).stringValue,
+                                    (isID?@"user_id":@"screen_name"): user,
+                                    @"exclude_replies": @"false",
+                                    @"include_rts": @"true"
+                                    }.mutableCopy;
     
     if (sinceID.length > 0) {
         params[@"since_id"] = sinceID;
@@ -430,69 +462,7 @@
         params[@"max_id"] = maxID;
     }
     
-    return [self sendGETRequestForURL:baseURL andParams:params];
-}
-
-- (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size {
-    
-    if (username.length == 0) {
-        return [NSError badRequestError];
-    }
-    
-    NSURL *baseURL = [NSURL URLWithString:url_users_show];
-    id userShowReturn = [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name":username }];
-    
-    if ([userShowReturn isKindOfClass:[NSError class]]) {
-        return userShowReturn;
-    } else if ([userShowReturn isKindOfClass:[NSDictionary class]]) {
-        NSString *url = userShowReturn[@"profile_image_url"]; // normal
-        
-        if (size == 0) { // mini
-            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@"_mini"];
-        } else if (size == 2) { // bigger
-            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@"_bigger"];
-        } else if (size == 3) { // original
-            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@""];
-        }
-        
-        id ret = [self sendRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
-        
-        if ([ret isKindOfClass:[NSData class]]) {
-            return [UIImage imageWithData:(NSData *)ret];
-        }
-
-        return ret;
-    }
-    
-    return [NSError badRequestError];
-}
-
-- (id)getProfileImageURLStringForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size {
-    
-    if (username.length == 0) {
-        return [NSError badRequestError];
-    }
-    
-    NSURL *baseURL = [NSURL URLWithString:url_users_show];
-    id userShowReturn = [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name":username }];
-    
-    if ([userShowReturn isKindOfClass:[NSError class]]) {
-        return userShowReturn;
-    } else if ([userShowReturn isKindOfClass:[NSDictionary class]]) {
-        NSString *url = userShowReturn[@"profile_image_url"]; // normal
-        
-        if (size == 0) { // mini
-            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@"_mini"];
-        } else if (size == 2) { // bigger
-            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@"_bigger"];
-        } else if (size == 3) { // original
-            url = [url stringByReplacingOccurrencesOfString:@"_normal" withString:@""];
-        }
-        
-        return url;
-    }
-    
-    return [NSError badRequestError];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
 - (id)authenticatedUserIsBlocking:(NSString *)user isID:(BOOL)isID {
@@ -501,37 +471,39 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_blocks_exists];
-    return [self sendGETRequestForURL:baseURL andParams:@{ (isID?@"user_id":@"screen_name"):@"true", @"skip_status":@"true" }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     (isID?@"user_id":@"screen_name"): @"true",
+                                                                     @"skip_status": @"true"
+                                                                     }];
 }
 
 - (id)listBlockedUsers {
     NSURL *baseURL = [NSURL URLWithString:url_blocks_blocking];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"skip_status":@"true" }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{@"skip_status": @"true"}];
 }
 
 - (id)listBlockedIDs {
     NSURL *baseURL = [NSURL URLWithString:url_blocks_blocking_ids];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"stringify_ids":@"true" }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{@"stringify_ids": @"true"}];
 }
 
 - (id)getLanguages {
     NSURL *baseURL = [NSURL URLWithString:url_help_languages];
-    return [self sendGETRequestForURL:baseURL andParams:nil];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
 - (id)getConfiguration {
     NSURL *baseURL = [NSURL URLWithString:url_help_configuration];
-    return [self sendGETRequestForURL:baseURL andParams:nil];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
 - (NSError *)reportUserAsSpam:(NSString *)user isID:(BOOL)isID {
-    
     if (user.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_users_report_spam];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{(isID?@"user_id":@"screen_name"): user}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{(isID?@"user_id":@"screen_name"): user}];
 }
 
 - (id)showDirectMessage:(NSString *)messageID {
@@ -540,11 +512,10 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_direct_messages_show];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"id":messageID }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{@"id": messageID}];
 }
 
 - (NSError *)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID {
-    
     if (user.length == 0) {
         return [NSError badRequestError];
     }
@@ -554,51 +525,58 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_direct_messages_new];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"text": [body fhs_truncatedToLength:140], (isID?@"user_id":@"screen_name"):user}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{
+                                                                      @"text": [body fhs_truncatedToLength:140],
+                                                                      (isID?@"user_id":@"screen_name"): user
+                                                                      }];
 }
 
 - (id)getSentDirectMessages:(int)count {
-    
     if (count == 0) {
-        return nil;
+        return @[].mutableCopy;
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_direct_messages_sent];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"count":@(count).stringValue }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{@"count": @(count).stringValue}];
 }
 
 - (NSError *)deleteDirectMessage:(NSString *)messageID {
-    
     if (messageID.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_direct_messages_destroy];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"id": messageID, @"include_entities": (_includeEntities?@"true":@"false")}];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     @"id": messageID,
+                                                                     @"include_entities": (_includeEntities?@"true":@"false")
+                                                                     }];
 }
 
 - (id)getDirectMessages:(int)count {
     if (count == 0) {
-        return nil;
+        return @[].mutableCopy;
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_direct_messages];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"count":@(count).stringValue,@"skip_status":@"true" }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                          @"count": @(count).stringValue,
+                                                          @"skip_status": @"true"
+                                                          }];
 }
 
 - (id)getPrivacyPolicy {
     NSURL *baseURL = [NSURL URLWithString:url_help_privacy];
-    return [self sendGETRequestForURL:baseURL andParams:nil];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
 - (id)getTermsOfService {
     NSURL *baseURL = [NSURL URLWithString:url_help_tos];
-    return [self sendGETRequestForURL:baseURL andParams:nil];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
 - (id)getNoRetweetIDs {
     NSURL *baseURL = [NSURL URLWithString:url_friendships_no_retweets_ids];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"stringify_ids":@"true" }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ @"stringify_ids":@"true" }];
 }
 
 - (NSError *)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID {
@@ -608,41 +586,34 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_friendships_update];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{(isID?@"user_id":@"screen_name"): user, @"retweets": (enableRTs?@"true":@"false"), @"device": (devNotifs?@"true":@"false")}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{
+                                                                      (isID?@"user_id":@"screen_name"): user,
+                                                                      @"retweets": (enableRTs?@"true":@"false"),
+                                                                      @"device": (devNotifs?@"true":@"false")
+                                                                      }];
 }
 
 - (id)getPendingOutgoingFollowers {
     NSURL *baseURL = [NSURL URLWithString:url_friendships_outgoing];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"stringify_ids":@"true" }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{@"stringify_ids": @"true"}];
 }
 
 - (id)getPendingIncomingFollowers {
     NSURL *baseURL = [NSURL URLWithString:url_friendships_incoming];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"stringify_ids":@"true" }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ @"stringify_ids":@"true" }];
 }
 
 - (id)lookupFriendshipStatusForUsers:(NSArray *)users areIDs:(BOOL)areIDs {
     if (users.count == 0) {
-        return nil;
+        return @[].mutableCopy;
     }
     
-    NSArray *reqStrings = [self generateRequestStringsFromArray:users];
-    NSMutableArray *returnedDictionaries = [NSMutableArray arrayWithCapacity:reqStrings.count];
+    if (users.count > 100) {
+        return [NSError badRequestError];
+    }
     
     NSURL *baseURL = [NSURL URLWithString:url_friendships_lookup];
-    
-    for (NSString *reqString in reqStrings) {
-        
-        id retObj = [self sendGETRequestForURL:baseURL andParams:@{ (areIDs?@"user_id":@"screen_name"):reqString }];
-        
-        if ([retObj isKindOfClass:[NSArray class]]) {
-            [returnedDictionaries addObjectsFromArray:(NSArray *)retObj];
-        } else if ([retObj isKindOfClass:[NSError class]]) {
-            return retObj;
-        }
-    }
-    
-    return returnedDictionaries;
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{(areIDs?@"user_id":@"screen_name"): [users componentsJoinedByString:@","]}];
 }
 
 - (NSError *)unfollowUser:(NSString *)user isID:(BOOL)isID {
@@ -651,7 +622,7 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_friendships_destroy];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{(isID?@"user_id":@"screen_name"): user}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{(isID?@"user_id":@"screen_name"): user}];
 }
 
 - (NSError *)followUser:(NSString *)user isID:(BOOL)isID {
@@ -660,12 +631,12 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_friendships_create];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{(isID?@"user_id":@"screen_name"): user}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{(isID?@"user_id":@"screen_name"): user}];
 }
 
 - (id)verifyCredentials {
     NSURL *baseURL = [NSURL URLWithString:url_account_verify_credentials];
-    return [self sendGETRequestForURL:baseURL andParams:nil];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
 - (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count {
@@ -696,22 +667,21 @@
         params[@"max_id"] = maxID;
     }
     
-    return [self sendGETRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
 - (NSError *)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag {
-    
     if (tweetID.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:flag?url_favorites_create:url_favorites_destroy];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"id": tweetID}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"id": tweetID}];
 }
 
 - (id)getRateLimitStatus {
     NSURL *baseURL = [NSURL URLWithString:url_application_rate_limit_status];
-    return [self sendGETRequestForURL:baseURL andParams:nil];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
 - (NSError *)updateProfileColorsWithDictionary:(NSDictionary *)dictionary {
@@ -751,12 +721,15 @@
         params[@"profile_text_color"] = profile_text_color;
     }
     
-    return [self sendPOSTRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
 - (NSError *)setUseProfileBackgroundImage:(BOOL)shouldUseBGImg {
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_background_image];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status": @"true", @"use": (shouldUseBGImg?@"true":@"false")}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{
+                                                                      @"skip_status": @"true",
+                                                                      @"use": (shouldUseBGImg?@"true":@"false")
+                                                                      }];
 }
 
 - (NSError *)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled {
@@ -769,7 +742,7 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_background_image];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"use":@"true", @"include_entities":_includeEntities?@"true":@"false", @"tiled":(isTiled?@"true":@"false"), @"image":[data base64Encode]}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"skip_status":@"true", @"use":@"true", @"include_entities":_includeEntities?@"true":@"false", @"tiled":(isTiled?@"true":@"false"), @"image":[data base64Encode]}];
 }
 
 - (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled {
@@ -786,7 +759,11 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_image];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"skip_status":@"true", @"include_entities":(_includeEntities?@"true":@"false"), @"image":[data base64Encode]}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{
+                                                                      @"skip_status":@"true",
+                                                                      @"include_entities":(_includeEntities?@"true":@"false"),
+                                                                      @"image":[data base64Encode]
+                                                                      }];
 }
 
 - (NSError *)setProfileImageWithImageAtPath:(NSString *)file {
@@ -795,7 +772,7 @@
 
 - (id)getUserSettings {
     NSURL *baseURL = [NSURL URLWithString:url_account_settings];
-    return [self sendGETRequestForURL:baseURL andParams:nil];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
 - (NSError *)updateUserProfileWithDictionary:(NSDictionary *)settings {
@@ -838,7 +815,7 @@
         params[@"description"] = description;
     }
     
-    return [self sendPOSTRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
 - (NSError *)updateSettingsWithDictionary:(NSDictionary *)settings {
@@ -884,11 +861,10 @@
         params[@"lang"] = lang;
     }
     
-    return [self sendPOSTRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
 - (id)lookupUsers:(NSArray *)users areIDs:(BOOL)areIDs {
-    
     if (users.count == 0) {
         return nil;
     }
@@ -898,7 +874,7 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_users_lookup];
-    return [self sendGETRequestForURL:baseURL andParams:@{ (areIDs?@"user_id":@"screen_name"):[users componentsJoinedByString:@","] }];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ (areIDs?@"user_id":@"screen_name"):[users componentsJoinedByString:@","] }];
 }
 
 - (NSError *)unblock:(NSString *)username {
@@ -907,22 +883,21 @@
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_blocks_destroy];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"screen_name":username}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"screen_name": username}];
 }
 
 - (NSError *)block:(NSString *)username {
-    
     if (username.length == 0) {
         return [NSError badRequestError];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_blocks_create];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"screen_name":username}];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"screen_name":username}];
 }
 
 - (id)testService {
     NSURL *baseURL = [NSURL URLWithString:url_help_test];
-    return [self sendGETRequestForURL:baseURL andParams:nil];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count {
@@ -940,7 +915,7 @@
         params[@"since_id"] = sinceID;
     }
     
-    return [self sendGETRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
 - (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString {
@@ -957,7 +932,7 @@
         params[@"in_reply_to_status_id"] = inReplyToString;
     }
 
-    return [self sendPOSTRequestForURL:baseURL andParams:params];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
 - (NSError *)postTweet:(NSString *)tweetString {
@@ -966,12 +941,18 @@
 
 - (id)getFollowersIDs {
     NSURL *baseURL = [NSURL URLWithString:url_followers_ids];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _accessToken.username, @"stringify_ids":@"true"}];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     @"screen_name": _accessToken.username,
+                                                                     @"stringify_ids": @"true"
+                                                                     }];
 }
 
 - (id)getFriendsIDs {
     NSURL *baseURL = [NSURL URLWithString:url_friends_ids];
-    return [self sendGETRequestForURL:baseURL andParams:@{ @"screen_name": _accessToken.username, @"stringify_ids":@"true"}];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     @"screen_name": _accessToken.username,
+                                                                     @"stringify_ids": @"true"
+                                                                     }];
 }
 
 - (id)uploadImageToTwitPic:(UIImage *)image withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
@@ -1037,22 +1018,6 @@
 // Streaming API
 //
 
-// check out the streaming parameters here:
-// https://dev.twitter.com/docs/streaming-apis/parameters
-
-// This makes sure all track keywords are valid
-- (NSString *)sanitizeTrackParameter:(NSArray *)keywords {
-    NSMutableArray *sanitized = [NSMutableArray arrayWithCapacity:keywords.count];
-    
-    for (NSString *string in keywords) {
-        [sanitized addObject:[string fhs_truncatedToLength:60]];
-    }
-    
-    return [sanitized componentsJoinedByString:@","];
-}
-
-
-// Actual calls to the Twitter API
 // TODO: implement `replies`
 - (void)streamUserMessagesWith:(NSArray *)with replies:(BOOL)replies keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block {
     NSMutableDictionary *params = @{ @"stringify_friend_ids": @"true" }.mutableCopy;
@@ -1062,7 +1027,7 @@
     }
     
     if (keywords.count > 0) {
-        params[@"track"] = [self sanitizeTrackParameter:keywords];
+        params[@"track"] = [FHSStream sanitizeTrackParameter:keywords];
     }
     
     if (locBox.count == 4) {
@@ -1090,7 +1055,7 @@
     }
     
     if (keywordsValid) {
-        params[@"track"] = [self sanitizeTrackParameter:keywords];
+        params[@"track"] = [FHSStream sanitizeTrackParameter:keywords];
     }
     
     if (locBoxValid) {
@@ -1132,6 +1097,10 @@
     });
     return sharedInstance;
 }
+
+//
+// TODO: This method is a mess. It needs epic repairs and/pr a touch of functional programming
+//
 
 - (NSArray *)generateRequestStringsFromArray:(NSArray *)array {
     

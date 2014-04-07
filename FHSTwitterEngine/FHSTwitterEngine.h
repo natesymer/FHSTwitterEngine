@@ -1045,26 +1045,6 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
  */
 - (id)testService;
 
-
-#pragma mark Get profile image
-/**
- Gets profile image. API endpoint: users/profile_image.
- @param username Twitter user name.
- @param size Size of image using `FHSTwitterEngineImageSize` (for example: `FHSTwitterEngineImageSizeMini` for 24px)
- @return Profile image.
- */
-- (id)getProfileImageForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
-
-
-/**
- Gets profile image URL String. API endpoint: users/profile_image.
- @param username Twitter user name.
- @param size Size of image using `FHSTwitterEngineImageSize` (for example: `FHSTwitterEngineImageSizeMini` for 24px)
- @return URL String to profile image.
- */
-- (id)getProfileImageURLStringForUsername:(NSString *)username andSize:(FHSTwitterEngineImageSize)size;
-
-
 #pragma mark TwitPic (photo upload)
 
 /**

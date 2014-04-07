@@ -222,15 +222,6 @@
     return body;
 }
 
-- (NSError *)sendPOSTRequestForURL:(NSURL *)url andParams:(NSDictionary *)params {
-    id obj = [self sendRequestWithHTTPMethod:@"POST" URL:url params:params];
-    return [obj isKindOfClass:[NSError class]]?obj:nil;
-}
-
-- (id)sendGETRequestForURL:(NSURL *)url andParams:(NSDictionary *)params {
-    return [self sendRequestWithHTTPMethod:@"GET" URL:url params:params];
-}
-
 - (id)sendRequestWithHTTPMethod:(NSString *)httpmethod URL:(NSURL *)url params:(NSDictionary *)params {
     NSError *authError = [self checkAuth];
     

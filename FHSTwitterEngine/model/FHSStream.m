@@ -135,4 +135,14 @@
     }
 }
 
++ (NSString *)sanitizeTrackParameter:(NSArray *)keywords {
+    NSMutableArray *sanitized = [NSMutableArray arrayWithCapacity:keywords.count];
+    
+    for (NSString *string in keywords) {
+        [sanitized addObject:[string fhs_truncatedToLength:60]];
+    }
+    
+    return [sanitized componentsJoinedByString:@","];
+}
+
 @end

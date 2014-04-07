@@ -18,4 +18,10 @@
 - (void)stop;
 - (void)start;
 
+// check out the streaming parameters here:
+// https://dev.twitter.com/docs/streaming-apis/parameters
+
+// This makes sure all track keywords are valid
++ (NSString *)sanitizeTrackParameter:(NSArray *)keywords;
+
 @end
