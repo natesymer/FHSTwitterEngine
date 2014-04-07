@@ -83,7 +83,7 @@
         }];
     }
     
-    [paramPairs sortUsingSelector:@selector(compare:)];
+    [paramPairs sortUsingSelector:@selector(caseInsensitiveCompare:)]; // used to be compare:
     
     // Whew, that's over
 
@@ -176,9 +176,11 @@
 - (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
     NSMutableData *body = [NSMutableData data];
     
+    // setup commonly used data objects to save on processing
     NSData *cRetAndNlineData = [@"\r\n" dataUsingEncoding:NSUTF8StringEncoding];
     NSData *boundaryData = [[NSString stringWithFormat:@"--%@\r\n",boundary]dataUsingEncoding:NSUTF8StringEncoding];
     NSData *cTypeOctetStreamData = [@"Content-Type: application/octet-stream\r\n" dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *ctentXferEncData = [@"Content-Transfer-Encoding: binary\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding];
     
     [params enumerateKeysAndObjectsUsingBlock:^(NSString *key, id obj, BOOL *stop) {
         // start the parameter
@@ -190,7 +192,7 @@
             if ([dict[@"type"]isEqualToString:@"file"]) {
                 [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n",key,dict[@"filename"]] dataUsingEncoding:NSUTF8StringEncoding]];
                 [body appendData:[[NSString stringWithFormat:@"Content-Type: %@\r\n",dict[@"mimetype"]] dataUsingEncoding:NSUTF8StringEncoding]];
-                [body appendData:[@"Content-Transfer-Encoding: binary\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+                [body appendData:ctentXferEncData];
                 [body appendData:dict[@"data"]];
             }
             
