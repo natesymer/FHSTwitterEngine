@@ -1345,18 +1345,25 @@
         return [NSError badRequestError];
     }
     
+    NSDictionary *params = @{
+                             @"x_auth_mode": @"client_auth",
+                             @"x_auth_username": username,
+                             @"x_auth_password": password
+                             };
+    
     NSURL *url = [NSURL URLWithString:url_oauth_access_token];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil extraParameters:@{
-                                                                                                     @"x_auth_mode": @"client_auth",
-                                                                                                     @"x_auth_username": username,
-                                                                                                     @"x_auth_password": password
-                                                                                                     }];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil extraParameters:params];
 
-    NSString *bodyString = [NSString stringWithFormat:@"x_auth_mode=client_auth&x_auth_username=%@&x_auth_password=%@",username,password];
-    request.HTTPBody = [bodyString dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableArray *pairs = [NSMutableArray arrayWithCapacity:3];
+    
+    [params enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        [pairs addObject:[NSString stringWithFormat:@"%@=%@",key,obj]];
+    }];
+    
+    request.HTTPBody = [[pairs componentsJoinedByString:@"&"]dataUsingEncoding:NSUTF8StringEncoding];
     
     if (_shouldClearConsumer) {
         self.shouldClearConsumer = NO;
