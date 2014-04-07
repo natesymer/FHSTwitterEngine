@@ -6,16 +6,16 @@
 //  Copyright (c) 2014 Nathaniel Symer. All rights reserved.
 //
 
-#import "FHSTwitterEngineController.h"
+#import "FHSOAuthLoginController.h"
 #import "FHSTwitterEngine.h"
 #import "FHSToken.h"
 #import "NSString+FHSTE.h"
 
 static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||document.getElementById('oauth_pin');if(d){var d2=d.getElementsByTagName('code');d2.length>0?d2[0].innerHTML:d.innerHTML}";
 
-@implementation FHSTwitterEngineController
+@implementation FHSOAuthLoginController
 
-+ (FHSTwitterEngineController *)controllerWithCompletionBlock:(LoginControllerBlock)block {
++ (FHSOAuthLoginController *)controllerWithCompletionBlock:(LoginControllerBlock)block {
     return [[[self class]alloc]initWithCompletionBlock:block];
 }
 

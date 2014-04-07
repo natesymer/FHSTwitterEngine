@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 #import "FHSTwitterEngine.h"
-#import "FHSTwitterEngineController.h"
+#import "FHSOAuthLoginController.h"
 #import "FHSTwitterEngine+Requests.h"
 #import "FHSTwitterEngine+iOS.h"
 
@@ -225,7 +225,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 }
 
 - (void)loginOAuth {
-    FHSTwitterEngineController *loginController = [FHSTwitterEngineController controllerWithCompletionBlock:^(FHSTwitterEngineControllerResult result) {
+    FHSOAuthLoginController *loginController = [FHSOAuthLoginController controllerWithCompletionBlock:^(FHSTwitterEngineControllerResult result) {
         switch (result) {
             case FHSTwitterEngineControllerResultCancelled:
                 NSLog(@"Login Controller Cancelled");

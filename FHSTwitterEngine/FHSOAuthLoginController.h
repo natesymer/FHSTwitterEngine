@@ -1,5 +1,5 @@
 //
-//  FHSTwitterEngineController.h
+//  FHSOAuthLoginController.h
 //  FHSTwitterEngine
 //
 //  Created by Nathaniel Symer on 3/10/14.
@@ -20,10 +20,10 @@ typedef void(^LoginControllerBlock)(FHSTwitterEngineControllerResult result);
 
 
 /**
- `FHSTwitterEngineController` provides a view controller for `FHSTwitterEngine` to use OAuth.
+ `FHSOAuthLoginController` provides a view controller for `FHSTwitterEngine` to use OAuth.
  */
 
-@interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate>
+@interface FHSOAuthLoginController : UIViewController <UIWebViewDelegate>
 
 /**
  The controller navigation bar.
@@ -73,7 +73,7 @@ typedef void(^LoginControllerBlock)(FHSTwitterEngineControllerResult result);
  Gets an instance of `FHSTwitterEngineController` with `LoginControllerBlock` block.
  @param block Block of type `LoginControllerBlock`
  */
-+ (FHSTwitterEngineController *)controllerWithCompletionBlock:(LoginControllerBlock)block;
++ (FHSOAuthLoginController *)controllerWithCompletionBlock:(LoginControllerBlock)block;
 
 @end
 
