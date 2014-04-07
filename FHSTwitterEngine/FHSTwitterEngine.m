@@ -151,7 +151,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
-- (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description {
+- (id)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description {
     
     if (name.length == 0) {
         return [NSError badRequestError];
@@ -181,7 +181,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ @"list_id": listID }];
 }
 
-- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name {
+- (id)updateListWithID:(NSString *)listID name:(NSString *)name {
     if (listID.length == 0) {
         return [NSError badRequestError];
     } else if (name.length == 0) {
@@ -192,7 +192,7 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"list_id": listID, @"name": name}];
 }
 
-- (NSError *)updateListWithID:(NSString *)listID description:(NSString *)description {
+- (id)updateListWithID:(NSString *)listID description:(NSString *)description {
     if (listID.length == 0) {
         return [NSError badRequestError];
     }
@@ -204,7 +204,7 @@
                                                                       }];
 }
 
-- (NSError *)updateListWithID:(NSString *)listID mode:(BOOL)isPrivate {
+- (id)updateListWithID:(NSString *)listID mode:(BOOL)isPrivate {
     if (listID.length == 0) {
         return [NSError badRequestError];
     }
@@ -216,7 +216,7 @@
                                                                       }];
 }
 
-- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name description:(NSString *)description mode:(BOOL)isPrivate {
+- (id)updateListWithID:(NSString *)listID name:(NSString *)name description:(NSString *)description mode:(BOOL)isPrivate {
     if (listID.length == 0) {
         return [NSError badRequestError];
     } else if (name.length == 0) {
@@ -241,7 +241,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ @"list_id": listID }];
 }
 
-- (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users {
+- (id)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users {
     if (users.count > 100 || users.count == 0) {
         return [NSError badRequestError];
     } else if (listID.length == 0) {
@@ -252,7 +252,7 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"screen_name": [users componentsJoinedByString:@","]}];
 }
 
-- (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users {
+- (id)addUsersToListWithID:(NSString *)listID users:(NSArray *)users {
     if (users.count > 100 || users.count == 0) {
         return [NSError badRequestError];
     } else if (listID.length == 0) {
@@ -376,11 +376,11 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
-- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData {
+- (id)postTweet:(NSString *)tweetString withImageData:(NSData *)theData {
     return [self postTweet:tweetString withImageData:theData inReplyTo:nil];
 }
 
-- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt {
+- (id)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt {
     if (tweetString.length == 0) {
         return [NSError badRequestError];
     } else if (theData.length == 0) {
@@ -403,7 +403,7 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
-- (NSError *)destroyTweet:(NSString *)identifier {
+- (id)destroyTweet:(NSString *)identifier {
     if (identifier.length == 0) {
         return [NSError badRequestError];
     }
@@ -424,7 +424,7 @@
                                                                      }];
 }
 
-- (NSError *)retweet:(NSString *)identifier {
+- (id)retweet:(NSString *)identifier {
     if (identifier.length == 0) {
         return [NSError badRequestError];
     }
@@ -497,7 +497,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
-- (NSError *)reportUserAsSpam:(NSString *)user isID:(BOOL)isID {
+- (id)reportUserAsSpam:(NSString *)user isID:(BOOL)isID {
     if (user.length == 0) {
         return [NSError badRequestError];
     }
@@ -515,7 +515,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{@"id": messageID}];
 }
 
-- (NSError *)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID {
+- (id)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID {
     if (user.length == 0) {
         return [NSError badRequestError];
     }
@@ -540,7 +540,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{@"count": @(count).stringValue}];
 }
 
-- (NSError *)deleteDirectMessage:(NSString *)messageID {
+- (id)deleteDirectMessage:(NSString *)messageID {
     if (messageID.length == 0) {
         return [NSError badRequestError];
     }
@@ -579,7 +579,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ @"stringify_ids":@"true" }];
 }
 
-- (NSError *)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID {
+- (id)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID {
     
     if (user.length == 0) {
         return [NSError badRequestError];
@@ -616,7 +616,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{(areIDs?@"user_id":@"screen_name"): [users componentsJoinedByString:@","]}];
 }
 
-- (NSError *)unfollowUser:(NSString *)user isID:(BOOL)isID {
+- (id)unfollowUser:(NSString *)user isID:(BOOL)isID {
     if (user.length == 0) {
         return [NSError badRequestError];
     }
@@ -625,7 +625,7 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{(isID?@"user_id":@"screen_name"): user}];
 }
 
-- (NSError *)followUser:(NSString *)user isID:(BOOL)isID {
+- (id)followUser:(NSString *)user isID:(BOOL)isID {
     if (user.length == 0) {
         return [NSError badRequestError];
     }
@@ -670,7 +670,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
-- (NSError *)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag {
+- (id)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag {
     if (tweetID.length == 0) {
         return [NSError badRequestError];
     }
@@ -684,7 +684,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
-- (NSError *)updateProfileColorsWithDictionary:(NSDictionary *)dictionary {
+- (id)updateProfileColorsWithDictionary:(NSDictionary *)dictionary {
     
     if (!dictionary) {
         return [NSError badRequestError];
@@ -724,7 +724,7 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
-- (NSError *)setUseProfileBackgroundImage:(BOOL)shouldUseBGImg {
+- (id)setUseProfileBackgroundImage:(BOOL)shouldUseBGImg {
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_background_image];
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{
                                                                       @"skip_status": @"true",
@@ -732,7 +732,7 @@
                                                                       }];
 }
 
-- (NSError *)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled {
+- (id)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled {
     if (data.length == 0) {
         return [NSError badRequestError];
     }
@@ -745,11 +745,11 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"skip_status":@"true", @"use":@"true", @"include_entities":_includeEntities?@"true":@"false", @"tiled":(isTiled?@"true":@"false"), @"image":[data base64Encode]}];
 }
 
-- (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled {
+- (id)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled {
     return [self setProfileBackgroundImageWithImageData:[NSData dataWithContentsOfFile:file] tiled:isTiled];
 }
 
-- (NSError *)setProfileImageWithImageData:(NSData *)data {
+- (id)setProfileImageWithImageData:(NSData *)data {
     if (data.length == 0) {
         return [NSError badRequestError];
     }
@@ -766,7 +766,7 @@
                                                                       }];
 }
 
-- (NSError *)setProfileImageWithImageAtPath:(NSString *)file {
+- (id)setProfileImageWithImageAtPath:(NSString *)file {
     return [self setProfileImageWithImageData:[NSData dataWithContentsOfFile:file]];
 }
 
@@ -775,7 +775,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
-- (NSError *)updateUserProfileWithDictionary:(NSDictionary *)settings {
+- (id)updateUserProfileWithDictionary:(NSDictionary *)settings {
     
     if (!settings) {
         return [NSError badRequestError];
@@ -818,7 +818,7 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
-- (NSError *)updateSettingsWithDictionary:(NSDictionary *)settings {
+- (id)updateSettingsWithDictionary:(NSDictionary *)settings {
     
     if (!settings) {
         return [NSError badRequestError];
@@ -877,7 +877,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ (areIDs?@"user_id":@"screen_name"):[users componentsJoinedByString:@","] }];
 }
 
-- (NSError *)unblock:(NSString *)username {
+- (id)unblock:(NSString *)username {
     if (username.length == 0) {
         return [NSError badRequestError];
     }
@@ -886,7 +886,7 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"screen_name": username}];
 }
 
-- (NSError *)block:(NSString *)username {
+- (id)block:(NSString *)username {
     if (username.length == 0) {
         return [NSError badRequestError];
     }
@@ -918,7 +918,7 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
 }
 
-- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString {
+- (id)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString {
     if (tweetString.length == 0) {
         return [NSError badRequestError];
     }
@@ -935,7 +935,7 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
-- (NSError *)postTweet:(NSString *)tweetString {
+- (id)postTweet:(NSString *)tweetString {
     return [self postTweet:tweetString inReplyTo:nil];
 }
 
@@ -1096,50 +1096,6 @@
         sharedInstance = [[[self class]alloc]init];
     });
     return sharedInstance;
-}
-
-//
-// TODO: This method is a mess. It needs epic repairs and/pr a touch of functional programming
-//
-
-- (NSArray *)generateRequestStringsFromArray:(NSArray *)array {
-    
-    NSString *initialString = [array componentsJoinedByString:@","];
-    
-    if (array.count <= 100) {
-        return @[initialString];
-    }
-    
-    int offset = 0;
-    int remainder = fmod(array.count, 100);
-    int numberOfStrings = (array.count-remainder)/100;
-    
-    NSMutableArray *reqStrs = [NSMutableArray arrayWithCapacity:numberOfStrings];
-    
-    for (int i = 1; i <= numberOfStrings; ++i) {
-        NSString *ninetyNinththItem = (NSString *)array[(i*100)-1];
-        NSRange range = [initialString rangeOfString:ninetyNinththItem];
-        int endOffset = range.location+range.length;
-        NSRange rangeOfAString = NSMakeRange(offset, endOffset-offset);
-        offset = endOffset;
-        NSString *endResult = [initialString fhs_stringWithRange:rangeOfAString];
-        
-        if ([[endResult substringToIndex:1]isEqualToString:@","]) {
-            endResult = [endResult substringFromIndex:1];
-        }
-        
-        [reqStrs addObject:endResult];
-    }
-    
-    NSString *remainderString = [initialString stringByReplacingOccurrencesOfString:[reqStrs componentsJoinedByString:@","] withString:@""];
-    
-    if ([[remainderString substringToIndex:1]isEqualToString:@","]) {
-        remainderString = [remainderString substringFromIndex:1];
-    }
-    
-    [reqStrs addObject:remainderString];
-    
-    return reqStrs;
 }
 
 //

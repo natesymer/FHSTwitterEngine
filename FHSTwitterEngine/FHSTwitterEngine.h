@@ -185,43 +185,43 @@
 /**
  Destroys (deletes) the status specified by the Tweet ID. The authenticating user must be the author of the specified status. API endpoint: POST statuses/destroy.
  @param identifier Tweet ID.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)destroyTweet:(NSString *)identifier;
+- (id)destroyTweet:(NSString *)identifier;
 
 
 /**
  Posts a Tweet. To upload an image, use `postTweet:withImageData:`. API endpoint: POST statuses/update.
  @param tweetString Tweet to post.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)postTweet:(NSString *)tweetString;
+- (id)postTweet:(NSString *)tweetString;
 
 
 /**
  Posts a reply to a Tweet. API endpoint: POST statuses/update.
  @param tweetString Reply.
  @param inReplyToString Tweet ID to reply to.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
+- (id)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
 
 
 /**
  Retweets a Tweet with the given Tweet ID. API endpoint: POST statuses/retweet.
  @param identifier Tweet ID.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)retweet:(NSString *)identifier;
+- (id)retweet:(NSString *)identifier;
 
 
 /*
  Posts a Tweet with an image. API endpoint: POST statuses/update_with_media.
  @param tweetString Tweet to post.
  @param theData Image data.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
+- (id)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
 
 
 /*
@@ -229,9 +229,9 @@
  @param tweetString Tweet to post.
  @param theData Image data.
  @param inReplyToString Tweet ID to reply to.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
+- (id)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
 
 
 /**
@@ -335,9 +335,9 @@
 /**
  Destroys (deletes) the direct message specified in the required ID parameter. The authenticating user must be the recipient of the specified direct message. This method requires an access token with RWD. API endpoint: POST direct_messages/destroy.
  @param messageID ID of message.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)deleteDirectMessage:(NSString *)messageID;
+- (id)deleteDirectMessage:(NSString *)messageID;
 
 
 /**
@@ -345,9 +345,9 @@
  @param body Message body (required).
  @param user Message recipient (required).
  @param isID A Boolean that determines if `user` is a screen name or a user ID.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID;
+- (id)sendDirectMessage:(NSString *)body toUser:(NSString *)user isID:(BOOL)isID;
 
 
 #pragma mark - Friends & Followers
@@ -392,18 +392,18 @@
  Follows the specified user. API endpoint: POST friendships/create.
  @param user The user ID or screen name.
  @param isID A Boolean that determines if `user` is a screen name or a user ID.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)followUser:(NSString *)user isID:(BOOL)isID;
+- (id)followUser:(NSString *)user isID:(BOOL)isID;
 
 
 /**
  Unfollows the specified user. API endpoint: POST friendships/destroy.
  @param user The user ID or screen name.
  @param isID A Boolean that determines if `user` is a screen name or a user ID.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)unfollowUser:(NSString *)user isID:(BOOL)isID;
+- (id)unfollowUser:(NSString *)user isID:(BOOL)isID;
 
 
 /**
@@ -412,9 +412,9 @@
  @param devNotifs A Boolean value to determine whether to enable or disable device notifications.
  @param user The user ID or screen name.
  @param isID A Boolean that determines if `user` is a screen name or a user ID.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID;
+- (id)enableRetweets:(BOOL)enableRTs andDeviceNotifs:(BOOL)devNotifs forUser:(NSString *)user isID:(BOOL)isID;
 
 
 /**
@@ -476,9 +476,9 @@
  `end_sleep_time`: UTC time,
  `time_zone`: Europe/Copenhagen, Pacific/Tongatapu,
  `lang`: en, it, es.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)updateSettingsWithDictionary:(NSDictionary *)settings;
+- (id)updateSettingsWithDictionary:(NSDictionary *)settings;
 
 
 /**
@@ -494,27 +494,27 @@
  `url` (100 characters maximum),
  `location` (30 characters maximum),
  `description` (160 characters maximum).
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)updateUserProfileWithDictionary:(NSDictionary *)settings;
+- (id)updateUserProfileWithDictionary:(NSDictionary *)settings;
 
 
 /**
  Sets the authenticated user's profile background image with an image. API endpoint: POST account/update_profile_background_image.
  @param data Image data.
  @param isTiled A Boolean value that determines if the image is tiled. If `YES`, the image is tiled.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled;
+- (id)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled;
 
 
 /**
  Sets the authenticated user's profile background image with an image. API endpoint: POST account/update_profile_background_image.
  @param file File path of image.
  @param isTiled A Boolean value that determines if the image is tiled. If `YES`, the image is tiled.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled;
+- (id)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled;
 
 
 /**
@@ -526,33 +526,33 @@
  `profile_sidebar_fill_color`,
  `profile_text_color`.
  If the dictionary is nil, FHSTwitterEngine resets the values.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)updateProfileColorsWithDictionary:(NSDictionary *)dictionary;
+- (id)updateProfileColorsWithDictionary:(NSDictionary *)dictionary;
 
 
 /**
  Sets the profile image with an image file path. API endpoint: POST account/update_profile_image.
  @param file File path of image.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)setProfileImageWithImageAtPath:(NSString *)file;
+- (id)setProfileImageWithImageAtPath:(NSString *)file;
 
 
 /**
  Sets the profile image with an image. API endpoint: POST account/update_profile_image.
  @param data Image data.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)setProfileImageWithImageData:(NSData *)data;
+- (id)setProfileImageWithImageData:(NSData *)data;
 
 
 /**
  Sets whether the profile uses a background image. API endpoint: POST account/update_profile_image.
  @param shouldUseProfileBackgroundImage A Boolean value that determines if whether the profile uses a background image.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)setUseProfileBackgroundImage:(BOOL)shouldUseProfileBackgroundImage;
+- (id)setUseProfileBackgroundImage:(BOOL)shouldUseProfileBackgroundImage;
 
 
 /**
@@ -570,17 +570,17 @@
 /**
  Blocks the specified user from following the authenticating user. In addition the blocked user will not show in the authenticating users mentions or timeline (unless retweeted by another user). If a follow or friend relationship exists it is destroyed. API endpoint: POST blocks/create.
  @param username Screen name of user to block.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)block:(NSString *)username;
+- (id)block:(NSString *)username;
 
 
 /**
  Un-blocks the user specified user for the authenticating user. If relationships existed before the block was instated, they will not be restored. API endpoint: POST blocks/destroy.
  @param username Screen name of user to block.
- @return If an error occurs, returns an NSError object that describes the problem. 
+ @return The response from the Twitter API.
  */
-- (NSError *)unblock:(NSString *)username;
+- (id)unblock:(NSString *)username;
 
 
 /**
@@ -693,9 +693,9 @@
  Marks or unmarks Tweet as favorite for the authenticating user. API endpoints: POST favorites/destroy, POST favorites/create.
  @param tweetID ID of Tweet to mark or unmark as favorite.
  @param flag A Boolean value that determines if the Tweet is to be marked or unmarked as favorite. If `YES`, the Tweet is marked as favorite.
- @return If an error occurs, returns an NSError object that describes the problem. 
+ @return The response from the Twitter API.
  */
-- (NSError *)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag;
+- (id)markTweet:(NSString *)tweetID asFavorite:(BOOL)flag;
 
 // TODO: separate methods to favorite/destroy?
 
@@ -796,9 +796,9 @@
  Adds multiple members to a list, by specifying a comma-separated list of member ids or screen names. The authenticated user must own the list to be able to add members to it. Note that lists can't have more than 5,000 members. API endpoint: POST lists/members/create_all.
  @param listID The ID of the list.
  @param users List of user screen names (at least 1 user, maximum of 100 users).
- @return If an error occurs, returns an NSError object that describes the problem. 
+ @return The response from the Twitter API.
  */
-- (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;
+- (id)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;
 
 
 /**
@@ -831,27 +831,27 @@
  Updates the name of specified list. The authenticated user must own the list to be able to update it. API endpoint: POST lists/update.
  @param listID The ID of the list.
  @param name The name of the list (cannot be empty).
- @return If an error occurs, returns an NSError object that describes the problem. 
+ @return The response from the Twitter API.
  */
-- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name;
+- (id)updateListWithID:(NSString *)listID name:(NSString *)name;
 
 
 /**
  Updates the description of specified list. The authenticated user must own the list to be able to update it. API endpoint: POST lists/update.
  @param listID The ID of the list.
  @param description The description of the list.
- @return If an error occurs, returns an NSError object that describes the problem. 
+ @return The response from the Twitter API.
  */
-- (NSError *)updateListWithID:(NSString *)listID description:(NSString *)description;
+- (id)updateListWithID:(NSString *)listID description:(NSString *)description;
 
 
 /**
  Updates the privacy of specified list. The authenticated user must own the list to be able to update it. API endpoint: POST lists/update.
  @param listID The ID of the list.
  @param isPrivate A Boolean that specifies if the list is private.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)updateListWithID:(NSString *)listID mode:(BOOL)isPrivate;
+- (id)updateListWithID:(NSString *)listID mode:(BOOL)isPrivate;
 
 
 /**
@@ -860,9 +860,9 @@
  @param name The name of the list (cannot be empty).
  @param description The description of the list.
  @param isPrivate A Boolean that specifies if the list is private.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)updateListWithID:(NSString *)listID name:(NSString *)name description:(NSString *)description mode:(BOOL)isPrivate;
+- (id)updateListWithID:(NSString *)listID name:(NSString *)name description:(NSString *)description mode:(BOOL)isPrivate;
 
 
 /**
@@ -870,9 +870,9 @@
  @param name The name of the list (cannot be empty).
  @param isPrivate A Boolean that specifies if the list is private.
  @param description The description of the list (optional).
- @return If an error occurs, returns an NSError object that describes the problem. 
+ @return The response from the Twitter API.
  */
-- (NSError *)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
+- (id)createListWithName:(NSString *)name isPrivate:(BOOL)isPrivate description:(NSString *)description;
 
 
 /**
@@ -893,9 +893,9 @@
  Removes multiple members from a list, by specifying a comma-separated list of  screen names. The authenticated user must own the list to be able to remove members from it. API endpoint: POST lists/members/destroy_all.
  @param listID The ID of the list.
  @param users List of user screen names (at least 1 user, maximum of 100 users).
- @return If an error occurs, returns an NSError object that describes the problem. 
+ @return The response from the Twitter API.
  */
-- (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
+- (id)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
 
 
 /**
@@ -959,9 +959,9 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
  Reports the specified user as a spam account to Twitter (additionally blocks the user). API endpoint: POST users/report_spam.
  @param user The user ID or screen name.
  @param isID A Boolean that determines if `user` is a screen name or a user ID.
- @return If an error occurs, returns an NSError object that describes the problem.
+ @return The response from the Twitter API.
  */
-- (NSError *)reportUserAsSpam:(NSString *)user isID:(BOOL)isID;
+- (id)reportUserAsSpam:(NSString *)user isID:(BOOL)isID;
 
 
 #pragma mark - OAuth
@@ -1130,15 +1130,6 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
 
 
 #pragma mark Misc.
-
-/**
- Generates a request string:
- id/username concatenator - returns an array of concatenated id/username lists
- 100 ids/usernames per concatenated string
- @param array Request string Array.
- */
-- (NSArray *)generateRequestStringsFromArray:(NSArray *)array;
-
 
 /**
  Initializes `FHSTwitterEngine`.
