@@ -658,7 +658,7 @@
 
 
 /**
- Get list of user IDs the authenticating user has muted.
+ Get list of user IDs the authenticating user has muted. API endpoint: GET mutes/users/ids
  @return Returns an array of numeric user ids the authenticating user has muted. API endpoint: GET mutes/users/ids
  */
 - (id)getMutedIds;
