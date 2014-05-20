@@ -12,4 +12,5 @@ Pod::Spec.new do |s|
 	}
 	s.source_files = "FHSTwitterEngine/*.{h,m}"
 	s.requires_arc = true
+	s.platform = :ios
 end
