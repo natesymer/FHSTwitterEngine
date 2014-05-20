@@ -123,3 +123,8 @@ static NSString * const url_followers_list = @"https://api.twitter.com/1.1/follo
 
 static NSString * const url_friends_ids = @"https://api.twitter.com/1.1/friends/ids.json";
 static NSString * const url_friends_list = @"https://api.twitter.com/1.1/friends/list.json";
+
+static NSString * const url_mutes_users_create = @"https://api.twitter.com/1.1/mutes/users/create.json";
+static NSString * const url_mutes_users_destroy = @"https://api.twitter.com/1.1/mutes/users/destroy.json";
+static NSString * const url_mutes_users_ids = @"https://api.twitter.com/1.1/mutes/users/ids.json";
+static NSString * const url_mutes_users_list = @"https://api.twitter.com/1.1/mutes/users/list.json";

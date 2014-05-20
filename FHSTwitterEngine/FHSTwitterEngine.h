@@ -640,6 +640,38 @@
 
 
 /**
+ Mutes the user specified in the ID parameter for the authenticating user. API endpoint: POST mutes/users/create
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @return Returns the muted user in the requested format when successful. Returns a string describing the failure condition when unsuccessful.
+ */
+- (id)muteUser:(NSString *)user isID:(BOOL)isID;
+
+
+/**
+ Un-mutes the user specified in the ID parameter for the authenticating user. API endpoint: POST mutes/users/destroy
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @return Returns the unmuted user in the requested format when successful. Returns a string describing the failure condition when unsuccessful.
+ */
+- (id)unmuteUser:(NSString *)user isID:(BOOL)isID;
+
+
+/**
+ Get list of user IDs the authenticating user has muted.
+ @return Returns an array of numeric user ids the authenticating user has muted. API endpoint: GET mutes/users/ids
+ */
+- (id)getMutedIds;
+
+
+/** 
+ Get list of users the authenticating user has muted. API endpoint: GET mutes/users/list
+ @return Returns an array of user objects the authenticating user has muted.
+ */
+- (id)getMutedUsers;
+
+
+/**
  Returns a map of the available size variations of the specified user's profile banner. If the user has not uploaded a profile banner, a HTTP 404 will be served instead.  API endpoint: GET users/profile_banner.
  */
 //TODO: GET users/profile_banner
