@@ -639,6 +639,35 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
+- (id)muteUser:(NSString *)user isID:(BOOL)isID {
+    if (user.length == 0) {
+        return [NSError badRequestError];
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_mutes_users_create];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{(isID?@"user_id":@"screen_name"): user}];
+}
+
+- (id)unmuteUser:(NSString *)user isID:(BOOL)isID {
+    if (user.length == 0) {
+        return [NSError badRequestError];
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_mutes_users_destroy];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{(isID?@"user_id":@"screen_name"): user}];
+}
+
+- (id)getMutedIds {
+    NSURL *baseURL = [NSURL URLWithString:url_mutes_users_ids];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
+}
+
+- (id)getMutedUsers {
+    NSURL *baseURL = [NSURL URLWithString:url_mutes_users_list];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
+}
+
+
 - (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count {
     return [self getFavoritesForUser:user isID:isID andCount:count sinceID:nil maxID:nil];
 }
