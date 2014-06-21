@@ -57,7 +57,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return FHSTwitterEngine.sharedEngine.isAuthorized?4:3;
+    return FHSTwitterEngine.sharedEngine.isAuthorized?5:3;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -73,6 +73,23 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
             break;
         case 3:
             [self logout];
+            break;
+        case 4: {
+            NSLog(@"Demo - Posting tweet with multiple upload ");
+            
+            NSArray *images=@[@"image1",@"image2"];
+            
+            NSMutableArray *listOfNsData = [[NSMutableArray alloc] initWithCapacity:images.count];
+            
+            [images enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                UIImage *image = [UIImage imageNamed:obj];
+                NSData *data = UIImagePNGRepresentation(image);
+                [listOfNsData addObject:data];
+            }];
+            
+            NSString *tweet = [NSString stringWithFormat:@"Multiple images %@", @(arc4random()%100)];
+            [[FHSTwitterEngine sharedEngine] postTweet:tweet withListOfImageData:listOfNsData];
+        }
             break;
         default:
             break;
@@ -107,6 +124,11 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
             cell.textLabel.text = @"Logout";
             cell.detailTextLabel.text = FHSTwitterEngine.sharedEngine.accessToken.username;
             break;
+            
+        case 4:
+            cell.textLabel.text = @"Post Tweet With Multiple Images";
+            break;
+            
         default:
             break;
     }

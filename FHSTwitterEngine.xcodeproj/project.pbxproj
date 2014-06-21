@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1946B978195605BA00AB83DD /* image1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1946B976195605BA00AB83DD /* image1.png */; };
+		1946B979195605BA00AB83DD /* image2.png in Resources */ = {isa = PBXBuildFile; fileRef = 1946B977195605BA00AB83DD /* image2.png */; };
 		9B2A1BC415E805D1007E66E0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1B9915E805D1007E66E0 /* AppDelegate.m */; };
 		9B2A1BC515E805D1007E66E0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9B2A1B9A15E805D1007E66E0 /* InfoPlist.strings */; };
 		9B2A1BC915E805D1007E66E0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BA215E805D1007E66E0 /* main.m */; };
@@ -32,6 +34,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1946B976195605BA00AB83DD /* image1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = image1.png; sourceTree = "<group>"; };
+		1946B977195605BA00AB83DD /* image2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = image2.png; sourceTree = "<group>"; };
 		9B2A1B9815E805D1007E66E0 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		9B2A1B9915E805D1007E66E0 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		9B2A1B9B15E805D1007E66E0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -107,6 +111,8 @@
 		9B2A1BD815E80601007E66E0 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				1946B976195605BA00AB83DD /* image1.png */,
+				1946B977195605BA00AB83DD /* image2.png */,
 				9B2A59E31628F053003B4E2E /* Default-568h@2x.png */,
 				9B2A1B9A15E805D1007E66E0 /* InfoPlist.strings */,
 				9B2A1B9E15E805D1007E66E0 /* FHSTwitterEngine-Info.plist */,
@@ -244,7 +250,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1946B978195605BA00AB83DD /* image1.png in Resources */,
 				9B2A1BC515E805D1007E66E0 /* InfoPlist.strings in Resources */,
+				1946B979195605BA00AB83DD /* image2.png in Resources */,
 				9B2A59E41628F053003B4E2E /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
