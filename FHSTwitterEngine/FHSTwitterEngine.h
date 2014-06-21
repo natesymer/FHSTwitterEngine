@@ -235,6 +235,25 @@
 
 
 /**
+ Posts a tweet with multiple images. API endpoint: POST statuses/update.
+ @param tweetString Tweet to post.
+ @param listOfImageData List of images (image data).
+ @return The response from the Twitter API.
+ */
+- (id)postTweet:(NSString *)tweetString withListOfImageData:(NSArray*)listOfImageData;
+
+
+/**
+ Posts a reply to a tweet with multiple images. API endpoint: POST statuses/update.
+ @param tweetString Tweet to post.
+ @param listOfImageData List of images (image data).
+ @param inReplyToString Tweet ID to reply to.
+ @return The response from the Twitter API.
+ */
+- (id)postTweet:(NSString *)tweetString withListOfImageData:(NSArray*)listOfImageData inReplyTo:(NSString *)irt;
+
+
+/**
  Returns information allowing the creation of an embedded representation of a Tweet on third party sites. See the oEmbed specification for information about the response format. API endpoint: GET statuses/oembed.
 */
 //TODO: GET statuses/oembed

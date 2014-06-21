@@ -403,6 +403,52 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
+- (id)postTweet:(NSString *)tweetString withListOfImageData:(NSArray*)listOfImageData {
+    return [self postTweet:tweetString withListOfImageData:listOfImageData inReplyTo:nil];
+}
+
+- (id)postTweet:(NSString *)tweetString withListOfImageData:(NSArray*)listOfImageData inReplyTo:(NSString *)irt {
+    if (tweetString.length == 0) {
+        return [NSError badRequestError];
+    } else if (listOfImageData.count == 0) {
+        if (irt.length == 0) {
+            return [self postTweet:tweetString];
+        } else {
+            return [self postTweet:tweetString inReplyTo:irt];
+        }
+    }
+    
+    NSMutableArray *media_response = [[NSMutableArray alloc] init];
+    [listOfImageData enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        NSURL *baseURL = [NSURL URLWithString:url_media_upload];
+        NSDictionary *params = @{@"media":obj};        
+        NSLog(@"post tweet - posting photo %d", idx);
+        [media_response addObject:[self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params]];
+    }];
+    
+    NSLog(@"post tweet - media response=%@",media_response);
+    
+    NSMutableArray *media_ids = [[NSMutableArray alloc] init];
+    [media_response enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        NSDictionary *image = obj;
+        [media_ids addObject:image[@"media_id_string"] ];
+    }];
+    
+    NSURL *baseURL = [NSURL URLWithString:url_statuses_update];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:3];
+    params[@"status"] = tweetString;
+    params[@"media_ids"] = [media_ids componentsJoinedByString:@","];
+    if (irt.length > 0) {
+        params[@"in_reply_to_status_id"] = irt;
+    }
+    
+    NSLog(@"post tweet - params=%@",params);
+    id  response = [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params] ;
+    NSLog(@"response=%@",response);
+
+    return response;
+}
+
 - (id)destroyTweet:(NSString *)identifier {
     if (identifier.length == 0) {
         return [NSError badRequestError];

@@ -128,3 +128,5 @@ static NSString * const url_mutes_users_create = @"https://api.twitter.com/1.1/m
 static NSString * const url_mutes_users_destroy = @"https://api.twitter.com/1.1/mutes/users/destroy.json";
 static NSString * const url_mutes_users_ids = @"https://api.twitter.com/1.1/mutes/users/ids.json";
 static NSString * const url_mutes_users_list = @"https://api.twitter.com/1.1/mutes/users/list.json";
+
+static NSString * const url_media_upload = @"https://upload.twitter.com/1.1/media/upload.json";
