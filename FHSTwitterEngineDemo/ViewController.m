@@ -76,19 +76,11 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
             break;
         case 4: {
             NSLog(@"Demo - Posting tweet with multiple upload ");
-            
-            NSArray *images=@[@"image1",@"image2"];
-            
-            NSMutableArray *listOfNsData = [[NSMutableArray alloc] initWithCapacity:images.count];
-            
-            [images enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-                UIImage *image = [UIImage imageNamed:obj];
-                NSData *data = UIImagePNGRepresentation(image);
-                [listOfNsData addObject:data];
-            }];
+
+            NSArray *imageArray = @[[UIImage imageNamed:@"image1"], [UIImage imageNamed:@"image2"]];
             
             NSString *tweet = [NSString stringWithFormat:@"Multiple images %@", @(arc4random()%100)];
-            [[FHSTwitterEngine sharedEngine] postTweet:tweet withListOfImageData:listOfNsData];
+            NSLog(@"Posting Multiple Images (Response):\n%@",[FHSTwitterEngine.sharedEngine postTweet:tweet withImages:imageArray]);
         }
             break;
         default:

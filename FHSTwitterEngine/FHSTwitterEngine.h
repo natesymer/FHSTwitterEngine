@@ -237,20 +237,22 @@
 /**
  Posts a tweet with multiple images. API endpoint: POST statuses/update.
  @param tweetString Tweet to post.
- @param listOfImageData List of images (image data).
+ @param images NSArray of UIImages
  @return The response from the Twitter API.
  */
-- (id)postTweet:(NSString *)tweetString withListOfImageData:(NSArray*)listOfImageData;
+
+- (id)postTweet:(NSString *)tweetString withImages:(NSArray *)images;
 
 
 /**
  Posts a reply to a tweet with multiple images. API endpoint: POST statuses/update.
  @param tweetString Tweet to post.
- @param listOfImageData List of images (image data).
+ @param images NSArray of UIImages
  @param inReplyToString Tweet ID to reply to.
  @return The response from the Twitter API.
  */
-- (id)postTweet:(NSString *)tweetString withListOfImageData:(NSArray*)listOfImageData inReplyTo:(NSString *)irt;
+
+- (id)postTweet:(NSString *)tweetString withImages:(NSArray *)images inReplyTo:(NSString *)irt;
 
 
 /**

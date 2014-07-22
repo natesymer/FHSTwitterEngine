@@ -403,14 +403,14 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
-- (id)postTweet:(NSString *)tweetString withListOfImageData:(NSArray*)listOfImageData {
-    return [self postTweet:tweetString withListOfImageData:listOfImageData inReplyTo:nil];
+- (id)postTweet:(NSString *)tweetString withImages:(NSArray *)images {
+    return [self postTweet:tweetString withImages:images inReplyTo:nil];
 }
 
-- (id)postTweet:(NSString *)tweetString withListOfImageData:(NSArray*)listOfImageData inReplyTo:(NSString *)irt {
+- (id)postTweet:(NSString *)tweetString withImages:(NSArray *)images inReplyTo:(NSString *)irt {
     if (tweetString.length == 0) {
         return [NSError badRequestError];
-    } else if (listOfImageData.count == 0) {
+    } else if (images.count == 0) {
         if (irt.length == 0) {
             return [self postTweet:tweetString];
         } else {
@@ -418,35 +418,43 @@
         }
     }
     
-    NSMutableArray *media_response = [[NSMutableArray alloc] init];
-    [listOfImageData enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        NSURL *baseURL = [NSURL URLWithString:url_media_upload];
-        NSDictionary *params = @{@"media":obj};        
-        NSLog(@"post tweet - posting photo %d", idx);
-        [media_response addObject:[self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params]];
-    }];
+    __block NSError *mediaError = nil;
     
-    NSLog(@"post tweet - media response=%@",media_response);
+    NSMutableArray *mediaIds = [NSMutableArray array];
+
+    NSURL *mediaUploadBaseURL = [NSURL URLWithString:url_media_upload];
     
-    NSMutableArray *media_ids = [[NSMutableArray alloc] init];
-    [media_response enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        NSDictionary *image = obj;
-        [media_ids addObject:image[@"media_id_string"] ];
-    }];
-    
-    NSURL *baseURL = [NSURL URLWithString:url_statuses_update];
-    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:3];
-    params[@"status"] = tweetString;
-    params[@"media_ids"] = [media_ids componentsJoinedByString:@","];
-    if (irt.length > 0) {
-        params[@"in_reply_to_status_id"] = irt;
+    for (UIImage *image in images) {
+        NSDictionary *params = @{
+                                 @"media": @{
+                                         @"type": @"file",
+                                         @"filename": [NSString stringWithFormat:@"%@.png",[NSString fhs_UUID]],
+                                         @"data": UIImagePNGRepresentation(image),
+                                         @"mimetype": @"image/png"
+                                         }
+                                 };
+        
+        id res = [self sendRequestWithHTTPMethod:kPOST URL:mediaUploadBaseURL params:params];
+        
+        if ([res isKindOfClass:[NSError class]]) {
+            mediaError = (NSError *)res;
+            break;
+        } else if ([res isKindOfClass:[NSDictionary class]]) {
+            [mediaIds addObject:res[@"media_id_string"]];
+        }
     }
     
+    if (mediaError) return mediaError;
+    
+    NSURL *baseURL = [NSURL URLWithString:url_statuses_update];
+    NSMutableDictionary *params = @{
+                                    @"media_ids": [mediaIds componentsJoinedByString:@","],
+                                    @"status": tweetString
+                                    }.mutableCopy;
+    if (irt.length > 0) params[@"in_reply_to_status_id"] = irt;
+    
     NSLog(@"post tweet - params=%@",params);
-    id  response = [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params] ;
-    NSLog(@"response=%@",response);
-
-    return response;
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params] ;
 }
 
 - (id)destroyTweet:(NSString *)identifier {

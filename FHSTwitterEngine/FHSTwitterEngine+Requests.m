@@ -53,10 +53,6 @@
                                    @"oauth_version": @"1.0"
                                    }.mutableCopy;
 
-    if (realm.length > 0) {
-        oauth[@"oauth_realm"] = realm;
-    }
-
     // Determine if this request is for a request token
     if (tokenString.length > 0) {
         oauth[@"oauth_token"] = tokenString.fhs_URLEncode;
@@ -75,6 +71,11 @@
         NSString *pair = [NSString stringWithFormat:@"%@=%@",key, obj];
         [paramPairs addObject:pair];
     }];
+    
+    // Realm is not to be included in the Normalized request parameters
+    if (realm.length > 0) {
+        oauth[@"oauth_realm"] = realm;
+    }
     
     if (extraParams.count > 0) {
         [extraParams enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
@@ -174,6 +175,73 @@
 }
 
 - (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
+    NSMutableArray *lines = [NSMutableArray array];
+    
+    //
+    // Generate each line (NSData or NSString)
+    //
+    
+    [params enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        [lines addObject:[NSString stringWithFormat:@"--%@",boundary]];
+        
+        id payload = nil;
+
+        if ([obj isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *dict = (NSDictionary *)obj;
+
+            if ([dict[@"type"]isEqualToString:@"file"]) {
+                [lines addObject:[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"",key,dict[@"filename"]]];
+                [lines addObject:[NSString stringWithFormat:@"Content-Type: %@",dict[@"mimetype"] ?: @"application/octet-stream"]];
+                [lines addObject:@"Content-Transfer-Encoding: binary"];
+                payload = dict[@"data"];
+            }
+        } else {
+            [lines addObject:[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"",key]];
+
+            if ([obj isKindOfClass:[UIImage class]]) {
+                [lines addObject:@"Content-Type: image/png"];
+                payload = UIImagePNGRepresentation(obj);
+            } else if ([obj isKindOfClass:[NSData class]]) {
+                [lines addObject:@"Content-Type: application/octet-stream"];
+                payload = (NSData *)obj;
+            } else if ([obj isKindOfClass:[NSString class]]) {
+                payload = (NSString *)obj;
+            }
+        }
+
+        [lines addObject:@""];
+        [lines addObject:payload];
+    }];
+    
+    [lines addObject:[NSString stringWithFormat:@"--%@--",boundary]];
+    [lines addObject:@""];
+    
+   // NSLog(@"%@",lines);
+    
+    //
+    // Concat the lines into a giant NSData
+    //
+    
+    NSData *crlf = [@"\r\n" dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSMutableData *d = [NSMutableData data];
+    
+    for (id obj in lines) {
+        if ([obj isKindOfClass:[NSData class]]) {
+            [d appendData:obj];
+        } else if ([obj isKindOfClass:[NSString class]]) {
+            [d appendData:[obj dataUsingEncoding:NSUTF8StringEncoding]];
+        }
+        [d appendData:crlf];
+    }
+    
+    if (d.length < 1000) NSLog(@"\n%@",[[NSString alloc]initWithData:d encoding:NSUTF8StringEncoding]);
+    
+    return d;
+}
+
+// Probably slightly faster
+/*- (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
     NSMutableData *body = [NSMutableData data];
     
     // setup commonly used data objects to save on processing
@@ -219,8 +287,9 @@
     }];
     
     [body appendData:[[NSString stringWithFormat:@"--%@--\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    NSLog(@"POSTing\n%@",[[NSString alloc]initWithData:body encoding:NSUTF8StringEncoding]);
     return body;
-}
+}*/
 
 - (id)sendRequestWithHTTPMethod:(NSString *)httpmethod URL:(NSURL *)url params:(NSDictionary *)params {
     NSError *authError = [self checkAuth];
