@@ -41,7 +41,7 @@
                                             [self storeAccessToken:httpBody];
                                             completionBlock(nil);
                                         } else {
-                                            completionBlock([NSError errorWithDomain:kFHSErrorDomain code:-2001 userInfo:@{NSLocalizedDescriptionKey: @"A response with an empty body was returned."}]);
+                                            completionBlock([NSError noDataError]);
                                         }
                                     }
                                 }
