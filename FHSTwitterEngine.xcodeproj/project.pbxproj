@@ -19,7 +19,6 @@
 		9B31B96215E56E34003FC89D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96115E56E34003FC89D /* Foundation.framework */; };
 		9B31B96415E56E34003FC89D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96315E56E34003FC89D /* CoreGraphics.framework */; };
 		F106B12318CE6562007F68B5 /* NSURL+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */; };
-		F106B12718CEA634007F68B5 /* NSObject+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F106B12618CEA634007F68B5 /* NSObject+FHSTE.m */; };
 		F12A456B18CE384100D6AEFA /* NSError+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */; };
 		F173184018CE1148005C790B /* NSData+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F173183F18CE1148005C790B /* NSData+FHSTE.m */; };
 		F17DCD1018CDF9A2005382F4 /* FHSTwitterEngine+Requests.m in Sources */ = {isa = PBXBuildFile; fileRef = F17DCD0F18CDF9A2005382F4 /* FHSTwitterEngine+Requests.m */; };
@@ -31,6 +30,7 @@
 		F1E360E818D1513F00CBF03D /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E360E718D1513F00CBF03D /* Accounts.framework */; };
 		F1E360EA18D157EC00CBF03D /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E360E918D157EC00CBF03D /* Social.framework */; };
 		F1E39F9916645C380049DAB1 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */; };
+		F1E5B035198176E9002FC64E /* NSObject+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F1E5B034198176E9002FC64E /* NSObject+FHSTE.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,8 +54,6 @@
 		F106B12118CE6562007F68B5 /* NSURL+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+FHSTE.h"; sourceTree = "<group>"; };
 		F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+FHSTE.m"; sourceTree = "<group>"; };
 		F106B12418CEA3A3007F68B5 /* FHSDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FHSDefines.h; sourceTree = "<group>"; };
-		F106B12518CEA634007F68B5 /* NSObject+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+FHSTE.h"; sourceTree = "<group>"; };
-		F106B12618CEA634007F68B5 /* NSObject+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+FHSTE.m"; sourceTree = "<group>"; };
 		F12A456918CE384100D6AEFA /* NSError+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSError+FHSTE.h"; sourceTree = "<group>"; };
 		F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSError+FHSTE.m"; sourceTree = "<group>"; };
 		F173183E18CE1148005C790B /* NSData+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+FHSTE.h"; sourceTree = "<group>"; };
@@ -76,6 +74,8 @@
 		F1E360E718D1513F00CBF03D /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
 		F1E360E918D157EC00CBF03D /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
 		F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		F1E5B033198176E9002FC64E /* NSObject+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+FHSTE.h"; sourceTree = "<group>"; };
+		F1E5B034198176E9002FC64E /* NSObject+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+FHSTE.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,10 +127,10 @@
 			children = (
 				9B2A1C0815E807D9007E66E0 /* FHSTwitterEngine.h */,
 				9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */,
-				F17DCD0E18CDF9A2005382F4 /* FHSTwitterEngine+Requests.h */,
-				F17DCD0F18CDF9A2005382F4 /* FHSTwitterEngine+Requests.m */,
 				F1E360E218D138E000CBF03D /* FHSTwitterEngine+iOS.h */,
 				F1E360E318D138E000CBF03D /* FHSTwitterEngine+iOS.m */,
+				F17DCD0E18CDF9A2005382F4 /* FHSTwitterEngine+Requests.h */,
+				F17DCD0F18CDF9A2005382F4 /* FHSTwitterEngine+Requests.m */,
 				F17DCD1418CE006F005382F4 /* FHSOAuthLoginController.h */,
 				F17DCD1518CE006F005382F4 /* FHSOAuthLoginController.m */,
 				F106B12418CEA3A3007F68B5 /* FHSDefines.h */,
@@ -182,8 +182,8 @@
 				F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */,
 				F106B12118CE6562007F68B5 /* NSURL+FHSTE.h */,
 				F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */,
-				F106B12518CEA634007F68B5 /* NSObject+FHSTE.h */,
-				F106B12618CEA634007F68B5 /* NSObject+FHSTE.m */,
+				F1E5B033198176E9002FC64E /* NSObject+FHSTE.h */,
+				F1E5B034198176E9002FC64E /* NSObject+FHSTE.m */,
 			);
 			path = categories;
 			sourceTree = "<group>";
@@ -273,8 +273,8 @@
 				F106B12318CE6562007F68B5 /* NSURL+FHSTE.m in Sources */,
 				F17DCD1B18CE0196005382F4 /* NSString+FHSTE.m in Sources */,
 				F12A456B18CE384100D6AEFA /* NSError+FHSTE.m in Sources */,
+				F1E5B035198176E9002FC64E /* NSObject+FHSTE.m in Sources */,
 				9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */,
-				F106B12718CEA634007F68B5 /* NSObject+FHSTE.m in Sources */,
 				F1CC819B18EF76B6002468D0 /* FHSToken.m in Sources */,
 				F1E360E418D138E000CBF03D /* FHSTwitterEngine+iOS.m in Sources */,
 				F1CC819A18EF76B6002468D0 /* FHSStream.m in Sources */,
