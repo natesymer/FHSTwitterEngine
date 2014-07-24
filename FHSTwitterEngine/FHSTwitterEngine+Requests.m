@@ -38,17 +38,14 @@
 
 - (NSString *)generateOAuthHeaderForURL:(NSURL *)URL HTTPMethod:(NSString *)httpMethod withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm extraParameters:(NSDictionary *)extraParams {
     
-    NSString *nonce = [NSString fhs_UUID];
-    NSString *urlWithoutParams = URL.absoluteStringWithoutParameters.fhs_URLEncode;
-    
     // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
     // build a sorted array of both request parameters and OAuth header parameters
     NSMutableDictionary *oauth = @{
                                    @"oauth_consumer_key": self.consumerKey.fhs_URLEncode,
                                    @"oauth_signature_method": @"HMAC-SHA1",
                                    @"oauth_timestamp": @(time(nil)).stringValue,
-                                   @"oauth_nonce": nonce,
-                                   @"oauth_version": @"1.0"
+                                   @"oauth_nonce": [NSString fhs_UUID],
+                                   @"oauth_version": @"1.0a"
                                    }.mutableCopy;
 
     // Determine if this request is for a request token
@@ -71,6 +68,7 @@
     }];
     
     // Realm is not to be included in the Normalized request parameters
+    // That's why it's down here
     if (realm.length > 0) oauth[@"oauth_realm"] = realm;
     
     if (extraParams.count > 0) {
@@ -80,15 +78,24 @@
         }];
     }
     
-    [paramPairs sortUsingSelector:@selector(caseInsensitiveCompare:)]; // used to be compare:
+    // Include get params in the signature
+    if ([httpMethod isEqualToString:kGET]) {
+        [paramPairs addObjectsFromArray:[URL.parameterString componentsSeparatedByString:@"&"]];
+    }
     
-    // Whew, that's over
+    [paramPairs sortUsingSelector:@selector(caseInsensitiveCompare:)]; // used to be compare:
 
     NSString *normalizedRequestParameters = [paramPairs componentsJoinedByString:@"&"].fhs_URLEncode;
 
+    
+    // OAuth Spec, 9.1.2 "Construct Request URL"
+    // Remove parameters, lowercase, URLEncode
+    NSString *requestURL = URL.absoluteStringWithoutParameters.lowercaseString.fhs_URLEncode;
+    
+    
     // OAuth Spec, Section 9.1.2 "Concatenate Request Elements"
     // Sign request elements using HMAC-SHA1
-    NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",httpMethod,urlWithoutParams,normalizedRequestParameters];
+    NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",httpMethod,requestURL,normalizedRequestParameters];
     
     // this way a nil token won't make a bad signature
     NSString *tokenSecretSantized = tokenSecretString.length > 0 ? tokenSecretString.fhs_URLEncode : @""; // This is precicely the way that works. Don't question it.
@@ -259,7 +266,7 @@
     [request setHTTPMethod:httpMethod];
     [request setHTTPShouldHandleCookies:NO];
     
-    if ([httpMethod isEqualToString:@"POST"]) {
+    if ([httpMethod isEqualToString:kPOST]) {
         NSString *boundary = [NSString fhs_UUID];
         
         NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
@@ -267,7 +274,7 @@
         
         request.HTTPBody = [self POSTBodyWithParams:params boundary:boundary];
         [request setValue:@(request.HTTPBody.length).stringValue forHTTPHeaderField:@"Content-Length"];
-    } else if ([httpMethod isEqualToString:@"GET"]) {
+    } else if ([httpMethod isEqualToString:kGET]) {
         NSURL *paramURL = url.copy;
         [self appendGETParams:params toURL:&paramURL];
         request.URL = paramURL;

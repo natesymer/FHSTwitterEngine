@@ -47,6 +47,7 @@ static NSString * const FHSProfileDescriptionKey = @"description";
 
 static NSString * const kGET = @"GET";
 static NSString * const kPOST = @"POST";
+static NSString * const kDELETE = @"DELETE";
 
 
 //
