@@ -146,8 +146,7 @@
     }
 }
 
-// This is slightly slower, but it's more readable and maintainable.
-// It's O(n^2)
+// It's O(n^2), but SUPER readable and maintainable.
 - (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
     NSMutableArray *lines = [NSMutableArray array];
     
@@ -209,56 +208,6 @@
     
     return d;
 }
-
-// Probably slightly faster, it's O(n)
-/*- (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
-    NSMutableData *body = [NSMutableData data];
-    
-    // setup commonly used data objects to save on processing
-    NSData *cRetAndNlineData = [@"\r\n" dataUsingEncoding:NSUTF8StringEncoding];
-    NSData *boundaryData = [[NSString stringWithFormat:@"--%@\r\n",boundary]dataUsingEncoding:NSUTF8StringEncoding];
-    NSData *cTypeOctetStreamData = [@"Content-Type: application/octet-stream\r\n" dataUsingEncoding:NSUTF8StringEncoding];
-    NSData *ctentXferEncData = [@"Content-Transfer-Encoding: binary\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding];
-    
-    [params enumerateKeysAndObjectsUsingBlock:^(NSString *key, id obj, BOOL *stop) {
-        // start the parameter
-        [body appendData:boundaryData];
-        
-        if ([obj isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *dict = [NSDictionary dictionaryWithDictionary:(NSDictionary *)obj];
-
-            if ([dict[@"type"]isEqualToString:@"file"]) {
-                [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n",key,dict[@"filename"]] dataUsingEncoding:NSUTF8StringEncoding]];
-                [body appendData:[[NSString stringWithFormat:@"Content-Type: %@\r\n",dict[@"mimetype"]] dataUsingEncoding:NSUTF8StringEncoding]];
-                [body appendData:ctentXferEncData];
-                [body appendData:dict[@"data"]];
-            }
-            
-        } else {
-            [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n",key] dataUsingEncoding:NSUTF8StringEncoding]];
-            
-            NSData *data = nil;
-            
-            if ([obj isKindOfClass:[NSData class]]) {
-                [body appendData:cTypeOctetStreamData];
-                data = (NSData *)obj;
-            } else if ([obj isKindOfClass:[NSString class]]) {
-                data = [(NSString *)obj dataUsingEncoding:NSUTF8StringEncoding];
-            }
-            
-            if (data.length > 0) {
-                [body appendData:cRetAndNlineData];
-                [body appendData:data];
-            }
-        }
-        
-        // end the parameter
-        [body appendData:cRetAndNlineData];
-    }];
-    
-    [body appendData:[[NSString stringWithFormat:@"--%@--\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    return body;
-}*/
 
 #pragma mark - Request Generation
 
