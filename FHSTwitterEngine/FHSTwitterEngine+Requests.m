@@ -142,8 +142,6 @@
             [paramPairs addObject:paramPair];
         }];
         
-        NSLog(@"PPairs:\n%@",paramPairs);
-        
         *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?%@",(*url).absoluteStringWithoutParameters, [paramPairs componentsJoinedByString:@"&"]]];
     }
 }
