@@ -43,7 +43,4 @@
 - (NSError *)checkAuth;
 - (NSError *)checkError:(id)json;
 
-// Get length of url w/ parameters
-- (int)parameterLengthForURL:(NSString *)url params:(NSMutableDictionary *)params;
-
 @end

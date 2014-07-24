@@ -17,7 +17,7 @@
 @property (nonatomic, strong) NSString *username;
 @property (nonatomic, strong) NSString *user_id;
 
-+ (FHSToken *)tokenWithHTTPResponseBody:(NSString *)body;
++ (instancetype)tokenWithHTTPResponseBody:(NSString *)body;
 - (instancetype)initWithHTTPResponseBody:(NSString *)body;
 
 @end

@@ -10,8 +10,8 @@
 
 @implementation FHSToken
 
-+ (FHSToken *)tokenWithHTTPResponseBody:(NSString *)body {
-    return [[[self class]alloc]initWithHTTPResponseBody:body];
++ (instancetype)tokenWithHTTPResponseBody:(NSString *)body {
+    return [[self alloc]initWithHTTPResponseBody:body];
 }
 
 - (instancetype)initWithHTTPResponseBody:(NSString *)body {

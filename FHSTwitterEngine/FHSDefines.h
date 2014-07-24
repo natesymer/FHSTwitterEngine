@@ -32,6 +32,8 @@ static NSURLRequestCachePolicy const cachePolicy = NSURLRequestReloadRevalidatin
 
 static float const streamingTimeoutInterval = 30.0f;
 
+static NSString * const kFHSErrorDomain = @"kFHSErrorDomain";
+
 static NSString * const FHSProfileBackgroundColorKey = @"profile_background_color";
 static NSString * const FHSProfileLinkColorKey = @"profile_link_color";
 static NSString * const FHSProfileSidebarBorderColorKey = @"profile_sidebar_border_color";

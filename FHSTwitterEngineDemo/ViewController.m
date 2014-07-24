@@ -161,7 +161,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
                 
                 if ([returned isKindOfClass:[NSError class]]) {
                     NSError *error = (NSError *)returned;
-                    title = [NSString stringWithFormat:@"Error %d",error.code];
+                    title = [NSString stringWithFormat:@"Error %ld",(long)error.code];
                     message = error.localizedDescription;
                 } else {
                     NSLog(@"%@",returned);
@@ -192,7 +192,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
                     
                     dispatch_sync(dispatch_get_main_queue(), ^{
                         @autoreleasepool {
-                            NSString *title = returnValue?[NSString stringWithFormat:@"Error %d",returnValue.code]:@"Success";
+                            NSString *title = returnValue?[NSString stringWithFormat:@"Error %ld",(long)returnValue.code]:@"Success";
                             NSString *message = returnValue?returnValue.localizedDescription:@"You have successfully logged in via XAuth";
                             UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
                             [av show];
@@ -231,8 +231,8 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     
     [FHSTwitterEngine.sharedEngine reverseAuthWithAccountSelectionBlock:^ACAccount *(NSArray *accounts) {
         return accounts.firstObject;
-    } completion:^(BOOL success) {
-        NSLog(@"Reverse auth %@",success?@"succeeded":@"failed");
+    } completion:^(NSError *error) {
+        NSLog(@"Reverse auth %@",!error?@"succeeded":@"failed");
         [_theTableView reloadData];
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     }];

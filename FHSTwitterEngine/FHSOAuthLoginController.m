@@ -13,9 +13,18 @@
 
 static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||document.getElementById('oauth_pin');if(d){var d2=d.getElementsByTagName('code');d2.length>0?d2[0].innerHTML:d.innerHTML}";
 
+@interface FHSOAuthLoginController ()
+
+@property (strong) UINavigationBar *navBar;
+@property (strong) UIWebView *theWebView;
+@property (strong) UILabel *loadingText;
+@property (strong) UIActivityIndicatorView *spinner;
+
+@end
+
 @implementation FHSOAuthLoginController
 
-+ (FHSOAuthLoginController *)controllerWithCompletionBlock:(LoginControllerBlock)block {
++ (instancetype)controllerWithCompletionBlock:(LoginControllerBlock)block {
     return [[[self class]alloc]initWithCompletionBlock:block];
 }
 
@@ -41,6 +50,8 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
     _theWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _theWebView.dataDetectorTypes = UIDataDetectorTypeNone;
     _theWebView.scrollView.clipsToBounds = NO;
+    _theWebView.scrollView.contentInset = UIEdgeInsetsMake(64, 0, 0, 0);
+    _theWebView.scrollView.scrollIndicatorInsets = _theWebView.scrollView.contentInset;
     _theWebView.backgroundColor = [UIColor lightGrayColor];
     [self.view addSubview:_theWebView];
     
@@ -179,9 +190,7 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
 
 - (void)close {
     [self dismissViewControllerAnimated:YES completion:^(void){
-        if (_block) {
-            _block(FHSTwitterEngineControllerResultCancelled);
-        }
+        if (_block) _block(FHSTwitterEngineControllerResultCancelled);
     }];
 }
 

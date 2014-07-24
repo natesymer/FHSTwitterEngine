@@ -25,29 +25,6 @@ typedef void(^LoginControllerBlock)(FHSTwitterEngineControllerResult result);
 
 @interface FHSOAuthLoginController : UIViewController <UIWebViewDelegate>
 
-/**
- The controller navigation bar.
- */
-@property (nonatomic, strong) UINavigationBar *navBar;
-
-
-/**
- The controller web view.
- */
-@property (nonatomic, strong) UIWebView *theWebView;
-
-
-/**
- The label with the loading text. The default is set to "Please Wait...".
- */
-@property (nonatomic, strong) UILabel *loadingText;
-
-
-/**
- The loading spinner used with `loadingText`.
- */
-@property (nonatomic, strong) UIActivityIndicatorView *spinner;
-
 
 /**
  The request token.
@@ -73,7 +50,7 @@ typedef void(^LoginControllerBlock)(FHSTwitterEngineControllerResult result);
  Gets an instance of `FHSTwitterEngineController` with `LoginControllerBlock` block.
  @param block Block of type `LoginControllerBlock`
  */
-+ (FHSOAuthLoginController *)controllerWithCompletionBlock:(LoginControllerBlock)block;
++ (instancetype)controllerWithCompletionBlock:(LoginControllerBlock)block;
 
 @end
 

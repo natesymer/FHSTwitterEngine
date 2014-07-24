@@ -1247,6 +1247,8 @@
     self.consumerSecret = consumerSecret;
 }
 
+#pragma mark - Network Connectivity
+
 + (BOOL)isConnectedToInternet {
     struct sockaddr_in zeroAddress;
     bzero(&zeroAddress, sizeof(zeroAddress));
@@ -1261,32 +1263,19 @@
         CFRelease(reachability);
         
         if (worked) {
-            if ((flags & kSCNetworkReachabilityFlagsReachable) == 0) {
-                return NO;
+            if (!(flags & kSCNetworkReachabilityFlagsReachable)) return NO;
+            if (!(flags & kSCNetworkReachabilityFlagsConnectionRequired)) return YES;
+            if ((flags & kSCNetworkReachabilityFlagsConnectionOnDemand) || (flags & kSCNetworkReachabilityFlagsConnectionOnTraffic)) {
+                if (!(flags & kSCNetworkReachabilityFlagsInterventionRequired)) return YES;
             }
-            
-            if ((flags & kSCNetworkReachabilityFlagsConnectionRequired) == 0) {
-                return YES;
-            }
-            
-            if ((((flags & kSCNetworkReachabilityFlagsConnectionOnDemand) != 0) || (flags & kSCNetworkReachabilityFlagsConnectionOnTraffic) != 0)) {
-                if ((flags & kSCNetworkReachabilityFlagsInterventionRequired) == 0) {
-                    return YES;
-                }
-            }
-            
-            if ((flags & kSCNetworkReachabilityFlagsIsWWAN) == kSCNetworkReachabilityFlagsIsWWAN) {
-                return YES;
-            }
+            if ((flags & kSCNetworkReachabilityFlagsIsWWAN) == kSCNetworkReachabilityFlagsIsWWAN) return YES;
         }
         
     }
     return NO;
 }
 
-//
-// OAuth
-//
+#pragma mark - OAuth
 
 - (id)getRequestToken {
     return [self getRequestTokenReverseAuth:NO];
@@ -1342,16 +1331,11 @@
     return YES;
 }
 
-//
-// XAuth
-//
+#pragma mark - XAuth
 
 - (NSError *)authenticateWithUsername:(NSString *)username password:(NSString *)password {
-    if (password.length == 0) {
-        return [NSError badRequestError];
-    } else if (username.length == 0) {
-        return [NSError badRequestError];
-    }
+    if (password.length == 0) return [NSError badRequestError];
+    if (username.length == 0) return [NSError badRequestError];
     
     NSDictionary *params = @{
                              @"x_auth_mode": @"client_auth",
@@ -1367,8 +1351,8 @@
 
     NSMutableArray *pairs = [NSMutableArray arrayWithCapacity:3];
     
-    [params enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        [pairs addObject:[NSString stringWithFormat:@"%@=%@",key,obj]];
+    [params enumerateKeysAndObjectsUsingBlock:^(NSString *k, NSString *v, BOOL *stop) {
+        [pairs addObject:[NSString stringWithFormat:@"%@=%@",k,v]];
     }];
     
     request.HTTPBody = [[pairs componentsJoinedByString:@"&"]dataUsingEncoding:NSUTF8StringEncoding];
@@ -1378,12 +1362,12 @@
         [self clearConsumer];
     }
     
-    id ret = [self sendRequest:request];
+    id res = [self sendRequest:request];
     
-    if ([ret isKindOfClass:[NSError class]]) {
-        return ret;
-    } else if ([ret isKindOfClass:[NSData class]]) {
-        NSString *httpBody = [[NSString alloc]initWithData:(NSData *)ret encoding:NSUTF8StringEncoding];
+    if ([res isKindOfClass:[NSError class]]) {
+        return res;
+    } else if ([res isKindOfClass:[NSData class]]) {
+        NSString *httpBody = [[NSString alloc]initWithData:(NSData *)res encoding:NSUTF8StringEncoding];
         
         if (httpBody.length > 0) {
             [self storeAccessToken:httpBody];

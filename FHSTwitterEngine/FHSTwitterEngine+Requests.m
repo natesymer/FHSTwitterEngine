@@ -11,32 +11,30 @@
 
 @implementation FHSTwitterEngine (Requests)
 
-- (id)sendRequest:(NSURLRequest *)request {
-    [self clearConsumerIfNecessary];
-    
-    NSHTTPURLResponse *response = nil;
-    NSError *error = nil;
-    
-    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    
-    if (error) {
-        return error;
+#pragma mark - Checking
+
+- (NSError *)checkAuth {
+    if (![self isAuthorized]) {
+        [self loadAccessToken];
+        if (![self isAuthorized]) {
+            return [NSError errorWithDomain:FHSErrorDomain code:401 userInfo:@{NSLocalizedDescriptionKey:@"You are not authorized via OAuth."}];
+        }
     }
-    
-    if (response == nil) {
-        return error;
-    }
-    
-    if (response.statusCode >= 304) {
-        return error;
-    }
-    
-    if (data.length == 0) {
-        return error;
-    }
-    
-    return data;
+    return nil;
 }
+
+- (NSError *)checkError:(id)json {
+    if ([json isKindOfClass:[NSDictionary class]]) {
+        NSArray *errors = json[@"errors"];
+        
+        if (errors.count > 0) {
+            return [NSError errorWithDomain:FHSErrorDomain code:418 userInfo:@{NSLocalizedDescriptionKey: @"Multiple Errors", @"errors": errors}];
+        }
+    }
+    return nil;
+}
+
+#pragma mark - OAuth Signing
 
 - (NSString *)generateOAuthHeaderForURL:(NSURL *)URL HTTPMethod:(NSString *)httpMethod withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm extraParameters:(NSDictionary *)extraParams {
     
@@ -73,9 +71,7 @@
     }];
     
     // Realm is not to be included in the Normalized request parameters
-    if (realm.length > 0) {
-        oauth[@"oauth_realm"] = realm;
-    }
+    if (realm.length > 0) oauth[@"oauth_realm"] = realm;
     
     if (extraParams.count > 0) {
         [extraParams enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
@@ -95,9 +91,9 @@
     NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",httpMethod,urlWithoutParams,normalizedRequestParameters];
     
     // this way a nil token won't make a bad signature
-    NSString *tokenSecretSantized = (tokenSecretString.length > 0)?tokenSecretString:@""; // This is precicely the way that works. Don't question it.
+    NSString *tokenSecretSantized = tokenSecretString.length > 0 ? tokenSecretString.fhs_URLEncode : @""; // This is precicely the way that works. Don't question it.
     
-    NSString *secret = [NSString stringWithFormat:@"%@&%@",self.consumerSecret.fhs_URLEncode,tokenSecretSantized.fhs_URLEncode];
+    NSString *secret = [NSString stringWithFormat:@"%@&%@",self.consumerSecret.fhs_URLEncode,tokenSecretSantized];
     
     NSData *secretData = [secret dataUsingEncoding:NSUTF8StringEncoding];
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
@@ -115,7 +111,7 @@
     
     [oauthPairs sortUsingSelector:@selector(caseInsensitiveCompare:)];
     
-    return [NSString stringWithFormat:@"OAuth %@",[oauthPairs componentsJoinedByString:@", "]];
+    return [NSString stringWithFormat:@"OAuth %@",[oauthPairs componentsJoinedByString:@","]];
 }
 
 - (void)signRequest:(NSMutableURLRequest *)request {
@@ -127,53 +123,23 @@
     [request setValue:oauthHeader forHTTPHeaderField:@"Authorization"];
 }
 
-- (int)parameterLengthForURL:(NSString *)url params:(NSMutableDictionary *)params {
-    int length = url.length;
-    
-    for (NSString *key in params) {
-        length += key.fhs_URLEncode.length;
-        length += [params[key] fhs_URLEncode].length;
-    }
-    
-    length += params.count*2; // accounts for equal sign & ampersands and the question mark
-    
-    return length;
-}
-
-- (NSError *)checkAuth {
-    if (![self isAuthorized]) {
-        [self loadAccessToken];
-        if (![self isAuthorized]) {
-            return [NSError errorWithDomain:FHSErrorDomain code:401 userInfo:@{NSLocalizedDescriptionKey:@"You are not authorized via OAuth."}];
-        }
-    }
-    return nil;
-}
-
-- (NSError *)checkError:(id)json {
-    if ([json isKindOfClass:[NSDictionary class]]) {
-        NSArray *errors = json[@"errors"];
-        
-        if (errors.count > 0) {
-            return [NSError errorWithDomain:FHSErrorDomain code:418 userInfo:@{NSLocalizedDescriptionKey: @"Multiple Errors", @"errors": errors}];
-        }
-    }
-    return nil;
-}
+#pragma mark - Parameter Handling
 
 - (void)appendGETParams:(NSDictionary *)params toURL:(NSURL **)url {
     if (params.count > 0) {
         NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:params.count];
         
-        for (NSString *key in params) {
-            NSString *paramPair = [NSString stringWithFormat:@"%@=%@",key.fhs_URLEncode,[params[key] fhs_URLEncode]];
+        [params enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
+            NSString *paramPair = [NSString stringWithFormat:@"%@=%@",key.fhs_URLEncode,obj.fhs_URLEncode];
             [paramPairs addObject:paramPair];
-        }
+        }];
         
         *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?%@",(*url).absoluteStringWithoutParameters, [paramPairs componentsJoinedByString:@"&"]]];
     }
 }
 
+// This is slightly slower, but it's more readable and maintainable.
+// It's O(n^2)
 - (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
     NSMutableArray *lines = [NSMutableArray array];
     
@@ -216,8 +182,6 @@
     [lines addObject:[NSString stringWithFormat:@"--%@--",boundary]];
     [lines addObject:@""];
     
-   // NSLog(@"%@",lines);
-    
     //
     // Concat the lines into a giant NSData
     //
@@ -235,12 +199,10 @@
         [d appendData:crlf];
     }
     
-    if (d.length < 1000) NSLog(@"\n%@",[[NSString alloc]initWithData:d encoding:NSUTF8StringEncoding]);
-    
     return d;
 }
 
-// Probably slightly faster
+// Probably slightly faster, it's O(n)
 /*- (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
     NSMutableData *body = [NSMutableData data];
     
@@ -287,44 +249,58 @@
     }];
     
     [body appendData:[[NSString stringWithFormat:@"--%@--\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    NSLog(@"POSTing\n%@",[[NSString alloc]initWithData:body encoding:NSUTF8StringEncoding]);
     return body;
 }*/
 
-- (id)sendRequestWithHTTPMethod:(NSString *)httpmethod URL:(NSURL *)url params:(NSDictionary *)params {
-    NSError *authError = [self checkAuth];
-    
-    if (authError) {
-        return authError;
-    }
-    
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
-    [request setHTTPMethod:httpmethod];
+#pragma mark - Request Generation
+
+- (NSMutableURLRequest *)requestWithURL:(NSURL *)url HTTPMethod:(NSString *)httpMethod params:(NSDictionary *)params {
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:cachePolicy timeoutInterval:30.0f];
+    [request setHTTPMethod:httpMethod];
     [request setHTTPShouldHandleCookies:NO];
     
-    if ([httpmethod isEqualToString:@"POST"]) {
+    if ([httpMethod isEqualToString:@"POST"]) {
         NSString *boundary = [NSString fhs_UUID];
         
         NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
         [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
-
+        
         request.HTTPBody = [self POSTBodyWithParams:params boundary:boundary];
         [request setValue:@(request.HTTPBody.length).stringValue forHTTPHeaderField:@"Content-Length"];
-    } else if ([httpmethod isEqualToString:@"GET"]) {
-        [self appendGETParams:params toURL:&url];
+    } else if ([httpMethod isEqualToString:@"GET"]) {
+        NSURL *paramURL = url.copy;
+        [self appendGETParams:params toURL:&paramURL];
+        request.URL = paramURL;
     }
     
     [self signRequest:request];
     
-    id retobj = [self sendRequest:request];
+    return request;
+}
+
+- (id)streamingRequestForURL:(NSURL *)url HTTPMethod:(NSString *)method parameters:(NSDictionary *)params {
+    NSError *authError = [self checkAuth];
+    if (authError) return authError;
     
-    if (!retobj) {
-        return [NSError noDataError];
-    } else if ([retobj isKindOfClass:[NSError class]]) {
-        return retobj;
-    }
+    NSMutableURLRequest *request = [self requestWithURL:url HTTPMethod:method params:params];
+    request.timeoutInterval = MAXFLOAT; // Disable timeout
+    return request;
+}
+
+#pragma mark - Request Sending
+
+- (id)sendRequestWithHTTPMethod:(NSString *)httpmethod URL:(NSURL *)url params:(NSDictionary *)params {
+    NSError *authError = [self checkAuth];
+    if (authError) return authError;
     
-    id parsed = [[NSJSONSerialization JSONObjectWithData:(NSData *)retobj options:NSJSONReadingMutableContainers error:nil]removeNull];
+    NSMutableURLRequest *request = [self requestWithURL:url HTTPMethod:httpmethod params:params];
+    
+    id res = [self sendRequest:request];
+    
+    if (!res) return [NSError noDataError];
+    if ([res isKindOfClass:[NSError class]]) return res;
+    
+    id parsed = [[NSJSONSerialization JSONObjectWithData:(NSData *)res options:NSJSONReadingMutableContainers error:nil]removeNull];
     
     NSError *error = [self checkError:parsed];
     
@@ -335,35 +311,20 @@
     return parsed;
 }
 
-- (id)streamingRequestForURL:(NSURL *)url HTTPMethod:(NSString *)method parameters:(NSDictionary *)params {
-    NSError *authError = [self checkAuth];
+- (id)sendRequest:(NSURLRequest *)request {
+    [self clearConsumerIfNecessary];
     
-    if (authError) {
-        return authError;
-    }
+    NSHTTPURLResponse *response = nil;
+    NSError *error = nil;
     
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:cachePolicy timeoutInterval:MAXFLOAT]; // timeouts are handled manually
-    [request setHTTPMethod:method];
-    [request setHTTPShouldHandleCookies:NO];
+    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
     
-    // Only POST and GET are relevant to the Twitter API
+    if (error) return error;
+    if (!response) return error;
+    if (response.statusCode >= 304) return error;
+    if (data.length == 0) return error;
     
-    if ([method isEqualToString:@"POST"]) {
-        NSString *boundary = [NSString fhs_UUID];
-        NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
-        [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
-        request.HTTPBody = [self POSTBodyWithParams:params boundary:boundary];
-        [request setValue:@(request.HTTPBody.length).stringValue forHTTPHeaderField:@"Content-Length"];
-    } else if ([method isEqualToString:@"GET"]) {
-        [self appendGETParams:params toURL:&url];
-        request.URL = url;
-    } else {
-        return [NSError errorWithDomain:FHSErrorDomain code:-400 userInfo:@{NSLocalizedDescriptionKey: @"HTTP method not supported by FHSTwitterEngine."}];
-    }
-    
-    [self signRequest:request];
-    return request;
+    return data;
 }
 
 @end
-
