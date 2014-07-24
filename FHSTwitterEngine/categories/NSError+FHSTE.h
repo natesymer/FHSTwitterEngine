@@ -15,5 +15,6 @@ extern NSString * const FHSErrorDomain;
 + (NSError *)badRequestError;
 + (NSError *)noDataError;
 + (NSError *)imageTooLargeError;
++ (NSError *)errorWithErrors:(NSArray *)errors;
 
 @end

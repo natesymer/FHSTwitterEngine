@@ -26,10 +26,7 @@
 - (NSError *)checkError:(id)json {
     if ([json isKindOfClass:[NSDictionary class]]) {
         NSArray *errors = json[@"errors"];
-        
-        if (errors.count > 0) {
-            return [NSError errorWithDomain:FHSErrorDomain code:418 userInfo:@{NSLocalizedDescriptionKey: @"Multiple Errors", @"errors": errors}];
-        }
+        if (errors.count > 0) return [NSError errorWithErrors:errors];
     }
     return nil;
 }

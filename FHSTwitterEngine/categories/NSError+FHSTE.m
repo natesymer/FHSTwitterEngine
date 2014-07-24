@@ -24,4 +24,8 @@ NSString * const FHSErrorDomain = @"FHSErrorDomain";
     return [NSError errorWithDomain:FHSErrorDomain code:422 userInfo:@{NSLocalizedDescriptionKey:@"The image you are trying to upload is too large."}];
 }
 
++ (NSError *)errorWithErrors:(NSArray *)errors {
+    return [NSError errorWithDomain:FHSErrorDomain code:418 userInfo:@{NSLocalizedDescriptionKey: @"Multiple Errors", @"errors": errors}];
+}
+
 @end
