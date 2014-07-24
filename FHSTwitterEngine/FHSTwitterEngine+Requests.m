@@ -60,33 +60,34 @@
         }
     }
     
+    // Encode extra parameters
+    NSMutableDictionary *encodedExtraParams = [NSMutableDictionary dictionaryWithCapacity:extraParams.count];
+    [extraParams enumerateKeysAndObjectsUsingBlock:^(NSString *k, NSString *v, BOOL *stop) {
+        encodedExtraParams[k] = v.fhs_URLEncode;
+    }];
+    
+    // Put all params into one hash
+    NSMutableDictionary *requestParameters = [NSMutableDictionary dictionary];
+    [requestParameters addEntriesFromDictionary:oauth];
+    [requestParameters addEntriesFromDictionary:encodedExtraParams];
+    if ([httpMethod isEqualToString:kGET]) [requestParameters addEntriesFromDictionary:URL.queryDictionary];
+
+    // Make parameter pairs
     NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:oauth.count+extraParams.count];
     
-    [oauth enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
-        NSString *pair = [NSString stringWithFormat:@"%@=%@",key, obj];
+    [requestParameters enumerateKeysAndObjectsUsingBlock:^(NSString *k, NSString *v, BOOL *stop) {
+        NSString *pair = [NSString stringWithFormat:@"%@=%@",k,v];
         [paramPairs addObject:pair];
     }];
+    
+    [paramPairs sortUsingSelector:@selector(caseInsensitiveCompare:)];
+
+    NSString *normalizedRequestParameters = [paramPairs componentsJoinedByString:@"&"].fhs_URLEncode;
     
     // Realm is not to be included in the Normalized request parameters
     // That's why it's down here
     if (realm.length > 0) oauth[@"oauth_realm"] = realm;
     
-    if (extraParams.count > 0) {
-        [extraParams enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
-            NSString *pair = [NSString stringWithFormat:@"%@=%@",key, obj];
-            [paramPairs addObject:pair];
-        }];
-    }
-    
-    // Include get params in the signature
-    if ([httpMethod isEqualToString:kGET]) {
-        [paramPairs addObjectsFromArray:[URL.parameterString componentsSeparatedByString:@"&"]];
-    }
-    
-    [paramPairs sortUsingSelector:@selector(caseInsensitiveCompare:)]; // used to be compare:
-
-    NSString *normalizedRequestParameters = [paramPairs componentsJoinedByString:@"&"].fhs_URLEncode;
-
     
     // OAuth Spec, 9.1.2 "Construct Request URL"
     // Remove parameters, lowercase, URLEncode
@@ -140,6 +141,8 @@
             NSString *paramPair = [NSString stringWithFormat:@"%@=%@",key.fhs_URLEncode,obj.fhs_URLEncode];
             [paramPairs addObject:paramPair];
         }];
+        
+        NSLog(@"PPairs:\n%@",paramPairs);
         
         *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?%@",(*url).absoluteStringWithoutParameters, [paramPairs componentsJoinedByString:@"&"]]];
     }

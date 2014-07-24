@@ -21,7 +21,7 @@
     for (NSString *param in paramPairs) {
         NSArray *parts = [param componentsSeparatedByString:@"="];
         if (parts.count < 2) continue;
-        params[parts[1]] = parts[0];
+        params[parts[0]] = parts[1];
     }
     
     return params;
