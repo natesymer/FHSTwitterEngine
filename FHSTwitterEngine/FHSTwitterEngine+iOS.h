@@ -11,11 +11,11 @@
 #import <Social/Social.h>
 #import <Accounts/Accounts.h>
 
-typedef ACAccount *(^AccountSelectionBlock)(NSArray *accounts);
+typedef void(^AccountsFoundBlock)(NSArray *accounts, NSError *error);
 typedef void(^ReverseAuthCompletionBlock)(NSError *error);
 
 @interface FHSTwitterEngine (iOS)
 
-- (void)reverseAuthWithAccountSelectionBlock:(AccountSelectionBlock)accSelBlock completion:(ReverseAuthCompletionBlock)completionBlock;
+- (void)authenticateWithAccount:(ACAccount *)account completion:(ReverseAuthCompletionBlock)completionBlock;
 
 @end

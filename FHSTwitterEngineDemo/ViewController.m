@@ -219,22 +219,55 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     [sheet showInView:self.view];
 }
 
+//
+// A note about reverse Auth:
+// Account picking is not simplified or wrapped
+// It's up to YOU to get a suitable ACAccount. Then
+// you can pass it to FHSTwitterEngine and go from there.
+//
+
 - (void)loginReverseAuth {
     // Check if user has set up Twitter
     if (![SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter]) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Twitter is no setup on this device, change this in Settings." delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles: nil];
-        [alert show];
+        [[[UIAlertView alloc]initWithTitle:@"Oops" message:@"Twitter is no setup on this device, change this in Settings." delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles:nil]show];
         return;
     }
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
-    [FHSTwitterEngine.sharedEngine reverseAuthWithAccountSelectionBlock:^ACAccount *(NSArray *accounts) {
-        return accounts.firstObject;
-    } completion:^(NSError *error) {
-        NSLog(@"Reverse auth %@",!error?@"succeeded":@"failed");
-        [_theTableView reloadData];
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    ACAccountStore *accountStore = [[ACAccountStore alloc]init];
+    ACAccountType *twitterType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+    
+    [accountStore requestAccessToAccountsWithType:twitterType options:nil completion:^(BOOL granted, NSError *error) {
+        UIAlertView *a = [[UIAlertView alloc]initWithTitle:@"Auth Error" message:nil delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        if (error) {
+            a.message = error.localizedDescription;
+        } else if (!granted) {
+            a.message = @"Failed to gain access to local Twitter accounts.";
+        } else {
+            NSArray *accounts = [accountStore accountsWithAccountType:twitterType];
+            
+            if (accounts.count > 0) {
+                // I'm being lazy and just saying 'Pick the first one'
+                // You should probably pop a UIActionSheet or something
+                ACAccount *twitterAccount = accounts.firstObject;
+                
+                //
+                // Actual FHSTwitterEngine call is here.
+                //
+                
+                [[FHSTwitterEngine sharedEngine]authenticateWithAccount:twitterAccount completion:^(NSError *error) {
+                    NSLog(@"Reverse auth %@",!error?@"succeeded":@"failed");
+                    [_theTableView reloadData];
+                    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                }];
+            } else {
+                a.message = @"No available twitter accounts.";
+            }
+        }
+        if (a.message.length > 0) {
+            [a show];
+        }
     }];
 }
 
