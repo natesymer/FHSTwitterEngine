@@ -54,7 +54,6 @@
 				<string>9B2A1B9915E805D1007E66E0</string>
 				<string>9B2A1BC215E805D1007E66E0</string>
 				<string>9B2A1BC315E805D1007E66E0</string>
-				<string>9B2A1C0715E807D9007E66E0</string>
 				<string>9B2A1BD815E80601007E66E0</string>
 			</array>
 			<key>isa</key>
@@ -223,8 +222,6 @@
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
-			<key>name</key>
-			<string>Supporting Files</string>
 			<key>path</key>
 			<string>Supporting Files</string>
 			<key>sourceTree</key>
@@ -248,6 +245,8 @@
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
+			<key>name</key>
+			<string>FHSTwitterEngine</string>
 			<key>path</key>
 			<string>FHSTwitterEngine</string>
 			<key>sourceTree</key>
@@ -313,6 +312,7 @@
 		<dict>
 			<key>children</key>
 			<array>
+				<string>9B2A1C0715E807D9007E66E0</string>
 				<string>9B2A1B9715E805D1007E66E0</string>
 				<string>9B31B95E15E56E34003FC89D</string>
 				<string>9B31B95C15E56E34003FC89D</string>
