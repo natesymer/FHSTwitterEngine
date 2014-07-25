@@ -32,6 +32,7 @@
 // These are internal
 #import "FHSStream.h"
 #import "FHSTwitterEngine+Requests.h"
+#import "NSMutableURLRequest+OAuth.h"
 
 @interface FHSTwitterEngine ()
 
@@ -1049,33 +1050,31 @@
     
     if (!appropriateExtension) return [NSError badRequestError];
     
-    NSMutableURLRequest *credVerifyReq = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url_account_verify_credentials]];
-    NSString *oauthHeaders = [self OAuthHeaderForRequest:credVerifyReq token:_accessToken.key tokenSecret:_accessToken.secret verifier:nil realm:@"http://api.twitter.com/".fhs_URLEncode];
-    
-    NSURL *url = [NSURL URLWithString:url_twitpic_upload];
-    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
-    [req setHTTPMethod:@"POST"];
-    [req setValue:oauthHeaders forHTTPHeaderField:@"X-Verify-Credentials-Authorization"];
-    [req setValue:url_account_verify_credentials forHTTPHeaderField:@"X-Auth-Service-Provider"];
-
-    NSString *boundary = [NSString fhs_UUID];
-    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
-    [req addValue:contentType forHTTPHeaderField:@"Content-Type"];
+    NSURL *verifyURL = [NSURL URLWithString:url_account_verify_credentials];
+    NSMutableURLRequest *credVerifyReq = [NSMutableURLRequest requestWithURL:verifyURL];
+    NSString *oauthHeaders = [credVerifyReq OAuthHeaderWithToken:_accessToken.key
+                                                     tokenSecret:_accessToken.secret
+                                                        verifier:nil
+                                                     consumerKey:_consumerKey
+                                                  consumerSecret:_consumerSecret
+                                                           realm:@"http://api.twitter.com/".fhs_URLEncode];
     
     NSDictionary *params = @{
                              @"message": message,
                              @"key": twitPicAPIKey,
                              @"media": @{
-                                          @"type": @"file",
-                                          @"filename": [NSString stringWithFormat:@"%@.%@",NSString.fhs_UUID,appropriateExtension],
-                                          @"data": imageData,
-                                          @"mimetype": [NSString stringWithFormat:@"image/%@",appropriateExtension]
-                                        }
+                                     @"type": @"file",
+                                     @"filename": [NSString stringWithFormat:@"%@.%@",NSString.fhs_UUID,appropriateExtension],
+                                     @"data": imageData,
+                                     @"mimetype": [NSString stringWithFormat:@"image/%@",appropriateExtension]
+                                     }
                              };
     
-    req.HTTPBody = [self POSTBodyWithParams:params boundary:boundary];
-    [req setValue:@(req.HTTPBody.length).stringValue forHTTPHeaderField:@"Content-Length"];
-    
+    NSURL *url = [NSURL URLWithString:url_twitpic_upload];
+    NSMutableURLRequest *req = [NSMutableURLRequest multipartPOSTRequestWithURL:url params:params];
+    [req setValue:oauthHeaders forHTTPHeaderField:@"X-Verify-Credentials-Authorization"];
+    [req setValue:url_account_verify_credentials forHTTPHeaderField:@"X-Auth-Service-Provider"];
+
     id res = [self sendRequest:req];
     
     if ([res isKindOfClass:[NSError class]]) return res;
@@ -1274,10 +1273,12 @@
 
 - (id)getRequestTokenReverseAuth:(BOOL)reverseAuth {
     NSURL *url = [NSURL URLWithString:url_oauth_request_token];
-    NSMutableURLRequest *request = [self formURLEncodedPOSTRequestWithURL:url params:reverseAuth?@{@"x_auth_mode": @"reverse_auth"}:nil];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil];
+    
+    // Because the params are all strings, it will be x-www-form-urlencoded
+    // It's also presigned
+    NSMutableURLRequest *r = [self requestWithURL:url HTTPMethod:kPOST params:reverseAuth?@{@"x_auth_mode": @"reverse_auth"}:nil];
 
-    id res = [self sendRequest:request];
+    id res = [self sendRequest:r];
     
     if ([res isKindOfClass:[NSData class]]) {
         return [[NSString alloc]initWithData:(NSData *)res encoding:NSUTF8StringEncoding];
@@ -1288,12 +1289,10 @@
 
 - (NSError *)finishAuthWithRequestToken:(FHSToken *)reqToken {
     NSURL *url = [NSURL URLWithString:url_oauth_access_token];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:cachePolicy timeoutInterval:30.0f];
-    [request setHTTPMethod:@"POST"];
-    [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier realm:nil];
     
-    id res = [self sendRequest:request];
+    NSMutableURLRequest *r = [self requestWithURL:url HTTPMethod:kPOST params:nil];
+    
+    id res = [self sendRequest:r];
     
     if ([res isKindOfClass:[NSError class]]) return res;
     
@@ -1319,10 +1318,9 @@
                              };
     
     NSURL *url = [NSURL URLWithString:url_oauth_access_token];
-    NSMutableURLRequest *request = [self formURLEncodedPOSTRequestWithURL:url params:params];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil];
+    NSMutableURLRequest *r = [self requestWithURL:url HTTPMethod:kPOST params:params];
     
-    id res = [self sendRequest:request];
+    id res = [self sendRequest:r];
     
     if ([res isKindOfClass:[NSError class]]) {
         return res;
@@ -1332,7 +1330,7 @@
         if (httpBody.length > 0) {
             [self storeAccessToken:httpBody];
         } else {
-            return [NSError errorWithDomain:FHSErrorDomain code:422 userInfo:@{NSLocalizedDescriptionKey:@"The request was well-formed but was unable to be followed due to semantic errors.", @"request":request}];
+            return [NSError errorWithDomain:FHSErrorDomain code:422 userInfo:@{NSLocalizedDescriptionKey:@"The request was well-formed but was unable to be followed due to semantic errors.", @"request":r}];
         }
     }
     

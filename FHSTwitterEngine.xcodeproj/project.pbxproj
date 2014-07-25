@@ -20,6 +20,8 @@
 		9B31B96415E56E34003FC89D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96315E56E34003FC89D /* CoreGraphics.framework */; };
 		F106B12318CE6562007F68B5 /* NSURL+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */; };
 		F1127D381981D59200BE6469 /* NSURLRequest+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */; };
+		F1127D3B1982A44200BE6469 /* NSMutableURLRequest+OAuth.m in Sources */ = {isa = PBXBuildFile; fileRef = F1127D3A1982A44200BE6469 /* NSMutableURLRequest+OAuth.m */; };
+		F1127D3E1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F1127D3D1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m */; };
 		F12A456B18CE384100D6AEFA /* NSError+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */; };
 		F173184018CE1148005C790B /* NSData+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F173183F18CE1148005C790B /* NSData+FHSTE.m */; };
 		F17DCD1018CDF9A2005382F4 /* FHSTwitterEngine+Requests.m in Sources */ = {isa = PBXBuildFile; fileRef = F17DCD0F18CDF9A2005382F4 /* FHSTwitterEngine+Requests.m */; };
@@ -57,6 +59,10 @@
 		F106B12418CEA3A3007F68B5 /* FHSDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FHSDefines.h; sourceTree = "<group>"; };
 		F1127D361981D59200BE6469 /* NSURLRequest+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLRequest+FHSTE.h"; sourceTree = "<group>"; };
 		F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLRequest+FHSTE.m"; sourceTree = "<group>"; };
+		F1127D391982A44200BE6469 /* NSMutableURLRequest+OAuth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+OAuth.h"; sourceTree = "<group>"; };
+		F1127D3A1982A44200BE6469 /* NSMutableURLRequest+OAuth.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableURLRequest+OAuth.m"; sourceTree = "<group>"; };
+		F1127D3C1982A79600BE6469 /* NSMutableURLRequest+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+FHSTE.h"; sourceTree = "<group>"; };
+		F1127D3D1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableURLRequest+FHSTE.m"; sourceTree = "<group>"; };
 		F12A456918CE384100D6AEFA /* NSError+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSError+FHSTE.h"; sourceTree = "<group>"; };
 		F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSError+FHSTE.m"; sourceTree = "<group>"; };
 		F173183E18CE1148005C790B /* NSData+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+FHSTE.h"; sourceTree = "<group>"; };
@@ -189,6 +195,10 @@
 				F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */,
 				F1E5B033198176E9002FC64E /* NSObject+FHSTE.h */,
 				F1E5B034198176E9002FC64E /* NSObject+FHSTE.m */,
+				F1127D3C1982A79600BE6469 /* NSMutableURLRequest+FHSTE.h */,
+				F1127D3D1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m */,
+				F1127D391982A44200BE6469 /* NSMutableURLRequest+OAuth.h */,
+				F1127D3A1982A44200BE6469 /* NSMutableURLRequest+OAuth.m */,
 			);
 			path = categories;
 			sourceTree = "<group>";
@@ -278,6 +288,8 @@
 				F173184018CE1148005C790B /* NSData+FHSTE.m in Sources */,
 				F106B12318CE6562007F68B5 /* NSURL+FHSTE.m in Sources */,
 				F17DCD1B18CE0196005382F4 /* NSString+FHSTE.m in Sources */,
+				F1127D3E1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m in Sources */,
+				F1127D3B1982A44200BE6469 /* NSMutableURLRequest+OAuth.m in Sources */,
 				F12A456B18CE384100D6AEFA /* NSError+FHSTE.m in Sources */,
 				F1E5B035198176E9002FC64E /* NSObject+FHSTE.m in Sources */,
 				9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */,
