@@ -24,6 +24,7 @@ typedef NS_ENUM(NSInteger, FHSTwitterEngineResultType) {
     FHSTwitterEngineResultTypePopular
 };
 
+typedef void(^ErrorBlock)(NSError *error);
 typedef void(^StreamBlock)(id result, BOOL *stop);
 typedef NSString *(^LoadAccessTokenBlock)(void);
 typedef void(^StoreAccessTokenBlock)(NSString *accessToken);

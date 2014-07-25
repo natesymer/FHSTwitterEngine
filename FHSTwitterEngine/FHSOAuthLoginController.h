@@ -16,7 +16,7 @@ typedef NS_ENUM(NSInteger, FHSTwitterEngineControllerResult) {
     FHSTwitterEngineControllerResultCancelled
 };
 
-typedef void(^LoginControllerBlock)(FHSTwitterEngineControllerResult result);
+typedef void(^LoginBlock)(BOOL cancelled, NSError *error);
 
 
 /**
@@ -29,28 +29,28 @@ typedef void(^LoginControllerBlock)(FHSTwitterEngineControllerResult result);
 /**
  The request token.
  */
-@property (nonatomic, strong) FHSToken *requestToken;
+//@property (nonatomic, strong) FHSToken *requestToken;
 
 
 /**
- The `LoginControllerBlock` block which returns a `FHSTwitterEngineControllerResult`.
+ The `LoginBlock` block which returns a `BOOL` and an `NSError`.
  */
-@property (nonatomic, copy) LoginControllerBlock block;
+@property (nonatomic, copy) LoginBlock block;
 
 
 /**
- Initializes `FHSTwitterEngineController` with `LoginControllerBlock` block.
- @param block Block of type `LoginControllerBlock`
+ Initializes `FHSTwitterEngineController` with a `LoginBlock` block.
+ @param block Block of type `LoginBlock`
  @return An instance of `FHSTwitterEngineController`
  */
-- (instancetype)initWithCompletionBlock:(LoginControllerBlock)block;
+- (instancetype)initWithCompletionBlock:(LoginBlock)block;
 
 
 /**
- Gets an instance of `FHSTwitterEngineController` with `LoginControllerBlock` block.
- @param block Block of type `LoginControllerBlock`
+ Gets an instance of `FHSTwitterEngineController` with an `LoginBlock` block.
+ @param block Block of type `LoginBlock`
  */
-+ (instancetype)controllerWithCompletionBlock:(LoginControllerBlock)block;
++ (instancetype)controllerWithCompletionBlock:(LoginBlock)block;
 
 @end
 

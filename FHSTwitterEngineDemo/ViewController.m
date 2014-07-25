@@ -272,23 +272,21 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 }
 
 - (void)loginOAuth {
-    FHSOAuthLoginController *loginController = [FHSOAuthLoginController controllerWithCompletionBlock:^(FHSTwitterEngineControllerResult result) {
-        switch (result) {
-            case FHSTwitterEngineControllerResultCancelled:
-                NSLog(@"Login Controller Cancelled");
-                break;
-            case FHSTwitterEngineControllerResultFailed:
-                NSLog(@"Login Controller Failed");
-                break;
-            case FHSTwitterEngineControllerResultSucceeded:
+    FHSOAuthLoginController *c = [FHSOAuthLoginController controllerWithCompletionBlock:^(BOOL cancelled, NSError *error) {
+        if (cancelled) {
+            NSLog(@"Login Controller Cancelled");
+            return;
+        } else {
+            if (error) {
+                NSLog(@"Login Controller Failed: %@",error);
+            } else {
                 NSLog(@"Login Controller Succeeded");
-                break;
-            default:
-                break;
+            }
         }
         [_theTableView reloadData];
     }];
-    [self presentViewController:loginController animated:YES completion:nil];
+    
+    [self presentViewController:c animated:YES completion:nil];
 }
 
 - (void)loginXAuth {

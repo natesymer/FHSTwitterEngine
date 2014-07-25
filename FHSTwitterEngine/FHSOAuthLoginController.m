@@ -20,15 +20,17 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
 @property (strong) UILabel *loadingText;
 @property (strong) UIActivityIndicatorView *spinner;
 
+@property (nonatomic, strong) FHSToken *requestToken;
+
 @end
 
 @implementation FHSOAuthLoginController
 
-+ (instancetype)controllerWithCompletionBlock:(LoginControllerBlock)block {
++ (instancetype)controllerWithCompletionBlock:(LoginBlock)block {
     return [[[self class]alloc]initWithCompletionBlock:block];
 }
 
-- (instancetype)initWithCompletionBlock:(LoginControllerBlock)block {
+- (instancetype)initWithCompletionBlock:(LoginBlock)block {
     self = [super init];
     if (self) {
         self.block = block;
@@ -90,14 +92,14 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
                         [_theWebView loadRequest:request];
                     }
                 });
-            } else {
+            } else if ([res isKindOfClass:[NSError class]]) {
                 double delayInSeconds = 0.5;
                 dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
                 dispatch_after(popTime, dispatch_get_main_queue(),^(void) {
                     @autoreleasepool {
                         [self dismissViewControllerAnimated:YES completion:^(void){
                             if (_block) {
-                                _block(FHSTwitterEngineControllerResultFailed);
+                                _block(NO, res);
                             }
                         }];
                     }
@@ -109,11 +111,10 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
 
 - (void)gotPin:(NSString *)pin {
     _requestToken.verifier = pin;
-    BOOL ret = [[FHSTwitterEngine sharedEngine]finishAuthWithRequestToken:_requestToken];
     
-    if (_block) {
-        _block(ret?FHSTwitterEngineControllerResultSucceeded:FHSTwitterEngineControllerResultFailed);
-    }
+    NSError *res = [[FHSTwitterEngine sharedEngine]finishAuthWithRequestToken:_requestToken];
+    
+    if (_block) _block(NO, res);
     
     [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -190,7 +191,7 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
 
 - (void)close {
     [self dismissViewControllerAnimated:YES completion:^(void){
-        if (_block) _block(FHSTwitterEngineControllerResultCancelled);
+        if (_block) _block(YES, nil);
     }];
 }
 

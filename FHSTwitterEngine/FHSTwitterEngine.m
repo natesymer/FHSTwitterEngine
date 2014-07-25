@@ -1287,11 +1287,15 @@
     return res;
 }
 
-- (NSError *)finishAuthWithRequestToken:(FHSToken *)reqToken {
+- (NSError *)finishAuthWithRequestToken:(FHSToken *)t {
     NSURL *url = [NSURL URLWithString:url_oauth_access_token];
     
-    NSMutableURLRequest *r = [self requestWithURL:url HTTPMethod:kPOST params:nil];
-    
+    // This kind of BS has to happen because
+    // this request has to be signed with a verifier
+    NSMutableURLRequest *r = [NSMutableURLRequest defaultRequestWithURL:url];
+    r.HTTPMethod = kPOST;
+    [r signWithToken:t.key tokenSecret:t.secret verifier:t.verifier consumerKey:_consumerKey consumerSecret:_consumerKey realm:nil];
+
     id res = [self sendRequest:r];
     
     if ([res isKindOfClass:[NSError class]]) return res;

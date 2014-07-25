@@ -22,6 +22,8 @@
     return request;
 }
 
+#pragma mark - GET Requests
+
 + (NSMutableURLRequest *)GETRequestWithURL:(NSURL *)url params:(NSDictionary *)params {
     NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:params.count];
     
@@ -34,6 +36,8 @@
     
     return [self defaultRequestWithURL:parameterizedURL];
 }
+
+#pragma mark - POST requests
 
 // application/x-www-form-urlencoded
 + (NSMutableURLRequest *)formURLEncodedPOSTRequestWithURL:(NSURL *)url params:(NSDictionary *)params {
@@ -62,7 +66,7 @@
     NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
     [r addValue:contentType forHTTPHeaderField:@"Content-Type"];
     
-    r.HTTPBody = [self POSTBodyWithParams:params boundary:boundary];
+    r.HTTPBody = [self multipartBodyWithParams:params boundary:boundary];
     [r setValue:@(r.HTTPBody.length).stringValue forHTTPHeaderField:@"Content-Length"];
     
     return r;
@@ -71,7 +75,10 @@
 #pragma mark - Multipart POST Body Generation
 
 // It's O(n^2), but SUPER readable and maintainable.
-+ (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
+//
+// It could have been written to do both data generation
+// body construction in one `for` loop, but that's impossible to maintain.
++ (NSData *)multipartBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
     NSMutableArray *lines = [NSMutableArray array];
     
     //

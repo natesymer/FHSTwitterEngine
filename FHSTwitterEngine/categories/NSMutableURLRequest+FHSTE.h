@@ -14,6 +14,5 @@
 + (NSMutableURLRequest *)GETRequestWithURL:(NSURL *)url params:(NSDictionary *)params;
 + (NSMutableURLRequest *)formURLEncodedPOSTRequestWithURL:(NSURL *)url params:(NSDictionary *)params;
 + (NSMutableURLRequest *)multipartPOSTRequestWithURL:(NSURL *)url params:(NSDictionary *)params;
-+ (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary;
 
 @end
