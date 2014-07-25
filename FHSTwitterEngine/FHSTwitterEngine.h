@@ -39,6 +39,7 @@
 #import "NSString+FHSTE.h"
 #import "NSObject+FHSTE.h"
 #import "NSURL+FHSTE.h"
+#import "NSURLRequest+FHSTE.h"
 
 /**
  Use `FHSTwitterEngine` to authenticate with Twitter and make a request to just about every Twitter API endpoint.

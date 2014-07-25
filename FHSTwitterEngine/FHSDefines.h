@@ -28,6 +28,8 @@ typedef void(^StreamBlock)(id result, BOOL *stop);
 typedef NSString *(^LoadAccessTokenBlock)(void);
 typedef void(^StoreAccessTokenBlock)(NSString *accessToken);
 
+static NSString * const kW3FormURLEncoded = @"application/x-www-form-urlencoded";
+
 static NSURLRequestCachePolicy const cachePolicy = NSURLRequestReloadRevalidatingCacheData;
 
 static float const streamingTimeoutInterval = 30.0f;
@@ -53,6 +55,8 @@ static NSString * const kDELETE = @"DELETE";
 //
 // URL constants
 //
+
+static NSString * const url_twitpic_upload = @"http://api.twitpic.com/2/upload.json";
 
 static NSString * const url_oauth_access_token = @"https://api.twitter.com/oauth/access_token";
 static NSString * const url_oauth_request_token = @"https://api.twitter.com/oauth/request_token";

@@ -19,6 +19,7 @@
 		9B31B96215E56E34003FC89D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96115E56E34003FC89D /* Foundation.framework */; };
 		9B31B96415E56E34003FC89D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96315E56E34003FC89D /* CoreGraphics.framework */; };
 		F106B12318CE6562007F68B5 /* NSURL+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */; };
+		F1127D381981D59200BE6469 /* NSURLRequest+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */; };
 		F12A456B18CE384100D6AEFA /* NSError+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */; };
 		F173184018CE1148005C790B /* NSData+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F173183F18CE1148005C790B /* NSData+FHSTE.m */; };
 		F17DCD1018CDF9A2005382F4 /* FHSTwitterEngine+Requests.m in Sources */ = {isa = PBXBuildFile; fileRef = F17DCD0F18CDF9A2005382F4 /* FHSTwitterEngine+Requests.m */; };
@@ -54,6 +55,8 @@
 		F106B12118CE6562007F68B5 /* NSURL+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+FHSTE.h"; sourceTree = "<group>"; };
 		F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+FHSTE.m"; sourceTree = "<group>"; };
 		F106B12418CEA3A3007F68B5 /* FHSDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FHSDefines.h; sourceTree = "<group>"; };
+		F1127D361981D59200BE6469 /* NSURLRequest+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLRequest+FHSTE.h"; sourceTree = "<group>"; };
+		F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLRequest+FHSTE.m"; sourceTree = "<group>"; };
 		F12A456918CE384100D6AEFA /* NSError+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSError+FHSTE.h"; sourceTree = "<group>"; };
 		F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSError+FHSTE.m"; sourceTree = "<group>"; };
 		F173183E18CE1148005C790B /* NSData+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+FHSTE.h"; sourceTree = "<group>"; };
@@ -182,6 +185,8 @@
 				F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */,
 				F106B12118CE6562007F68B5 /* NSURL+FHSTE.h */,
 				F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */,
+				F1127D361981D59200BE6469 /* NSURLRequest+FHSTE.h */,
+				F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */,
 				F1E5B033198176E9002FC64E /* NSObject+FHSTE.h */,
 				F1E5B034198176E9002FC64E /* NSObject+FHSTE.m */,
 			);
@@ -267,6 +272,7 @@
 				9B2A1BC415E805D1007E66E0 /* AppDelegate.m in Sources */,
 				9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */,
 				F17DCD1018CDF9A2005382F4 /* FHSTwitterEngine+Requests.m in Sources */,
+				F1127D381981D59200BE6469 /* NSURLRequest+FHSTE.m in Sources */,
 				F17DCD1618CE006F005382F4 /* FHSOAuthLoginController.m in Sources */,
 				9B2A1BC915E805D1007E66E0 /* main.m in Sources */,
 				F173184018CE1148005C790B /* NSData+FHSTE.m in Sources */,

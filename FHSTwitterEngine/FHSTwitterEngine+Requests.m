@@ -33,10 +33,14 @@
 
 #pragma mark - OAuth Signing
 
-- (NSString *)generateOAuthHeaderForURL:(NSURL *)URL HTTPMethod:(NSString *)httpMethod withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm extraParameters:(NSDictionary *)extraParams {
+- (NSString *)OAuthHeaderForRequest:(NSURLRequest *)request token:(NSString *)token tokenSecret:(NSString *)tokenSecret verifier:(NSString *)verifier realm:(NSString *)realm {
     
     // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
-    // build a sorted array of both request parameters and OAuth header parameters
+    //
+    // Build a query-style string containing the URL query, POST params
+    // (if Content-Type is application/x-www-form-urlencoded), and OAuth header params.
+    
+    // Gather OAuth params
     NSMutableDictionary *oauth = @{
                                    @"oauth_consumer_key": self.consumerKey.fhs_URLEncode,
                                    @"oauth_signature_method": @"HMAC-SHA1",
@@ -44,33 +48,26 @@
                                    @"oauth_nonce": [NSString fhs_UUID],
                                    @"oauth_version": @"1.0a"
                                    }.mutableCopy;
-
-    // Determine if this request is for a request token
-    if (tokenString.length > 0) {
-        oauth[@"oauth_token"] = tokenString.fhs_URLEncode;
-        if (verifierString.length > 0) {
-            oauth[@"oauth_verifier"] = verifierString.fhs_URLEncode;
-        }
-    } else {
-        if (extraParams.count == 0) {
-            oauth[@"oauth_callback"] = @"oob";
-        }
-    }
     
-    // Encode extra parameters
-    NSMutableDictionary *encodedExtraParams = [NSMutableDictionary dictionaryWithCapacity:extraParams.count];
-    [extraParams enumerateKeysAndObjectsUsingBlock:^(NSString *k, NSString *v, BOOL *stop) {
-        encodedExtraParams[k] = v.fhs_URLEncode;
-    }];
+    // Determine if this request is for a request token
+    if (token.length > 0) {
+        oauth[@"oauth_token"] = token.fhs_URLEncode;
+        if (verifier.length > 0) oauth[@"oauth_verifier"] = verifier.fhs_URLEncode;
+    } else {
+        // The oauth_callback should only be set for a "Request Token" request.
+        // Such requests shouldn't have a POST body.
+        // If you have a better idea, contact us at @natesymer or @dkhamsing
+        if (request.HTTPBody.length == 0) oauth[@"oauth_callback"] = @"oob";
+    }
     
     // Put all params into one hash
     NSMutableDictionary *requestParameters = [NSMutableDictionary dictionary];
-    [requestParameters addEntriesFromDictionary:oauth];
-    [requestParameters addEntriesFromDictionary:encodedExtraParams];
-    if ([httpMethod isEqualToString:kGET]) [requestParameters addEntriesFromDictionary:URL.queryDictionary];
-
+    [requestParameters addEntriesFromDictionary:oauth]; // OAuth headers
+    if ([request.HTTPMethod isEqualToString:kGET]) [requestParameters addEntriesFromDictionary:request.URL.queryDictionary]; // GET query params (already encoded)
+    if (request.isW3FormURLEncoded) [requestParameters addEntriesFromDictionary:request.postBodyDictionary]; // x-www-form-urlencoded POST params (already encoded)
+    
     // Make parameter pairs
-    NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:oauth.count+extraParams.count];
+    NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:requestParameters.count];
     
     [requestParameters enumerateKeysAndObjectsUsingBlock:^(NSString *k, NSString *v, BOOL *stop) {
         NSString *pair = [NSString stringWithFormat:@"%@=%@",k,v];
@@ -78,25 +75,28 @@
     }];
     
     [paramPairs sortUsingSelector:@selector(caseInsensitiveCompare:)];
-
+    
     NSString *normalizedRequestParameters = [paramPairs componentsJoinedByString:@"&"].fhs_URLEncode;
     
-    // Realm is not to be included in the Normalized request parameters
+    // Realm is not to be included in the Normalized Request Parameters
     // That's why it's down here
     if (realm.length > 0) oauth[@"oauth_realm"] = realm;
     
     
     // OAuth Spec, 9.1.2 "Construct Request URL"
+    //
     // Remove parameters, lowercase, URLEncode
-    NSString *requestURL = URL.absoluteStringWithoutParameters.lowercaseString.fhs_URLEncode;
+    NSString *requestURL = request.URL.absoluteStringWithoutParameters.lowercaseString.fhs_URLEncode;
     
     
-    // OAuth Spec, Section 9.1.2 "Concatenate Request Elements"
+    // OAuth Spec, Section 9.1.3 "Concatenate Request Elements"
+    //
     // Sign request elements using HMAC-SHA1
-    NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",httpMethod,requestURL,normalizedRequestParameters];
+    NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",request.HTTPMethod,requestURL,normalizedRequestParameters];
     
     // this way a nil token won't make a bad signature
-    NSString *tokenSecretSantized = tokenSecretString.length > 0 ? tokenSecretString.fhs_URLEncode : @""; // This is precicely the way that works. Don't question it.
+    NSString *tokenSecretSantized = tokenSecret.length > 0 ? tokenSecret.fhs_URLEncode : @""; // This is precicely the way that works. Don't question it.
+   // NSString *tokenSecretSantized = tokenSecret.fhs_URLEncode ?: @"";
     
     NSString *secret = [NSString stringWithFormat:@"%@&%@",self.consumerSecret.fhs_URLEncode,tokenSecretSantized];
     
@@ -104,13 +104,14 @@
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
     unsigned char result[20];
 	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
-
+    
     oauth[@"oauth_signature"] = [[NSData dataWithBytes:result length:20]base64Encode];
     
     NSMutableArray *oauthPairs = [NSMutableArray arrayWithCapacity:oauth.count];
     
-    [oauth enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
-        NSString *pair = [NSString stringWithFormat:@"%@=\"%@\"",key.fhs_URLEncode, obj.fhs_URLEncode];
+    [oauth enumerateKeysAndObjectsUsingBlock:^(NSString *k, NSString *v, BOOL *stop) {
+       // NSString *pair = [NSString stringWithFormat:@"%@=\"%@\"",k.fhs_URLEncode, v.fhs_URLEncode];
+        NSString *pair = [NSString stringWithFormat:@"%@=\"%@\"",k, v.fhs_URLEncode];
         [oauthPairs addObject:pair];
     }];
     
@@ -120,11 +121,11 @@
 }
 
 - (void)signRequest:(NSMutableURLRequest *)request {
-    [self signRequest:request withToken:self.accessToken.key tokenSecret:self.accessToken.secret verifier:nil realm:nil extraParameters:nil];
+    [self signRequest:request withToken:self.accessToken.key tokenSecret:self.accessToken.secret verifier:nil realm:nil];
 }
 
-- (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)tokenString tokenSecret:(NSString *)tokenSecretString verifier:(NSString *)verifierString realm:(NSString *)realm extraParameters:(NSDictionary *)extraParams {
-    NSString *oauthHeader = [self generateOAuthHeaderForURL:request.URL HTTPMethod:request.HTTPMethod withToken:tokenString tokenSecret:tokenSecretString verifier:verifierString realm:realm extraParameters:extraParams];
+- (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)token tokenSecret:(NSString *)tokenSecret verifier:(NSString *)verifier realm:(NSString *)realm {
+    NSString *oauthHeader = [self OAuthHeaderForRequest:request token:token tokenSecret:tokenSecret verifier:verifier realm:realm];
     [request setValue:oauthHeader forHTTPHeaderField:@"Authorization"];
 }
 
@@ -207,6 +208,23 @@
 }
 
 #pragma mark - Request Generation
+// application/x-www-form-urlencoded
+- (NSMutableURLRequest *)formURLEncodedPOSTRequestWithURL:(NSURL *)url params:(NSDictionary *)params {
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:cachePolicy timeoutInterval:30.0f];
+    [request setHTTPMethod:kPOST];
+    [request setHTTPShouldHandleCookies:NO];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    
+    NSMutableArray *pairs = [NSMutableArray arrayWithCapacity:params.count];
+    
+    [params enumerateKeysAndObjectsUsingBlock:^(NSString *k, NSString *v, BOOL *stop) {
+        [pairs addObject:[NSString stringWithFormat:@"%@=%@",k,v]];
+    }];
+    
+    request.HTTPBody = [[pairs componentsJoinedByString:@"&"]dataUsingEncoding:NSUTF8StringEncoding];
+    
+    return request;
+}
 
 - (NSMutableURLRequest *)requestWithURL:(NSURL *)url HTTPMethod:(NSString *)httpMethod params:(NSDictionary *)params {
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:cachePolicy timeoutInterval:30.0f];

@@ -1045,22 +1045,18 @@
 // Works by generating auth for twitter
 // Then sending it to TwitPic
 - (id)uploadImageDataToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
-    
     NSString *appropriateExtension = [imageData appropriateFileExtension];
     
-    if (appropriateExtension == nil) {
-        return [NSError badRequestError];
-    }
+    if (!appropriateExtension) return [NSError badRequestError];
     
-    NSString *verifyURL = @"https://api.twitter.com/1.1/account/verify_credentials.json";
+    NSMutableURLRequest *credVerifyReq = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url_account_verify_credentials]];
+    NSString *oauthHeaders = [self OAuthHeaderForRequest:credVerifyReq token:_accessToken.key tokenSecret:_accessToken.secret verifier:nil realm:@"http://api.twitter.com/".fhs_URLEncode];
     
-    NSString *oauthHeaders = [self generateOAuthHeaderForURL:[NSURL URLWithString:verifyURL] HTTPMethod:@"GET" withToken:_accessToken.key tokenSecret:_accessToken.secret verifier:nil realm:@"http://api.twitter.com/".fhs_URLEncode extraParameters:nil];
-    
-    NSURL *url = [NSURL URLWithString:@"http://api.twitpic.com/2/upload.json"];
+    NSURL *url = [NSURL URLWithString:url_twitpic_upload];
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
     [req setHTTPMethod:@"POST"];
     [req setValue:oauthHeaders forHTTPHeaderField:@"X-Verify-Credentials-Authorization"];
-    [req setValue:verifyURL forHTTPHeaderField:@"X-Auth-Service-Provider"];
+    [req setValue:url_account_verify_credentials forHTTPHeaderField:@"X-Auth-Service-Provider"];
 
     NSString *boundary = [NSString fhs_UUID];
     NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
@@ -1071,7 +1067,7 @@
                              @"key": twitPicAPIKey,
                              @"media": @{
                                           @"type": @"file",
-                                          @"filename": [NSString stringWithFormat:@"%@.%@",[NSString fhs_UUID],appropriateExtension],
+                                          @"filename": [NSString stringWithFormat:@"%@.%@",NSString.fhs_UUID,appropriateExtension],
                                           @"data": imageData,
                                           @"mimetype": [NSString stringWithFormat:@"image/%@",appropriateExtension]
                                         }
@@ -1082,17 +1078,12 @@
     
     id res = [self sendRequest:req];
     
-    if ([res isKindOfClass:[NSError class]]) {
-        return res;
-    }
+    if ([res isKindOfClass:[NSError class]]) return res;
     
     id parsed = [[NSJSONSerialization JSONObjectWithData:res options:NSJSONReadingMutableContainers error:nil]removeNull];
     
     NSError *error = [self checkError:parsed];
-    
-    if (error) {
-        return error;
-    }
+    if (error) return error;
     
     return parsed;
 }
@@ -1283,16 +1274,9 @@
 
 - (id)getRequestTokenReverseAuth:(BOOL)reverseAuth {
     NSURL *url = [NSURL URLWithString:url_oauth_request_token];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
-    [request setHTTPMethod:@"POST"];
-    [request setHTTPShouldHandleCookies:NO];
-    
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil extraParameters:reverseAuth?@{@"x_auth_mode": @"reverse_auth"}:nil];
+    NSMutableURLRequest *request = [self formURLEncodedPOSTRequestWithURL:url params:reverseAuth?@{@"x_auth_mode": @"reverse_auth"}:nil];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil];
 
-    if (reverseAuth) {
-        request.HTTPBody = [@"x_auth_mode=reverse_auth" dataUsingEncoding:NSUTF8StringEncoding];
-    }
-    
     id retobj = [self sendRequest:request];
     
     if ([retobj isKindOfClass:[NSData class]]) {
@@ -1307,12 +1291,7 @@
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier realm:nil extraParameters:nil];
-    
-    if (_shouldClearConsumer) {
-        self.shouldClearConsumer = NO;
-        [self clearConsumer];
-    }
+    [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier realm:nil];
     
     id retobj = [self sendRequest:request];
     
@@ -1344,23 +1323,8 @@
                              };
     
     NSURL *url = [NSURL URLWithString:url_oauth_access_token];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
-    [request setHTTPMethod:@"POST"];
-    [request setHTTPShouldHandleCookies:NO];
-    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil extraParameters:params];
-
-    NSMutableArray *pairs = [NSMutableArray arrayWithCapacity:3];
-    
-    [params enumerateKeysAndObjectsUsingBlock:^(NSString *k, NSString *v, BOOL *stop) {
-        [pairs addObject:[NSString stringWithFormat:@"%@=%@",k,v]];
-    }];
-    
-    request.HTTPBody = [[pairs componentsJoinedByString:@"&"]dataUsingEncoding:NSUTF8StringEncoding];
-    
-    if (_shouldClearConsumer) {
-        self.shouldClearConsumer = NO;
-        [self clearConsumer];
-    }
+    NSMutableURLRequest *request = [self formURLEncodedPOSTRequestWithURL:url params:params];
+    [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil];
     
     id res = [self sendRequest:request];
     
