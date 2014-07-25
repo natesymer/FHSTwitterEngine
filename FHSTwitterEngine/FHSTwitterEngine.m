@@ -1277,37 +1277,33 @@
     NSMutableURLRequest *request = [self formURLEncodedPOSTRequestWithURL:url params:reverseAuth?@{@"x_auth_mode": @"reverse_auth"}:nil];
     [self signRequest:request withToken:nil tokenSecret:nil verifier:nil realm:nil];
 
-    id retobj = [self sendRequest:request];
+    id res = [self sendRequest:request];
     
-    if ([retobj isKindOfClass:[NSData class]]) {
-        return [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
+    if ([res isKindOfClass:[NSData class]]) {
+        return [[NSString alloc]initWithData:(NSData *)res encoding:NSUTF8StringEncoding];
     }
     
-    return retobj;
+    return res;
 }
 
-- (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken {
+- (NSError *)finishAuthWithRequestToken:(FHSToken *)reqToken {
     NSURL *url = [NSURL URLWithString:url_oauth_access_token];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:cachePolicy timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
     [self signRequest:request withToken:reqToken.key tokenSecret:reqToken.secret verifier:reqToken.verifier realm:nil];
     
-    id retobj = [self sendRequest:request];
+    id res = [self sendRequest:request];
     
-    if ([retobj isKindOfClass:[NSError class]]) {
-        return NO;
-    }
+    if ([res isKindOfClass:[NSError class]]) return res;
     
-    NSString *response = [[NSString alloc]initWithData:(NSData *)retobj encoding:NSUTF8StringEncoding];
+    NSString *response = [[NSString alloc]initWithData:(NSData *)res encoding:NSUTF8StringEncoding];
     
-    if (response.length == 0) {
-        return NO;
-    }
+    if (response.length == 0) [NSError noDataError];
     
     [self storeAccessToken:response];
     
-    return YES;
+    return nil;
 }
 
 #pragma mark - XAuth

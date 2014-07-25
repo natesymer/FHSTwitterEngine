@@ -78,7 +78,7 @@
     
     NSString *normalizedRequestParameters = [paramPairs componentsJoinedByString:@"&"].fhs_URLEncode;
     
-    // Realm is not to be included in the Normalized Request Parameters
+    // Realm isn't to be included in the Normalized Request Parameters
     // That's why it's down here
     if (realm.length > 0) oauth[@"oauth_realm"] = realm;
     
@@ -93,12 +93,7 @@
     //
     // Sign request elements using HMAC-SHA1
     NSString *signatureBaseString = [NSString stringWithFormat:@"%@&%@&%@",request.HTTPMethod,requestURL,normalizedRequestParameters];
-    
-    // this way a nil token won't make a bad signature
-    NSString *tokenSecretSantized = tokenSecret.length > 0 ? tokenSecret.fhs_URLEncode : @""; // This is precicely the way that works. Don't question it.
-   // NSString *tokenSecretSantized = tokenSecret.fhs_URLEncode ?: @"";
-    
-    NSString *secret = [NSString stringWithFormat:@"%@&%@",self.consumerSecret.fhs_URLEncode,tokenSecretSantized];
+    NSString *secret = [NSString stringWithFormat:@"%@&%@",self.consumerSecret.fhs_URLEncode,tokenSecret.fhs_URLEncode ?: @""];
     
     NSData *secretData = [secret dataUsingEncoding:NSUTF8StringEncoding];
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
@@ -110,7 +105,6 @@
     NSMutableArray *oauthPairs = [NSMutableArray arrayWithCapacity:oauth.count];
     
     [oauth enumerateKeysAndObjectsUsingBlock:^(NSString *k, NSString *v, BOOL *stop) {
-       // NSString *pair = [NSString stringWithFormat:@"%@=\"%@\"",k.fhs_URLEncode, v.fhs_URLEncode];
         NSString *pair = [NSString stringWithFormat:@"%@=\"%@\"",k, v.fhs_URLEncode];
         [oauthPairs addObject:pair];
     }];
@@ -222,7 +216,6 @@
     }];
     
     request.HTTPBody = [[pairs componentsJoinedByString:@"&"]dataUsingEncoding:NSUTF8StringEncoding];
-    
     return request;
 }
 
@@ -275,10 +268,7 @@
     id parsed = [[NSJSONSerialization JSONObjectWithData:(NSData *)res options:NSJSONReadingMutableContainers error:nil]removeNull];
     
     NSError *error = [self checkError:parsed];
-    
-    if (error) {
-        return error;
-    }
+    if (error) return error;
     
     return parsed;
 }

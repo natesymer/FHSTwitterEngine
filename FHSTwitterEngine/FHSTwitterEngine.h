@@ -1126,7 +1126,7 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
  @param reqToken Request token `FHSToken`.
  @return A Boolean that specifies whether the request was successful.
  */
-- (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken;
+- (NSError *)finishAuthWithRequestToken:(FHSToken *)reqToken;
 
 
 /**
