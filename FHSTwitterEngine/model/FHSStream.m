@@ -96,10 +96,12 @@
 
 #endif
     
+    [self keepAlive];
+    
     for (NSData *message in messages) {
         BOOL stop = NO;
-        
-        id json = [NSJSONSerialization JSONObjectWithData:message options:NSJSONReadingMutableContainers error:0];
+
+        id json = [NSJSONSerialization JSONObjectWithData:message options:NSJSONReadingMutableContainers error:NULL];
         if (_block) _block(json, &stop);
         
         if (stop) {

@@ -42,13 +42,13 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
     int inMessage = 0;
     
     unsigned long position = 0;
-    unsigned long messageStart = -1;
-    int bufferLength = -1;
+    unsigned long messageStart = 0;
+    int bufferLength = 0;
     char *buffer = NULL;
     
     while (position < length) {
         char currChar = chars[position];
-        if ((currChar > '0' && currChar < '9') && !inMessage) {
+        if (currChar >= '0' && currChar <= '9' && inMessage == 0) {
             
             // Create a buffer to hold bytes that
             // Represent the length of the message
@@ -88,12 +88,12 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                 currChar = chars[position];
                 inMessage = 1;
 
-                
                 // Check if the data includes the whole message
-                
-                unsigned long remainingBytes = length-(position);
+                unsigned long remainingBytes = length-position;
 
-                if (bufferLength > remainingBytes) {
+                // Return the leftover data using a pointer
+                // and return the array of complete messages
+                if (remainingBytes < bufferLength) {
                     if (leftoverData) {
                         // Read leftover bytes into a buffer
                         if (remainingBytes > 0) {
@@ -114,8 +114,13 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                     return messages;
                 } else {
                     // otherwise, create the message buffer
-                    
+
                     if (buffer) {
+                        // Sometimes crashes here
+                        //
+                        // FHSTwitterEngine(5166,0x102c9d310) malloc: *** error for object 0x10ac4ad28: incorrect checksum for freed object - object was probably modified after being freed.
+                        // *** set a breakpoint in malloc_error_break to debug
+                      //  NSLog(@"Buffer: %s",buffer);
                         free(buffer);
                         buffer = NULL;
                     }
@@ -133,7 +138,7 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
             }
             
             continue;
-        } else {
+        } else if (inMessage == 1) {
             if (!buffer) {
                 // If no message length has been established
                 // (this means this payload contains the other
@@ -168,7 +173,7 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                 continue;
             }
             buffer[position-messageStart] = currChar;
-            
+
             // If we've got to the end of a message,
             // let's turn it into an ObjC object and
             // put it in an array.
@@ -177,6 +182,10 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                 inMessage = 0;
             }
             
+            position++;
+            continue;
+        } else {
+            // In the length delimiter field and there's a non-numerical character
             position++;
             continue;
         }
