@@ -82,10 +82,10 @@
 #else
     NSData *saneData = data;
 #endif
-    
+
     NSData *leftover;
     NSArray *messages = [StreamParser parseStreamData:saneData leftoverData:&leftover];
-    
+
 #if kFHSTwitterEngineRepairSplitMessages == 1
     
     [_buffer setLength:0];

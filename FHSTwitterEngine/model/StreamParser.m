@@ -91,10 +91,9 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                 
                 // Check if the data includes the whole message
                 
-                unsigned long remainingBytes = length-(position+1);
-                NSLog(@"Leftover Bytes: %lu",remainingBytes);
-                
-                if (bufferLength-remainingBytes > 0) {
+                unsigned long remainingBytes = length-(position);
+
+                if (bufferLength > remainingBytes) {
                     if (leftoverData) {
                         // Read leftover bytes into a buffer
                         if (remainingBytes > 0) {
