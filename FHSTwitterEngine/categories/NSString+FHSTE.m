@@ -10,6 +10,10 @@
 
 @implementation NSString (FHSTwitterEngine)
 
++ (NSString *)fhs_UTF8StringFromData:(NSData *)data {
+    return [[self alloc]initWithData:data encoding:NSUTF8StringEncoding];
+}
+
 + (NSString *)fhs_UUID {
     if ([[[UIDevice currentDevice]systemVersion]floatValue] >= 6.0f) {
         return [[NSUUID UUID]UUIDString];

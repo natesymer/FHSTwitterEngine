@@ -10,9 +10,9 @@
 
 @interface StreamParser : NSObject
 
-+ (BOOL)startsAbruptly:(NSData *)data;
-+ (BOOL)endsAbruptly:(NSData *)data;
-
 + (NSArray *)parseStreamData:(NSData *)data;
++ (NSArray *)parseStreamData:(NSData *)data leftoverData:(NSData **)leftoverData;
+
+- (NSArray *)parseUndelemitedData:(NSData *)data;
 
 @end

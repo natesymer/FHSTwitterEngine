@@ -12,88 +12,38 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
 
 @implementation StreamParser
 
-+ (BOOL)startsAbruptly:(NSData *)data {
-    char *chars = (char *)data.bytes;
-    unsigned long length = data.length;
-    
-    // check the first 20 characters for CRLF
-    
-    BOOL startsAbruptly = YES;
-    
-    for (unsigned long i = 0; i < MIN(20,length-1); i++) {
-        if (chars[i] == '\r' && chars[i+1] == '\n') {
-            startsAbruptly = NO;
-            break;
-        }
-    }
-    return startsAbruptly;
-}
-
-+ (BOOL)endsAbruptly:(NSData *)data {
-    char *chars = (char *)data.bytes;
-    unsigned long length = data.length;
-    
-    BOOL endsAbruptly = NO;
-    
-    unsigned long pos = length-1;
-    
-    while (pos > 0) {
-        if (chars[pos-1] == '\r' && chars[pos] == '\n') {
-            char currChar = chars[pos-2];
-            
-            unsigned long delimBufLength = kDelimiterBufferStartingLength;
-            unsigned long delimBufCount = 0;
-            char *delimBuf = malloc(sizeof(char *)*delimBufLength);
-            
-            while (currChar > '0' && currChar < '9') {
-                if (pos == 0 || (chars[pos-1] == '\r' && chars[pos] == '\n')) break;
-                // Expand buffer accordingly
-                if (delimBufCount+1 > delimBufLength) {
-                    delimBufLength += 2;
-                    char *newbuf = malloc(sizeof(char *)*delimBufLength);
-                    memcpy(newbuf, delimBuf, sizeof(char *)*delimBufCount);
-                    if (delimBuf) free(delimBuf);
-                    delimBuf = newbuf;
-                }
-                
-                delimBuf[delimBufCount] = currChar;
-                delimBufCount++;
-                
-                pos--;
-                currChar = chars[pos];
-            }
-            
-            int bufferLength = atoi(delimBuf);
-            free(delimBuf);
-            
-            if (pos+delimBufCount+2+bufferLength != length) {
-                endsAbruptly = YES;
-            }
-        }
-        pos--;
-    }
-    
-    return endsAbruptly;
-}
-
 + (NSArray *)parseStreamData:(NSData *)data {
+    return [self parseStreamData:data leftoverData:NULL];
+}
+
++ (NSArray *)parseStreamData:(NSData *)data leftoverData:(NSData **)leftoverData {
     NSMutableArray *messages = [NSMutableArray array];
     
     char *chars = (char *)data.bytes;
     unsigned long length = data.length;
+    
+    //
+    // TODO: Check for delimiting kind
+    //       (Right now `length` delimiting is assumed)
+    //
+    
+    // Check for data not delimited by length
+    // It's impossible to determine if this data is
+    // cut off or not, unless you want to track brackets.
+    /*for (unsigned long i = 0; i < length; i++) {
+        
+    }*/
     
     // @"Exceeded connection limit for user\r\n"
     if (chars[0] == 'E' && chars[length-3] == 'r') {
         return @[[@"{\"error\": \"Exceeded connection limit for user.\" }\n" dataUsingEncoding:NSUTF8StringEncoding]];
     }
 
-    // Newline: 10, Carriage Return: 13
-    
     int inMessage = 0;
     
     unsigned long position = 0;
-    unsigned long messageStart = 0;
-    int bufferLength = 0;
+    unsigned long messageStart = -1;
+    int bufferLength = -1;
     char *buffer = NULL;
     
     while (position < length) {
@@ -101,14 +51,14 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
         if ((currChar > '0' && currChar < '9') && !inMessage) {
             unsigned long delimBufLength = kDelimiterBufferStartingLength;
             unsigned long delimBufCount = 0;
-            char *delimBuf = malloc(sizeof(char *)*delimBufLength);
+            char *delimBuf = malloc(sizeof(char)*delimBufLength);
 
             while (currChar >= '0' && currChar <= '9') {
                 // Expand buffer accordingly
                 if (delimBufCount+1 > delimBufLength) {
                     delimBufLength += 2;
-                    char *newbuf = malloc(sizeof(char *)*delimBufLength);
-                    memcpy(newbuf, delimBuf, sizeof(char *)*delimBufCount);
+                    char *newbuf = malloc(sizeof(char)*delimBufLength);
+                    memcpy(newbuf, delimBuf, sizeof(char)*delimBufCount);
                     if (delimBuf) free(delimBuf);
                     delimBuf = newbuf;
                 }
@@ -118,26 +68,47 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                 position++; // This will bleed over into the byte after the length delimiter (the CR)
                 currChar = chars[position];
             }
-
+            
             if (currChar == '\r' && chars[position+1] == '\n') {
-                position += 2; // accommodate for the LF
-                messageStart = position;
-                
                 bufferLength = atoi(delimBuf);
                 free(delimBuf);
                 delimBuf = NULL;
+                
+                position += 2; // accommodate for the LF
+                messageStart = position;
+                currChar = chars[position];
+
+                if (position+bufferLength > length) {
+                    
+                    unsigned long numLeftoverBytes = bufferLength-(length-(position+1));
+                    NSLog(@"Leftover Bytes: %lu",numLeftoverBytes);
+                    
+                    if (leftoverData) {
+                        // capture leftover data
+                        if (numLeftoverBytes > 0) {
+                            char *leftoverBytes = malloc(sizeof(char)*numLeftoverBytes);
+                        
+                            for (unsigned long i = 0; i < numLeftoverBytes; i++) {
+                                leftoverBytes[i] = chars[position+i];
+                            }
+                            
+                            *leftoverData = [NSData dataWithBytes:leftoverBytes length:numLeftoverBytes];
+                            free(leftoverBytes);
+                            leftoverBytes = NULL;
+                        }
+                    }
+                    return messages;
+                }
                 
                 if (buffer) {
                     free(buffer);
                     buffer = NULL;
                 }
                 
-                buffer = malloc(sizeof(char *)*bufferLength);
+                buffer = malloc(sizeof(char)*bufferLength);
                 
                 inMessage = 1;
-            }
-            
-            if (delimBuf) {
+            } else if (delimBuf) {
                 free(delimBuf);
                 delimBuf = NULL;
             }
@@ -145,11 +116,32 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
             continue;
         } else {
             if (!buffer) {
-                printf("No buffer to accommodate character: %c (%d) at position: %lu\n",currChar,currChar,position);
+                // It's the second half of some leftover data...
+                // Let's skip it.
+                
+                // look for next \r\n and set position to that place
+                while (currChar != '\r') {
+                    position++;
+                    
+                    // Could not find a CR
+                    if (position == length) {
+                        // Return some error JSON
+                        NSMutableData *errorJson = [[@"{\"error\":\"" dataUsingEncoding:NSUTF8StringEncoding]mutableCopy];
+                        [errorJson appendData:data];
+                        [errorJson appendData:[@"\"}" dataUsingEncoding:NSUTF8StringEncoding]];
+                        return @[errorJson];
+                    } else {
+                        currChar = chars[position];
+                    }
+                }
+                
+                position += 2;
+                inMessage = 0;
+                continue;
             }
             buffer[position-messageStart] = currChar;
             
-            if (position+1 == messageStart+bufferLength) {
+            if (position == messageStart+bufferLength-1) {
                 [messages addObject:[NSData dataWithBytes:buffer length:bufferLength]];
                 inMessage = 0;
             }
@@ -165,6 +157,18 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
     }
     
     return messages;
+}
+
+- (NSArray *)parseUndelemitedData:(NSData *)data {
+    NSString *dString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+    NSArray *parts = [dString componentsSeparatedByString:@"\r\n"];
+    NSMutableArray *messages = [NSMutableArray array];
+    
+    for (NSString *s in parts) {
+        [messages addObject:[s dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+    
+    return parts;
 }
 
 @end

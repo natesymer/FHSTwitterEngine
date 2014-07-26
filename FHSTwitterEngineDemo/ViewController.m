@@ -330,7 +330,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     if (!_isStreaming) {
         self.isStreaming = YES;
         [[FHSTwitterEngine shared]streamSampleStatusesWithBlock:^(id result, BOOL *stop) {
-            //NSLog(@"%@",result);
+            NSLog(@"%@",result);
             if (_isStreaming == NO) {
                 *stop = YES;
             }

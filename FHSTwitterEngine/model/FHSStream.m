@@ -11,7 +11,7 @@
 #import "NSError+FHSTE.h"
 #import "StreamParser.h"
 
-@interface FHSStream () <NSURLConnectionDelegate>
+@interface FHSStream () <NSURLConnectionDelegate,NSURLConnectionDataDelegate>
 
 @property (nonatomic, strong) NSURLConnection *connection;
 @property (nonatomic, strong) NSMutableData *buffer;
@@ -66,36 +66,46 @@
         [self stop];
     }
 }
-// Stream Format:
-// <length>\n<length-1 characters>
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     
-    if ([StreamParser endsAbruptly:data]) {
+#if kFHSTwitterEngineRepairSplitMessages == 1
+    
+    NSData *saneData;
+    
+    if (_buffer.length > 0) {
         [_buffer appendData:data];
+        saneData = _buffer;
     } else {
-        NSMutableData *d = [NSMutableData dataWithData:data];
+        saneData = data;
+    }
+#else
+    NSData *saneData = data;
+#endif
+    
+    NSData *leftover;
+    NSArray *messages = [StreamParser parseStreamData:saneData leftoverData:&leftover];
+    
+#if kFHSTwitterEngineRepairSplitMessages == 1
+    
+    [_buffer setLength:0];
+    
+    if (leftover.length > 0) {
+        [_buffer appendData:leftover];
+    }
+
+#endif
+    
+    for (NSData *message in messages) {
+        BOOL stop = NO;
         
-        if ([StreamParser startsAbruptly:data] && [StreamParser endsAbruptly:_buffer]) {
-            [d appendData:_buffer];
-            [_buffer setLength:0];
-        }
+        id json = [NSJSONSerialization JSONObjectWithData:message options:NSJSONReadingMutableContainers error:0];
+        if (_block) _block(json, &stop);
         
-        NSArray *messages = [StreamParser parseStreamData:d];
-        
-        for (NSData *message in messages) {
-            BOOL stop = NO;
-            
-            id json = [NSJSONSerialization JSONObjectWithData:message options:NSJSONReadingMutableContainers error:0];
-            if (_block) _block(json, &stop);
-            
-            if (stop) {
-                [self stop];
-            }
+        if (stop) {
+            [self stop];
         }
     }
-    
-    
 }
 
 - (void)keepAlive {

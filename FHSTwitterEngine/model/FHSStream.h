@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "FHSTwitterEngine.h"
 
+#define kFHSTwitterEngineRepairSplitMessages 0
+
 @interface FHSStream : NSObject
 
 @property (nonatomic, copy) StreamBlock block;

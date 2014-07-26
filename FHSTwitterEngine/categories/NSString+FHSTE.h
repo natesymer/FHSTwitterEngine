@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @interface NSString (FHSTwitterEngine)
++ (NSString *)fhs_UTF8StringFromData:(NSData *)data;
 + (NSString *)fhs_UUID;
 - (NSString *)fhs_URLEncode;
 - (NSString *)fhs_truncatedToLength:(int)length;
