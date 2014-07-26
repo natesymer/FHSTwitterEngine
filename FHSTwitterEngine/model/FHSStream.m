@@ -14,6 +14,7 @@
 @interface FHSStream () <NSURLConnectionDelegate>
 
 @property (nonatomic, strong) NSURLConnection *connection;
+@property (nonatomic, strong) NSMutableData *buffer;
 
 @end
 
@@ -39,7 +40,8 @@
             _parameters = [NSDictionary dictionaryWithDictionary:params];
         }
         
-        self.block = block;
+        _block = block;
+        _buffer = [NSMutableData data];
     }
     return self;
 }
@@ -69,76 +71,31 @@
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     
-    NSArray *messages = [StreamParser parseStreamData:data];
-    
-    for (NSData *message in messages) {
-        BOOL stop = NO;
-        NSLog(@"message: %@",message);
-        if (_block) _block([NSJSONSerialization JSONObjectWithData:message options:NSJSONReadingMutableContainers error:0], &stop);
+    if ([StreamParser endsAbruptly:data]) {
+        [_buffer appendData:data];
+    } else {
+        NSMutableData *d = [NSMutableData dataWithData:data];
         
-        if (stop) {
-            [self stop];
+        if ([StreamParser startsAbruptly:data] && [StreamParser endsAbruptly:_buffer]) {
+            [d appendData:_buffer];
+            [_buffer setLength:0];
+        }
+        
+        NSArray *messages = [StreamParser parseStreamData:d];
+        
+        for (NSData *message in messages) {
+            BOOL stop = NO;
+            
+            id json = [NSJSONSerialization JSONObjectWithData:message options:NSJSONReadingMutableContainers error:0];
+            if (_block) _block(json, &stop);
+            
+            if (stop) {
+                [self stop];
+            }
         }
     }
     
-    /*int bytesExpected = 0;
-    NSMutableString *message = nil;
     
-    NSLog(@"%@",[[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding]);
-
-    NSString *response = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
-
-    for (NSString *part in [response componentsSeparatedByString:@"\r\n"]) {
-        int length = [part intValue];
-
-        if (length > 0) {
-            message = [NSMutableString string];
-            bytesExpected = length;
-        }
-        
-        if (bytesExpected > 0 && message) {
-            NSRange rangeOfCount = [message rangeOfString:@(bytesExpected).stringValue];
-            if (rangeOfCount.location == 0) {
-                message = [message substringFromIndex:rangeOfCount.length].mutableCopy;
-            }
-            
-            if (message.length < bytesExpected) {
-                [message appendString:part];
-                
-                if (message.length < bytesExpected) {
-                    [message appendString:@"\r\n"];
-                }
-                
-                if (message.length == bytesExpected) {
-                    NSError *jsonError = nil;
-                    id json = [NSJSONSerialization JSONObjectWithData:[message dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:&jsonError];
-
-                    BOOL stop = NO;
-                    
-                    if (!jsonError) {
-                        if (_block) {
-                            _block(json, &stop);
-                        }
-                        [self keepAlive];
-                    } else {
-                        NSError *error = [NSError errorWithDomain:FHSErrorDomain code:406 userInfo:@{ NSUnderlyingErrorKey: jsonError, NSLocalizedDescriptionKey: @"Invalid JSON was returned from Twitter", @"json": json }];
-                        if (_block) {
-                            _block(error, &stop);
-                        }
-                    }
-                    
-                    if (stop) {
-                        [self stop];
-                    }
-
-                    message = nil;
-                    bytesExpected = 0;
-                }
-            }
-        } else {
-            [self keepAlive];
-        }
-    }*/
 }
 
 - (void)keepAlive {
