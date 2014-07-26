@@ -46,10 +46,10 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     
     // This is if you want to use xAuth
     // It uses the keys from Feathers (by Naklab) without the developer's permission.
-    [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"iD3JmMTXZ36MlISkfmkFvg" andSecret:@"B7HLYGJpwnyZr8fJeUGidW129i3cpgI2WsyGsHM2s"];
+    [[FHSTwitterEngine shared]permanentlySetConsumerKey:@"iD3JmMTXZ36MlISkfmkFvg" andSecret:@"B7HLYGJpwnyZr8fJeUGidW129i3cpgI2WsyGsHM2s"];
     
  //   [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"Xg3ACDprWAH8loEPjMzRg" andSecret:@"9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0"];
-    [[FHSTwitterEngine sharedEngine]loadAccessToken];
+    [[FHSTwitterEngine shared]loadAccessToken];
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
@@ -57,7 +57,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return FHSTwitterEngine.sharedEngine.isAuthorized?5:3;
+    return FHSTwitterEngine.shared.isAuthorized?5:3;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -80,7 +80,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
             NSArray *imageArray = @[[UIImage imageNamed:@"image1"], [UIImage imageNamed:@"image2"]];
             
             NSString *tweet = [NSString stringWithFormat:@"Multiple images %@", @(arc4random()%100)];
-            NSLog(@"Posting Multiple Images (Response):\n%@",[FHSTwitterEngine.sharedEngine postTweet:tweet withImages:imageArray]);
+            NSLog(@"Posting Multiple Images (Response):\n%@",[FHSTwitterEngine.shared postTweet:tweet withImages:imageArray]);
         }
             break;
         default:
@@ -114,7 +114,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
             break;
         case 3:
             cell.textLabel.text = @"Logout";
-            cell.detailTextLabel.text = FHSTwitterEngine.sharedEngine.accessToken.username;
+            cell.detailTextLabel.text = FHSTwitterEngine.shared.accessToken.username;
             break;
             
         case 4:
@@ -153,7 +153,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             @autoreleasepool {
                 NSString *tweet = [alertView textFieldAtIndex:0].text;
-                id returned = [[FHSTwitterEngine sharedEngine]postTweet:tweet];
+                id returned = [[FHSTwitterEngine shared]postTweet:tweet];
                 [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
                 
                 NSString *title = nil;
@@ -187,7 +187,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 @autoreleasepool {
                     // getXAuthAccessTokenForUsername:password: returns an NSError, not id.
-                    NSError *returnValue = [[FHSTwitterEngine sharedEngine]authenticateWithUsername:username password:password];
+                    NSError *returnValue = [[FHSTwitterEngine shared]authenticateWithUsername:username password:password];
                     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
                     
                     dispatch_sync(dispatch_get_main_queue(), ^{
@@ -256,7 +256,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
                 // Actual FHSTwitterEngine call is here.
                 //
                 
-                [[FHSTwitterEngine sharedEngine]authenticateWithAccount:twitterAccount completion:^(NSError *error) {
+                [[FHSTwitterEngine shared]authenticateWithAccount:twitterAccount completion:^(NSError *error) {
                     NSLog(@"Reverse auth %@",!error?@"succeeded":@"failed");
                     [_theTableView reloadData];
                     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
@@ -298,7 +298,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 }
 
 - (void)logout {
-    [[FHSTwitterEngine sharedEngine]clearAccessToken];
+    [[FHSTwitterEngine shared]clearAccessToken];
     [_theTableView reloadData];
 }
 
@@ -306,7 +306,8 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @autoreleasepool {
-            NSLog(@"%@",[[FHSTwitterEngine sharedEngine]getTimelineForUser:FHSTwitterEngine.sharedEngine.accessToken.username isID:YES count:10]);
+            NSLog(@"%@",[[FHSTwitterEngine shared]getTimelineForUser:FHSTwitterEngine.shared.accessToken.user_id isID:YES count:10]);
+           // NSLog(@"%@",[FHSTwitterEngine.shared getConfiguration]);
             
             dispatch_sync(dispatch_get_main_queue(), ^{
                 @autoreleasepool {
@@ -328,7 +329,7 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 - (void)toggleStreaming {
     if (!_isStreaming) {
         self.isStreaming = YES;
-        [[FHSTwitterEngine sharedEngine]streamSampleStatusesWithBlock:^(id result, BOOL *stop) {
+        [[FHSTwitterEngine shared]streamSampleStatusesWithBlock:^(id result, BOOL *stop) {
             NSLog(@"%@",result);
             if (_isStreaming == NO) {
                 *stop = YES;

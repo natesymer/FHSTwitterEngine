@@ -13,7 +13,8 @@
 
 @property (nonatomic, copy) StreamBlock block;
 
-+ (FHSStream *)streamWithURL:(NSString *)url httpMethod:(NSString *)httpMethod parameters:(NSDictionary *)params timeout:(float)timeout block:(StreamBlock)block;
++ (FHSStream *)streamWithURL:(NSURL *)url httpMethod:(NSString *)httpMethod parameters:(NSDictionary *)params timeout:(float)timeout block:(StreamBlock)block;
+- (instancetype)initWithURL:(NSURL *)url httpMethod:(NSString *)httpMethod parameters:(NSDictionary *)params timeout:(float)timeout block:(StreamBlock)block;
 
 - (void)stop;
 - (void)start;
@@ -23,5 +24,10 @@
 
 // This makes sure all track keywords are valid
 + (NSString *)sanitizeTrackParameter:(NSArray *)keywords;
+
+@property (strong, readonly) NSURL *url;
+@property (strong, readonly) NSString *HTTPMethod;
+@property (strong, readonly) NSDictionary *parameters;
+@property (readonly) float timeout;
 
 @end

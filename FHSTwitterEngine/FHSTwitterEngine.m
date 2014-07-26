@@ -36,17 +36,51 @@
 
 @interface FHSTwitterEngine ()
 
-@property (assign, nonatomic) BOOL shouldClearConsumer;
+@property BOOL shouldClearConsumer;
+@property (nonatomic, strong) NSMutableArray *activeStreams;
 
 @end
 
 @implementation FHSTwitterEngine
 
-//
-// Most of these methods are
-// implementations of the
-// Twitter API resources
-//
+#pragma mark - Initialization
+
++ (instancetype)shared {
+    static id shared;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        shared = [self new];
+    });
+    return shared;
+}
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        
+    }
+    return self;
+}
+
+#pragma mark - Helpers
+
+// Twitter API datestamps are UTC
+// Set up the date formatter once. Allocating a
+// new one takes a _long_ time
++ (NSDateFormatter *)dateFormatter {
+    static NSDateFormatter *formatter = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        formatter = [[NSDateFormatter alloc]init];
+        formatter.locale = [[NSLocale alloc]initWithLocaleIdentifier:@"en_US"];
+        formatter.dateStyle = NSDateFormatterLongStyle;
+        formatter.formatterBehavior = NSDateFormatterBehavior10_4;
+        formatter.dateFormat = @"EEE MMM dd HH:mm:ss ZZZZ yyyy";
+    });
+    return formatter;
+}
+
+#pragma mark - REST API
 
 - (id)listFollowersForUser:(NSString *)user isID:(BOOL)isID withCursor:(NSString *)cursor {
     if (user.length == 0) {
@@ -1107,7 +1141,7 @@
         params[@"locations"] = [locBox componentsJoinedByString:@","];
     }
     
-    [[FHSStream streamWithURL:@"https://userstream.twitter.com/1.1/user.json" httpMethod:@"POST" parameters:params timeout:streamingTimeoutInterval block:block]start]; // Twitter says it should be GET, but on further investigation of the docs, POST works too.
+    [[FHSStream streamWithURL:[NSURL URLWithString:url_stream_user] httpMethod:kPOST parameters:params timeout:streamingTimeoutInterval block:block]start]; // Twitter says it should be GET, but on further investigation of the docs, POST works too.
 }
 
 - (void)streamPublicStatusesForUsers:(NSArray *)users keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block {
@@ -1135,45 +1169,18 @@
         params[@"locations"] = [locBox componentsJoinedByString:@","];
     }
     
-    [[FHSStream streamWithURL:@"https://stream.twitter.com/1.1/statuses/filter.json" httpMethod:@"POST" parameters:params timeout:streamingTimeoutInterval block:block]start];
+    [[FHSStream streamWithURL:[NSURL URLWithString:url_stream_statuses_filter] httpMethod:kPOST parameters:params timeout:streamingTimeoutInterval block:block]start];
 }
 
 - (void)streamSampleStatusesWithBlock:(StreamBlock)block {
-    [[FHSStream streamWithURL:@"https://stream.twitter.com/1.1/statuses/sample.json" httpMethod:@"GET" parameters:nil timeout:streamingTimeoutInterval block:block]start];
+    [[FHSStream streamWithURL:[NSURL URLWithString:url_stream_statuses_sample] httpMethod:kGET parameters:nil timeout:streamingTimeoutInterval block:block]start];
 }
 
 - (void)streamFirehoseWithBlock:(StreamBlock)block {
-    [[FHSStream streamWithURL:@"https://stream.twitter.com/1.1/statuses/firehose.json" httpMethod:@"GET" parameters:nil timeout:streamingTimeoutInterval block:block]start];
+    [[FHSStream streamWithURL:[NSURL URLWithString:url_stream_statuses_firehose] httpMethod:kGET parameters:nil timeout:streamingTimeoutInterval block:block]start];
 }
 
-// Twitter API datestamps are UTC
-// Set up the date formatter once. Allocating a
-// new one takes a _long_ time
-+ (NSDateFormatter *)dateFormatter {
-    static NSDateFormatter *formatter = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        formatter = [[NSDateFormatter alloc]init];
-        formatter.locale = [[NSLocale alloc]initWithLocaleIdentifier:@"en_US"];
-        formatter.dateStyle = NSDateFormatterLongStyle;
-        formatter.formatterBehavior = NSDateFormatterBehavior10_4;
-        formatter.dateFormat = @"EEE MMM dd HH:mm:ss ZZZZ yyyy";
-    });
-    return formatter;
-}
-
-+ (FHSTwitterEngine *)sharedEngine {
-    static FHSTwitterEngine *sharedInstance = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedInstance = [[[self class]alloc]init];
-    });
-    return sharedInstance;
-}
-
-//
-// Access Token Management
-//
+#pragma mark - Access Tokens
 
 - (void)loadAccessToken {
     NSString *savedHttpBody = _loadAccessTokenBlock?_loadAccessTokenBlock():[[NSUserDefaults standardUserDefaults]objectForKey:@"SavedAccessHTTPBody"];
@@ -1209,9 +1216,7 @@
 	self.accessToken = nil;
 }
 
-//
-// Consumer key pair manament
-//
+#pragma mark - Consumer Keys
 
 - (void)clearConsumer {
     self.consumerKey = nil;

@@ -1187,10 +1187,10 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
 #pragma mark Misc.
 
 /**
- Initializes `FHSTwitterEngine`.
+ Gets the shared instance of `FHSTwitterEngine`.
  Never call -[FHSTwitterEngine init] directly.
  */
-+ (FHSTwitterEngine *)sharedEngine;
++ (instancetype)shared;
 
 
 /**

@@ -19,6 +19,7 @@
 		9B31B96215E56E34003FC89D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96115E56E34003FC89D /* Foundation.framework */; };
 		9B31B96415E56E34003FC89D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96315E56E34003FC89D /* CoreGraphics.framework */; };
 		F106B12318CE6562007F68B5 /* NSURL+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */; };
+		F11270A819832743005F309D /* StreamParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F11270A719832743005F309D /* StreamParser.m */; };
 		F1127D381981D59200BE6469 /* NSURLRequest+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */; };
 		F1127D3B1982A44200BE6469 /* NSMutableURLRequest+OAuth.m in Sources */ = {isa = PBXBuildFile; fileRef = F1127D3A1982A44200BE6469 /* NSMutableURLRequest+OAuth.m */; };
 		F1127D3E1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F1127D3D1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m */; };
@@ -57,6 +58,8 @@
 		F106B12118CE6562007F68B5 /* NSURL+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+FHSTE.h"; sourceTree = "<group>"; };
 		F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+FHSTE.m"; sourceTree = "<group>"; };
 		F106B12418CEA3A3007F68B5 /* FHSDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FHSDefines.h; sourceTree = "<group>"; };
+		F11270A619832743005F309D /* StreamParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamParser.h; sourceTree = "<group>"; };
+		F11270A719832743005F309D /* StreamParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StreamParser.m; sourceTree = "<group>"; };
 		F1127D361981D59200BE6469 /* NSURLRequest+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLRequest+FHSTE.h"; sourceTree = "<group>"; };
 		F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLRequest+FHSTE.m"; sourceTree = "<group>"; };
 		F1127D391982A44200BE6469 /* NSMutableURLRequest+OAuth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+OAuth.h"; sourceTree = "<group>"; };
@@ -208,6 +211,8 @@
 			children = (
 				F1CC819618EF76B6002468D0 /* FHSStream.h */,
 				F1CC819718EF76B6002468D0 /* FHSStream.m */,
+				F11270A619832743005F309D /* StreamParser.h */,
+				F11270A719832743005F309D /* StreamParser.m */,
 				F1CC819818EF76B6002468D0 /* FHSToken.h */,
 				F1CC819918EF76B6002468D0 /* FHSToken.m */,
 			);
@@ -279,6 +284,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F11270A819832743005F309D /* StreamParser.m in Sources */,
 				9B2A1BC415E805D1007E66E0 /* AppDelegate.m in Sources */,
 				9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */,
 				F17DCD1018CDF9A2005382F4 /* FHSTwitterEngine+Requests.m in Sources */,

@@ -81,7 +81,7 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @autoreleasepool {
-            id res = [[FHSTwitterEngine sharedEngine]getRequestToken];
+            id res = [[FHSTwitterEngine shared]getRequestToken];
 
             if ([res isKindOfClass:[NSString class]]) {
                 self.requestToken = [FHSToken tokenWithHTTPResponseBody:(NSString *)res];
@@ -112,7 +112,7 @@ static NSString * const pinJS = @"var d=document.getElementById('oauth-pin')||do
 - (void)gotPin:(NSString *)pin {
     _requestToken.verifier = pin;
     
-    NSError *res = [[FHSTwitterEngine sharedEngine]finishAuthWithRequestToken:_requestToken];
+    NSError *res = [[FHSTwitterEngine shared]finishAuthWithRequestToken:_requestToken];
     
     if (_block) _block(NO, res);
     

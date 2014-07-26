@@ -13,7 +13,7 @@
 - (void)authenticateWithAccount:(ACAccount *)account completion:(ReverseAuthCompletionBlock)completionBlock {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @autoreleasepool {
-            id res = [FHSTwitterEngine.sharedEngine getRequestTokenReverseAuth:YES];
+            id res = [FHSTwitterEngine.shared getRequestTokenReverseAuth:YES];
             
             dispatch_sync(dispatch_get_main_queue(), ^{
                 if ([res isKindOfClass:[NSString class]]) {

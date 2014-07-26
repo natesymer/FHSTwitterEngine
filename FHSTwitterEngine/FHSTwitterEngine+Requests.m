@@ -8,6 +8,7 @@
 
 #import "FHSTwitterEngine+Requests.h"
 #import "NSMutableURLRequest+OAuth.h"
+#import "FHSStream.h"
 
 @implementation FHSTwitterEngine (Requests)
 
@@ -67,13 +68,14 @@
     return request;
 }
 
-- (id)streamingRequestForURL:(NSURL *)url HTTPMethod:(NSString *)method parameters:(NSDictionary *)params {
-    NSError *authError = [self checkAuth];
-    if (authError) return authError;
+#pragma mark - Streaming
+
+- (void)streamURL:(NSURL *)url httpMethod:(NSString *)httpMethod params:(NSDictionary *)params block:(id)block {
+    [[FHSStream streamWithURL:url httpMethod:kPOST parameters:params timeout:streamingTimeoutInterval block:block]start];
+}
+
+- (void)stopStreaming {
     
-    NSMutableURLRequest *request = [self requestWithURL:url HTTPMethod:method params:params];
-    request.timeoutInterval = MAXFLOAT; // Disable timeout
-    return request;
 }
 
 #pragma mark - Request Sending

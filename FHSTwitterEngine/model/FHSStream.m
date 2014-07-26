@@ -9,36 +9,48 @@
 #import "FHSStream.h"
 #import "FHSTwitterEngine+Requests.h"
 #import "NSError+FHSTE.h"
+#import "StreamParser.h"
 
 @interface FHSStream () <NSURLConnectionDelegate>
 
 @property (nonatomic, strong) NSURLConnection *connection;
-@property (nonatomic, strong) NSMutableDictionary *params;
-@property (nonatomic, strong) NSString *URL;
-@property (nonatomic, strong) NSString *HTTPMethod;
-@property (nonatomic, assign) float timeout;
 
 @end
 
 @implementation FHSStream
 
-+ (instancetype)streamWithURL:(NSString *)url httpMethod:(NSString *)httpMethod parameters:(NSDictionary *)params timeout:(float)timeout block:(StreamBlock)block {
++ (instancetype)streamWithURL:(NSURL *)url httpMethod:(NSString *)httpMethod parameters:(NSDictionary *)params timeout:(float)timeout block:(StreamBlock)block {
     return [[[self class]alloc]initWithURL:url httpMethod:httpMethod parameters:params timeout:timeout block:block];
 }
 
-- (instancetype)initWithURL:(NSString *)url httpMethod:(NSString *)httpMethod parameters:(NSDictionary *)params timeout:(float)timeout block:(StreamBlock)block {
+- (instancetype)initWithURL:(NSURL *)url httpMethod:(NSString *)httpMethod parameters:(NSDictionary *)params timeout:(float)timeout block:(StreamBlock)block {
     self = [super init];
     if (self) {
-        self.timeout = timeout;
-        self.URL = url;
-        self.HTTPMethod = httpMethod;
-        self.params = (params == nil)?[NSMutableDictionary dictionaryWithCapacity:2]:params.mutableCopy;
-        _params[@"delimited"] = @"length"; // absolutely necessary
-        _params[@"stall_warnings"] = @"true";
+        _timeout = timeout;
+        _url = url;
+        _HTTPMethod = httpMethod;
+        
+        if (!params) {
+            _parameters = @{
+                            @"delimited": @"length", // This should never be changed.
+                            @"stall_warnings": @"true"
+                            };
+        } else {
+            _parameters = [NSDictionary dictionaryWithDictionary:params];
+        }
+        
         self.block = block;
     }
     return self;
 }
+
+- (NSURLRequest *)request {
+    NSMutableURLRequest *request = [FHSTwitterEngine.shared requestWithURL:_url HTTPMethod:_HTTPMethod params:_parameters];
+    request.timeoutInterval = MAXFLOAT; // Disable timeout
+    return request;
+}
+
+#pragma mark - NSURLConnection
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
     
@@ -52,10 +64,27 @@
         [self stop];
     }
 }
+// Stream Format:
+// <length>\n<length-1 characters>
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    int bytesExpected = 0;
+    
+    NSArray *messages = [StreamParser parseStreamData:data];
+    
+    for (NSData *message in messages) {
+        BOOL stop = NO;
+        NSLog(@"message: %@",message);
+        if (_block) _block([NSJSONSerialization JSONObjectWithData:message options:NSJSONReadingMutableContainers error:0], &stop);
+        
+        if (stop) {
+            [self stop];
+        }
+    }
+    
+    /*int bytesExpected = 0;
     NSMutableString *message = nil;
+    
+    NSLog(@"%@",[[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding]);
 
     NSString *response = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
 
@@ -109,7 +138,7 @@
         } else {
             [self keepAlive];
         }
-    }
+    }*/
 }
 
 - (void)keepAlive {
@@ -123,16 +152,8 @@
 }
 
 - (void)start {
-    id req = [[FHSTwitterEngine sharedEngine]streamingRequestForURL:[NSURL URLWithString:_URL] HTTPMethod:_HTTPMethod parameters:_params];
-    
-    if ([req isKindOfClass:[NSURLRequest class]]) {
-        self.connection = [NSURLConnection connectionWithRequest:req delegate:self];
-        [self performSelector:@selector(stop) withObject:nil afterDelay:_timeout];
-    } else {
-        if (_block) {
-            _block(req, NULL);
-        }
-    }
+    self.connection = [NSURLConnection connectionWithRequest:self.request delegate:self];
+    [self performSelector:@selector(stop) withObject:nil afterDelay:_timeout];
 }
 
 + (NSString *)sanitizeTrackParameter:(NSArray *)keywords {
