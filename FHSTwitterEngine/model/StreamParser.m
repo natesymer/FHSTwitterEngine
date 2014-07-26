@@ -22,6 +22,13 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
     char *chars = (char *)data.bytes;
     unsigned long length = data.length;
     
+    // Return the data is nil or has no length
+    if (length == 0) return @[];
+    
+    // Return if the first character is not numeric.
+    char firstChar = chars[0];
+    if (firstChar < '0' || firstChar > '9') return @[];
+    
     //
     // TODO: Check for delimiting kind
     //       (Right now `length` delimiting is assumed)
@@ -186,6 +193,7 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
             continue;
         } else {
             // In the length delimiter field and there's a non-numerical character
+            // TODO: This part of the code should probably return the already parsed messages or skip ahead to the next message
             position++;
             continue;
         }
