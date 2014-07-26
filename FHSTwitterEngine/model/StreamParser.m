@@ -49,10 +49,15 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
     while (position < length) {
         char currChar = chars[position];
         if ((currChar > '0' && currChar < '9') && !inMessage) {
+            
+            // Create a buffer to hold bytes that
+            // Represent the length of the message
             unsigned long delimBufLength = kDelimiterBufferStartingLength;
             unsigned long delimBufCount = 0;
             char *delimBuf = malloc(sizeof(char)*delimBufLength);
 
+            // Read characters into the buffer until
+            // the characters are no longer numeric
             while (currChar >= '0' && currChar <= '9') {
                 // Expand buffer accordingly
                 if (delimBufCount+1 > delimBufLength) {
@@ -69,46 +74,61 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                 currChar = chars[position];
             }
             
+            // If the next two characters are a CRLF
+            // setup the message buffer
             if (currChar == '\r' && chars[position+1] == '\n') {
+                // this is an assumption that delimBuf exists
                 bufferLength = atoi(delimBuf);
                 free(delimBuf);
                 delimBuf = NULL;
                 
-                position += 2; // accommodate for the LF
+                // Move to the first character in the message
+                position += 2;
                 messageStart = position;
                 currChar = chars[position];
+                inMessage = 1;
 
-                if (position+bufferLength > length) {
-                    
-                    unsigned long numLeftoverBytes = bufferLength-(length-(position+1));
-                    NSLog(@"Leftover Bytes: %lu",numLeftoverBytes);
-                    
+                
+                // Check if the data includes the whole message
+                
+                unsigned long remainingBytes = length-(position+1);
+                NSLog(@"Leftover Bytes: %lu",remainingBytes);
+                
+                if (bufferLength-remainingBytes > 0) {
                     if (leftoverData) {
-                        // capture leftover data
-                        if (numLeftoverBytes > 0) {
-                            char *leftoverBytes = malloc(sizeof(char)*numLeftoverBytes);
-                        
-                            for (unsigned long i = 0; i < numLeftoverBytes; i++) {
+                        // Read leftover bytes into a buffer
+                        if (remainingBytes > 0) {
+                            char *leftoverBytes = malloc(sizeof(char)*remainingBytes);
+                            
+                            for (unsigned long i = 0; i < remainingBytes; i++) {
                                 leftoverBytes[i] = chars[position+i];
                             }
                             
-                            *leftoverData = [NSData dataWithBytes:leftoverBytes length:numLeftoverBytes];
+                            // Use the pointer to return the leftover data.
+                            *leftoverData = [NSData dataWithBytes:leftoverBytes length:remainingBytes];
+                            
+                            // Free that buffer
                             free(leftoverBytes);
                             leftoverBytes = NULL;
                         }
                     }
                     return messages;
+                } else {
+                    // otherwise, create the message buffer
+                    
+                    if (buffer) {
+                        free(buffer);
+                        buffer = NULL;
+                    }
+                    
+                    buffer = malloc(sizeof(char)*bufferLength);
                 }
-                
-                if (buffer) {
-                    free(buffer);
-                    buffer = NULL;
-                }
-                
-                buffer = malloc(sizeof(char)*bufferLength);
-                
-                inMessage = 1;
             } else if (delimBuf) {
+                if (!buffer) {
+                    // Ensure the message buffer length is always accurate.
+                    // We might have changed it, and this may change it back.
+                    bufferLength = 0;
+                }
                 free(delimBuf);
                 delimBuf = NULL;
             }
@@ -116,31 +136,43 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
             continue;
         } else {
             if (!buffer) {
-                // It's the second half of some leftover data...
-                // Let's skip it.
+                // If no message length has been established
+                // (this means this payload contains the other
+                // half of the previous payload's last and incomplete message)
                 
-                // look for next \r\n and set position to that place
+                // Let's look for the next length delimiter.
+                
+                // Since all messages end with a CRLF (\r\n),
+                // Let's look for it. It will tell us where the next
+                // length delimiter is.
                 while (currChar != '\r') {
                     position++;
                     
                     // Could not find a CR
                     if (position == length) {
-                        // Return some error JSON
+                        // This means that this payload did not contain
+                        // any messages, and therefore it's safe to say that
+                        // it contains an error.
                         NSMutableData *errorJson = [[@"{\"error\":\"" dataUsingEncoding:NSUTF8StringEncoding]mutableCopy];
                         [errorJson appendData:data];
                         [errorJson appendData:[@"\"}" dataUsingEncoding:NSUTF8StringEncoding]];
                         return @[errorJson];
                     } else {
+                        // advance the current character
                         currChar = chars[position];
                     }
                 }
                 
+                // move to beginning of length delimiter from CR
                 position += 2;
                 inMessage = 0;
                 continue;
             }
             buffer[position-messageStart] = currChar;
             
+            // If we've got to the end of a message,
+            // let's turn it into an ObjC object and
+            // put it in an array.
             if (position == messageStart+bufferLength-1) {
                 [messages addObject:[NSData dataWithBytes:buffer length:bufferLength]];
                 inMessage = 0;
