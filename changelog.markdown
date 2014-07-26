@@ -112,34 +112,21 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 
 - Added streaming
 
-OAuthConsumer
-===
-*Version numbers below are for **\_my\_** version of OAuthConsumer. I modified OAuthConsumer almost beyond recognition...*
+Version 2.0
+==
 
-**Pre-1.0 Versions**
+**Complete rewrite!!!!**
 
-- Condense code
-- Weed out useless stuff
+- Rewrote OAuth code to follow the spec more closely.
+- Only do multipart requests where necessary.
+- Custom Twitter stream parser
+	* Written in raw C
+	* Very little extra data conversion
+	* Stitches together incomplete data (Twitter chunks streams)
+	* High tolerance for errors in streams (like the bits of SSL data that sometimes appear in the streams)
+- Implemented more endpoints
+- Renamed clunky methods
+- Improved error handling and authentication
+- Removed excess abstraction
 
-**Version 1.0**
-
-- Fix some memory leaks
-
-**Version 1.1**
-
-- Fix most remaining memory leaks
-- Add better support the pin/verifier property in `OAToken` (The version of `OAuthConsumer` in `SA_OAuthTwitterEngine` uses the `pin` property)
-
-**Version 1.2**
-
-- Fix some potential memory leaks
-
-**Version 1.2.1**
-
-- Add convenience init methods to `OAMutableURLRequest`, `OAToken`, and `OAConsumer`
-- Moved `fetchDataForRequest:` to OAMutableURLRequest.m, removed `OAAsynchronousDataFetcher`
-
-**Version 1.2.2**
-
-- Just restructure and remove @synthesizes
 

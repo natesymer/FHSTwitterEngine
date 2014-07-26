@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "FHSTwitterEngine.h"
 
-#define kFHSTwitterEngineRepairSplitMessages 0
+#define kFHSTwitterEngineRepairSplitMessages 1
 
 @interface FHSStream : NSObject
 
