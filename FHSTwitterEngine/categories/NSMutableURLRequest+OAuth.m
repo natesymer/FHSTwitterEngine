@@ -10,8 +10,8 @@
 #import <CommonCrypto/CommonHMAC.h>
 #import "NSString+FHSTE.h"
 #import "NSURL+FHSTE.h"
-#import "NSURLRequest+FHSTE.h"
 #import "NSData+FHSTE.h"
+#import "NSMutableURLRequest+FHSTE.h"
 
 @implementation NSMutableURLRequest (OAuth)
 
@@ -70,8 +70,8 @@
     // Put all params into one hash
     NSMutableDictionary *requestParameters = [NSMutableDictionary dictionary];
     [requestParameters addEntriesFromDictionary:oauth]; // OAuth headers
-    if ([self.HTTPMethod isEqualToString:@"GET"]) [requestParameters addEntriesFromDictionary:self.URL.queryDictionary]; // GET query params (already encoded)
-    if (self.isW3FormURLEncoded) [requestParameters addEntriesFromDictionary:self.postBodyDictionary]; // x-www-form-urlencoded POST params (already encoded)
+    if ([self.HTTPMethod isEqualToString:@"GET"]) [requestParameters addEntriesFromDictionary:self.getParameters]; // GET query params (already encoded)
+    if (self.isW3FormURLEncoded) [requestParameters addEntriesFromDictionary:self.postParameters]; // x-www-form-urlencoded POST params (already encoded)
     
     // Make parameter pairs
     NSMutableArray *paramPairs = [NSMutableArray arrayWithCapacity:requestParameters.count];
@@ -93,7 +93,7 @@
     // OAuth Spec, 9.1.2 "Construct Request URL"
     //
     // Remove parameters, lowercase, URLEncode
-    NSString *requestURL = self.URL.absoluteStringWithoutParameters.lowercaseString.fhs_URLEncode;
+    NSString *requestURL = self.URL.URLWithoutQuery.absoluteString.lowercaseString.fhs_URLEncode;
     
     
     // OAuth Spec, Section 9.1.3 "Concatenate Request Elements"

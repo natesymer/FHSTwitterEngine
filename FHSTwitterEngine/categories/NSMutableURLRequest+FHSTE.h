@@ -10,6 +10,10 @@
 
 @interface NSMutableURLRequest (FHSTE)
 
+- (BOOL)isW3FormURLEncoded;
+- (NSDictionary *)postParameters;
+- (NSDictionary *)getParameters;
+
 + (NSMutableURLRequest *)defaultRequestWithURL:(NSURL *)url;
 + (NSMutableURLRequest *)GETRequestWithURL:(NSURL *)url params:(NSDictionary *)params;
 + (NSMutableURLRequest *)formURLEncodedPOSTRequestWithURL:(NSURL *)url params:(NSDictionary *)params;

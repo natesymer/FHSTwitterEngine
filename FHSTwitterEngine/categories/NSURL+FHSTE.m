@@ -10,14 +10,14 @@
 
 @implementation NSURL (FHSTwitterEngine)
 
-- (NSString *)absoluteStringWithoutParameters {
-    return [[NSURL alloc]initWithScheme:self.scheme host:self.host path:self.path].absoluteString;
+- (NSURL *)URLWithoutQuery {
+    return [[NSURL alloc]initWithScheme:self.scheme host:self.host path:self.path];
 }
 
-- (NSDictionary *)queryDictionary {
+- (NSDictionary *)queryParameters {
     NSArray *paramPairs = [self.query componentsSeparatedByString:@"&"];
     NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:paramPairs.count];
-
+    
     for (NSString *param in paramPairs) {
         NSArray *parts = [param componentsSeparatedByString:@"="];
         if (parts.count < 2) continue;

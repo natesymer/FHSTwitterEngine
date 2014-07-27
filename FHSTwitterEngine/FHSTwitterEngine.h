@@ -39,7 +39,6 @@
 #import "NSString+FHSTE.h"
 #import "NSObject+FHSTE.h"
 #import "NSURL+FHSTE.h"
-#import "NSURLRequest+FHSTE.h"
 #import "NSMutableURLRequest+FHSTE.h"
 
 /**
@@ -1023,38 +1022,32 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
 /// @name OAuth
 
 /**
- Allows a Consumer application to use an OAuth request_token to request user authorization. This method is a replacement of Section 6.2 of the OAuth 1.0 authentication flow for applications using the callback authentication flow.  API endpoint: GET oauth/authenticate.
- */
-// TODO: GET oauth/authenticate
-
-
-/**
- Allows a Consumer application to use an OAuth Request Token to request user authorization. This method fulfills Section 6.2 of the OAuth 1.0 authentication flow. Desktop applications must use this method (and cannot use GET oauth/authenticate). Please use HTTPS for this method. API endpoint: GET oauth/authorize.
- */
-// TODO: GET oauth/authorize
-
-
-/**
- Allows a Consumer application to exchange the OAuth Request Token for an OAuth Access Token. This method fulfills Section 6.3 of the OAuth 1.0 authentication flow. The OAuth access token may also be used for xAuth operations. Please use HTTPS for this method. API endpoint: POST oauth/access_token.
- */
-// TODO: POST oauth/access_token
-
-
-/**
- Allows a Consumer application to obtain an OAuth Request Token to request user authorization. API endpoint: POST oauth/request_token.
+ (Semi-Private) Allows a Consumer application to obtain an OAuth Request Token to request user authorization. API endpoint: POST oauth/request_token.
  */
 - (id)getRequestToken;
-- (id)getRequestTokenReverseAuth:(BOOL)reverseAuth; // for use with the iOS integrated twitter accounts
 
 /**
- Allows a registered application to obtain an OAuth 2 Bearer Token, which can be used to make API requests on an application's own behalf, without a user context. This is called Application-only authentication. A Bearer Token may be invalidated using oauth2/invalidate_token. API endpoint: POST oauth2/token.
+ (Semi-Private) Allows a Consumer application to obtain an OAuth Request Token to request user authorization. API endpoint: POST oauth/request_token.
+ @param reverseAuth Whether or not to include parameters for reverse auth.
  */
-// TODO: POST oauth2/token
+- (id)getRequestTokenReverseAuth:(BOOL)reverseAuth;
 
 /**
- Allows a registered application to revoke an issued OAuth 2 Bearer Token by presenting its client credentials. Once a Bearer Token has been invalidated, new creation attempts will yield a different Bearer Token and usage of the invalidated token will no longer be allowed. API endpoint: oauth2/invalidate_token.
+ (Semi-Private) Promotes a request token to an access token.
+ @param reqToken Request token `FHSToken`. It should include a key, secret, and verifier.
+ @return A Boolean that specifies whether the request was successful.
  */
-// TODO: POST oauth2/invalidate_token
+- (NSError *)finishAuthWithRequestToken:(FHSToken *)reqToken;
+
+/**
+ Authenticates using xAuth.
+ @param username Username for xAuth.
+ @param password Password for xAuth.
+ */
+- (NSError *)authenticateWithUsername:(NSString *)username password:(NSString *)password;
+
+//
+// TODO: OAuth2 app-only auth
 
 
 #pragma mark - Help
@@ -1089,16 +1082,14 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
  */
 - (id)getRateLimitStatus;
 
-
-#pragma mark - Non-API
-/// @name Non-API
-
-
-#pragma mark Test
 /**
  Tests the Twitter service. API endpoint: help/test.
  */
 - (id)testService;
+
+
+#pragma mark - Non-API
+/// @name Non-API
 
 #pragma mark TwitPic (photo upload)
 
@@ -1110,7 +1101,6 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
  */
 - (id)uploadImageToTwitPic:(UIImage *)image withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 
-
 /**
  Posts a Tweet with an image using TwitPic.
  @param imageData Image data of image to post.
@@ -1119,23 +1109,14 @@ Returns the top 10 trending topics for a specific WOEID, if trending information
  */
 - (id)uploadImageDataToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 
-
-#pragma mark Login and Auth
-
 /**
- OAuth.
- @param reqToken Request token `FHSToken`.
- @return A Boolean that specifies whether the request was successful.
+ Posts a Tweet with an image using TwitPic.
+ @param imageData Image data of image to post.
+ @param contentType The MIMEType of the imageData
+ @param message Message to post (optional).
+ @param twitPicAPIKey TwitPic API key.
  */
-- (NSError *)finishAuthWithRequestToken:(FHSToken *)reqToken;
-
-
-/**
- Authenticates using xAuth.
- @param username Username for xAuth.
- @param password Password for xAuth.
- */
-- (NSError *)authenticateWithUsername:(NSString *)username password:(NSString *)password;
+- (id)uploadImageDataToTwitPic:(NSData *)imageData contentType:(NSString *)contentType withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 
 
 #pragma mark Access Token Management

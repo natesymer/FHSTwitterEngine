@@ -32,12 +32,12 @@
 // These are internal
 #import "FHSStream.h"
 #import "FHSTwitterEngine+Requests.h"
+#import "FHSTwitterEngine+Streaming.h"
 #import "NSMutableURLRequest+OAuth.h"
 
 @interface FHSTwitterEngine ()
 
 @property BOOL shouldClearConsumer;
-@property (nonatomic, strong) NSMutableArray *activeStreams;
 
 @end
 
@@ -1074,16 +1074,19 @@
 }
 
 - (id)uploadImageToTwitPic:(UIImage *)image withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
-    return [self uploadImageDataToTwitPic:UIImagePNGRepresentation(image) withMessage:message twitPicAPIKey:twitPicAPIKey];
+    return [self uploadImageDataToTwitPic:UIImagePNGRepresentation(image) contentType:@"image/png" withMessage:message twitPicAPIKey:twitPicAPIKey];
+}
+
+- (id)uploadImageDataToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
+    NSString *e = [imageData appropriateFileExtension];
+    if (!e) return [NSError badRequestError];
+    
+    return [self uploadImageDataToTwitPic:imageData contentType:[NSString stringWithFormat:@"image/%@",e] withMessage:message twitPicAPIKey:twitPicAPIKey];
 }
 
 // Works by generating auth for twitter
 // Then sending it to TwitPic
-- (id)uploadImageDataToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
-    NSString *appropriateExtension = [imageData appropriateFileExtension];
-    
-    if (!appropriateExtension) return [NSError badRequestError];
-    
+- (id)uploadImageDataToTwitPic:(NSData *)imageData contentType:(NSString *)contentType withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey {
     NSURL *verifyURL = [NSURL URLWithString:url_account_verify_credentials];
     NSMutableURLRequest *credVerifyReq = [NSMutableURLRequest requestWithURL:verifyURL];
     NSString *oauthHeaders = [credVerifyReq OAuthHeaderWithToken:_accessToken.key
@@ -1098,9 +1101,9 @@
                              @"key": twitPicAPIKey,
                              @"media": @{
                                      @"type": @"file",
-                                     @"filename": [NSString stringWithFormat:@"%@.%@",NSString.fhs_UUID,appropriateExtension],
+                                     @"filename": [NSString stringWithFormat:@"%@.%@",NSString.fhs_UUID,imageData.appropriateFileExtension],
                                      @"data": imageData,
-                                     @"mimetype": [NSString stringWithFormat:@"image/%@",appropriateExtension]
+                                     @"mimetype": contentType
                                      }
                              };
     
@@ -1141,7 +1144,7 @@
         params[@"locations"] = [locBox componentsJoinedByString:@","];
     }
     
-    [[FHSStream streamWithURL:[NSURL URLWithString:url_stream_user] httpMethod:kPOST parameters:params timeout:streamingTimeoutInterval block:block]start]; // Twitter says it should be GET, but on further investigation of the docs, POST works too.
+    [self streamURL:[NSURL URLWithString:url_stream_user] httpMethod:kPOST params:params block:block]; // Twitter says it should be GET, but on further investigation of the docs, POST works too.
 }
 
 - (void)streamPublicStatusesForUsers:(NSArray *)users keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block {
@@ -1169,15 +1172,15 @@
         params[@"locations"] = [locBox componentsJoinedByString:@","];
     }
     
-    [[FHSStream streamWithURL:[NSURL URLWithString:url_stream_statuses_filter] httpMethod:kPOST parameters:params timeout:streamingTimeoutInterval block:block]start];
+    [self streamURL:[NSURL URLWithString:url_stream_statuses_filter] httpMethod:kPOST params:params block:block];
 }
 
 - (void)streamSampleStatusesWithBlock:(StreamBlock)block {
-    [[FHSStream streamWithURL:[NSURL URLWithString:url_stream_statuses_sample] httpMethod:kGET parameters:nil timeout:streamingTimeoutInterval block:block]start];
+    [self streamURL:[NSURL URLWithString:url_stream_statuses_sample] httpMethod:kGET params:nil block:block];
 }
 
 - (void)streamFirehoseWithBlock:(StreamBlock)block {
-    [[FHSStream streamWithURL:[NSURL URLWithString:url_stream_statuses_firehose] httpMethod:kGET parameters:nil timeout:streamingTimeoutInterval block:block]start];
+    [self streamURL:[NSURL URLWithString:url_stream_statuses_firehose] httpMethod:kGET params:nil block:block];
 }
 
 #pragma mark - Access Tokens
@@ -1339,7 +1342,6 @@
         
         if (httpBody.length > 0) {
             [self storeAccessToken:httpBody];
-            NSLog(@"%@, %@",_accessToken.key, _accessToken.secret);
         } else {
             return [NSError errorWithDomain:FHSErrorDomain code:422 userInfo:@{NSLocalizedDescriptionKey:@"The request was well-formed but was unable to be followed due to semantic errors.", @"request":r}];
         }

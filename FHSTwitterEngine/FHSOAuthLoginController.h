@@ -25,13 +25,6 @@ typedef void(^LoginBlock)(BOOL cancelled, NSError *error);
 
 @interface FHSOAuthLoginController : UIViewController <UIWebViewDelegate>
 
-
-/**
- The request token.
- */
-//@property (nonatomic, strong) FHSToken *requestToken;
-
-
 /**
  The `LoginBlock` block which returns a `BOOL` and an `NSError`.
  */

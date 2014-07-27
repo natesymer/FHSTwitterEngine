@@ -10,7 +10,7 @@
 
 @interface NSURL (FHSTwitterEngine)
 
-- (NSString *)absoluteStringWithoutParameters;
-- (NSDictionary *)queryDictionary;
+- (NSURL *)URLWithoutQuery;
+- (NSDictionary *)queryParameters;
 
 @end

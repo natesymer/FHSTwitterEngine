@@ -8,7 +8,6 @@
 
 #import "FHSTwitterEngine+Requests.h"
 #import "NSMutableURLRequest+OAuth.h"
-#import "FHSStream.h"
 
 @implementation FHSTwitterEngine (Requests)
 
@@ -72,16 +71,6 @@
     return request;
 }
 
-#pragma mark - Streaming
-
-- (void)streamURL:(NSURL *)url httpMethod:(NSString *)httpMethod params:(NSDictionary *)params block:(id)block {
-    [[FHSStream streamWithURL:url httpMethod:kPOST parameters:params timeout:streamingTimeoutInterval block:block]start];
-}
-
-- (void)stopStreaming {
-    
-}
-
 #pragma mark - Request Sending
 
 - (id)sendRequestWithHTTPMethod:(NSString *)httpmethod URL:(NSURL *)url params:(NSDictionary *)params {
@@ -95,6 +84,8 @@
     if (!res) return [NSError noDataError];
     if ([res isKindOfClass:[NSError class]]) return res;
     
+    [self clearConsumerIfNecessary];
+    
     id parsed = [[NSJSONSerialization JSONObjectWithData:(NSData *)res options:NSJSONReadingMutableContainers error:nil]removeNull];
     
     NSError *error = [self checkError:parsed];
@@ -104,8 +95,6 @@
 }
 
 - (id)sendRequest:(NSURLRequest *)request {
-    [self clearConsumerIfNecessary];
-    
     NSHTTPURLResponse *response = nil;
     NSError *error = nil;
     

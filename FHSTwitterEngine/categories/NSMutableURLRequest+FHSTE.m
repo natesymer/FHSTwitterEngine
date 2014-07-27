@@ -9,8 +9,37 @@
 #import "NSMutableURLRequest+FHSTE.h"
 #import "NSString+FHSTE.h"
 #import "NSURL+FHSTE.h"
+#import "FHSDefines.h"
 
 @implementation NSMutableURLRequest (FHSTE)
+
+- (BOOL)isW3FormURLEncoded {
+    if ([self.HTTPMethod isEqualToString:@"GET"]) return NO;
+    if (![self valueForHTTPHeaderField:@"Content-Type"]) return YES;
+    if ([[self valueForHTTPHeaderField:@"Content-Type"]rangeOfString:kW3FormURLEncoded].location != NSNotFound) return YES;
+    return NO;
+}
+
+- (NSDictionary *)getParameters {
+    return [self.URL queryParameters];
+}
+
+- (NSDictionary *)postParameters {
+    // Enforce content type
+    if (![self isW3FormURLEncoded]) return @{};
+    
+    NSString *postBody = [[NSString alloc]initWithData:self.HTTPBody encoding:NSUTF8StringEncoding];
+    NSArray *paramPairs = [postBody componentsSeparatedByString:@"&"];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:paramPairs.count];
+    
+    for (NSString *param in paramPairs) {
+        NSArray *parts = [param componentsSeparatedByString:@"="];
+        if (parts.count < 2) continue;
+        params[parts[0]] = parts[1];
+    }
+    
+    return params;
+}
 
 #pragma mark - Request Generation
 
@@ -32,7 +61,7 @@
         [paramPairs addObject:paramPair];
     }];
     
-    NSURL *parameterizedURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@?%@",url.absoluteStringWithoutParameters, [paramPairs componentsJoinedByString:@"&"]]];
+    NSURL *parameterizedURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@?%@",url.URLWithoutQuery.absoluteString, [paramPairs componentsJoinedByString:@"&"]]];
     
     return [self defaultRequestWithURL:parameterizedURL];
 }

@@ -25,10 +25,10 @@
 		F11270B119835DF5005F309D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B95F15E56E34003FC89D /* UIKit.framework */; };
 		F11270B719835DF5005F309D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F11270B519835DF5005F309D /* InfoPlist.strings */; };
 		F11270CA198361AE005F309D /* Streaming.m in Sources */ = {isa = PBXBuildFile; fileRef = F11270C9198361AE005F309D /* Streaming.m */; };
-		F1127D381981D59200BE6469 /* NSURLRequest+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */; };
 		F1127D3B1982A44200BE6469 /* NSMutableURLRequest+OAuth.m in Sources */ = {isa = PBXBuildFile; fileRef = F1127D3A1982A44200BE6469 /* NSMutableURLRequest+OAuth.m */; };
 		F1127D3E1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F1127D3D1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m */; };
 		F12A456B18CE384100D6AEFA /* NSError+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */; };
+		F16ADB6E1985AC2C003925A6 /* FHSTwitterEngine+Streaming.m in Sources */ = {isa = PBXBuildFile; fileRef = F16ADB6D1985AC2C003925A6 /* FHSTwitterEngine+Streaming.m */; };
 		F173184018CE1148005C790B /* NSData+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F173183F18CE1148005C790B /* NSData+FHSTE.m */; };
 		F17DCD1018CDF9A2005382F4 /* FHSTwitterEngine+Requests.m in Sources */ = {isa = PBXBuildFile; fileRef = F17DCD0F18CDF9A2005382F4 /* FHSTwitterEngine+Requests.m */; };
 		F17DCD1618CE006F005382F4 /* FHSOAuthLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = F17DCD1518CE006F005382F4 /* FHSOAuthLoginController.m */; };
@@ -82,14 +82,14 @@
 		F11270B619835DF5005F309D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F11270BA19835DF5005F309D /* FHSTwitterEngine Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FHSTwitterEngine Tests-Prefix.pch"; sourceTree = "<group>"; };
 		F11270C9198361AE005F309D /* Streaming.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Streaming.m; sourceTree = "<group>"; };
-		F1127D361981D59200BE6469 /* NSURLRequest+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLRequest+FHSTE.h"; sourceTree = "<group>"; };
-		F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLRequest+FHSTE.m"; sourceTree = "<group>"; };
 		F1127D391982A44200BE6469 /* NSMutableURLRequest+OAuth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+OAuth.h"; sourceTree = "<group>"; };
 		F1127D3A1982A44200BE6469 /* NSMutableURLRequest+OAuth.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableURLRequest+OAuth.m"; sourceTree = "<group>"; };
 		F1127D3C1982A79600BE6469 /* NSMutableURLRequest+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+FHSTE.h"; sourceTree = "<group>"; };
 		F1127D3D1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableURLRequest+FHSTE.m"; sourceTree = "<group>"; };
 		F12A456918CE384100D6AEFA /* NSError+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSError+FHSTE.h"; sourceTree = "<group>"; };
 		F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSError+FHSTE.m"; sourceTree = "<group>"; };
+		F16ADB6C1985AC2C003925A6 /* FHSTwitterEngine+Streaming.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FHSTwitterEngine+Streaming.h"; sourceTree = "<group>"; };
+		F16ADB6D1985AC2C003925A6 /* FHSTwitterEngine+Streaming.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FHSTwitterEngine+Streaming.m"; sourceTree = "<group>"; };
 		F173183E18CE1148005C790B /* NSData+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+FHSTE.h"; sourceTree = "<group>"; };
 		F173183F18CE1148005C790B /* NSData+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+FHSTE.m"; sourceTree = "<group>"; };
 		F17DCD0E18CDF9A2005382F4 /* FHSTwitterEngine+Requests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FHSTwitterEngine+Requests.h"; sourceTree = "<group>"; };
@@ -176,6 +176,8 @@
 				F1E360E318D138E000CBF03D /* FHSTwitterEngine+iOS.m */,
 				F17DCD0E18CDF9A2005382F4 /* FHSTwitterEngine+Requests.h */,
 				F17DCD0F18CDF9A2005382F4 /* FHSTwitterEngine+Requests.m */,
+				F16ADB6C1985AC2C003925A6 /* FHSTwitterEngine+Streaming.h */,
+				F16ADB6D1985AC2C003925A6 /* FHSTwitterEngine+Streaming.m */,
 				F17DCD1418CE006F005382F4 /* FHSOAuthLoginController.h */,
 				F17DCD1518CE006F005382F4 /* FHSOAuthLoginController.m */,
 				F106B12418CEA3A3007F68B5 /* FHSDefines.h */,
@@ -251,8 +253,6 @@
 				F12A456A18CE384100D6AEFA /* NSError+FHSTE.m */,
 				F106B12118CE6562007F68B5 /* NSURL+FHSTE.h */,
 				F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */,
-				F1127D361981D59200BE6469 /* NSURLRequest+FHSTE.h */,
-				F1127D371981D59200BE6469 /* NSURLRequest+FHSTE.m */,
 				F1E5B033198176E9002FC64E /* NSObject+FHSTE.h */,
 				F1E5B034198176E9002FC64E /* NSObject+FHSTE.m */,
 				F1127D3C1982A79600BE6469 /* NSMutableURLRequest+FHSTE.h */,
@@ -377,11 +377,11 @@
 				9B2A1BC415E805D1007E66E0 /* AppDelegate.m in Sources */,
 				9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */,
 				F17DCD1018CDF9A2005382F4 /* FHSTwitterEngine+Requests.m in Sources */,
-				F1127D381981D59200BE6469 /* NSURLRequest+FHSTE.m in Sources */,
 				F17DCD1618CE006F005382F4 /* FHSOAuthLoginController.m in Sources */,
 				9B2A1BC915E805D1007E66E0 /* main.m in Sources */,
 				F173184018CE1148005C790B /* NSData+FHSTE.m in Sources */,
 				F106B12318CE6562007F68B5 /* NSURL+FHSTE.m in Sources */,
+				F16ADB6E1985AC2C003925A6 /* FHSTwitterEngine+Streaming.m in Sources */,
 				F17DCD1B18CE0196005382F4 /* NSString+FHSTE.m in Sources */,
 				F1127D3E1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m in Sources */,
 				F1127D3B1982A44200BE6469 /* NSMutableURLRequest+OAuth.m in Sources */,
