@@ -111,16 +111,19 @@
 }
 
 - (void)keepAlive {
+    _isActive = YES;
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(stop) object:nil];
 }
 
 - (void)stop {
+    _isActive = NO;
     [_connection cancel];
     [_connection unscheduleFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     self.connection = nil;
 }
 
 - (void)start {
+    _isActive = YES;
     self.connection = [NSURLConnection connectionWithRequest:self.request delegate:self];
     [self performSelector:@selector(stop) withObject:nil afterDelay:_timeout];
 }

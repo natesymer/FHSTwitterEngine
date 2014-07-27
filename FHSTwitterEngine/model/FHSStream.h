@@ -31,5 +31,6 @@
 @property (strong, readonly) NSString *HTTPMethod;
 @property (strong, readonly) NSDictionary *parameters;
 @property (readonly) float timeout;
+@property (readonly) BOOL isActive;
 
 @end
