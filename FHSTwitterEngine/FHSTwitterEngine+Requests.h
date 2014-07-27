@@ -23,11 +23,9 @@
 // The heart of FHSTwitterEngine
 - (id)sendRequestWithHTTPMethod:(NSString *)httpmethod URL:(NSURL *)url params:(NSDictionary *)params;
 
-// Generate streaming request used in FHSStream
-- (id)streamingRequestForURL:(NSURL *)url HTTPMethod:(NSString *)method parameters:(NSDictionary *)params;
-
 // Generate an OAuth signed request
 - (NSMutableURLRequest *)requestWithURL:(NSURL *)url HTTPMethod:(NSString *)httpMethod params:(NSDictionary *)params;
+- (NSMutableURLRequest *)requestWithURL:(NSURL *)url HTTPMethod:(NSString *)httpMethod params:(NSDictionary *)params sign:(BOOL)sign;
 
 // DRY up auth & error checking
 - (NSError *)checkAuth;

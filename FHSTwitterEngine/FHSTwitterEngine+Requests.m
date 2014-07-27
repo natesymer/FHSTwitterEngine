@@ -39,12 +39,16 @@
 }
 
 - (void)signRequest:(NSMutableURLRequest *)request withToken:(NSString *)token tokenSecret:(NSString *)tokenSecret verifier:(NSString *)verifier realm:(NSString *)realm {
-    [request signWithToken:self.accessToken.key tokenSecret:self.accessToken.secret verifier:verifier consumerKey:self.consumerKey consumerSecret:self.consumerSecret realm:realm];
+    [request signWithToken:token tokenSecret:tokenSecret verifier:verifier consumerKey:self.consumerKey consumerSecret:self.consumerSecret realm:realm];
 }
 
 #pragma mark - Request Generation
 
 - (NSMutableURLRequest *)requestWithURL:(NSURL *)url HTTPMethod:(NSString *)httpMethod params:(NSDictionary *)params {
+    return [self requestWithURL:url HTTPMethod:httpMethod params:params sign:YES];
+}
+
+- (NSMutableURLRequest *)requestWithURL:(NSURL *)url HTTPMethod:(NSString *)httpMethod params:(NSDictionary *)params sign:(BOOL)sign {
     NSMutableURLRequest *request = nil;
     
     if ([httpMethod isEqualToString:kPOST]) {
@@ -63,7 +67,7 @@
         request = [NSMutableURLRequest GETRequestWithURL:url params:params];
     }
     
-    [self signRequest:request];
+    if (sign) [self signRequest:request];
     
     return request;
 }

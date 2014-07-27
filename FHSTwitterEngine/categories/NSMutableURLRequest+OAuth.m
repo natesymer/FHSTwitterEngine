@@ -23,6 +23,24 @@
                        consumerKey:(NSString *)consumerKey
                     consumerSecret:(NSString *)consumerSecret
                              realm:(NSString *)realm {
+    return [self OAuthHeaderWithToken:token
+                          tokenSecret:tokenSecret
+                             verifier:verifier
+                          consumerKey:consumerKey
+                       consumerSecret:consumerSecret
+                                nonce:[NSString fhs_UUID]
+                            timestamp:@(time(nil)).stringValue
+                                realm:realm];
+}
+
+- (NSString *)OAuthHeaderWithToken:(NSString *)token
+                       tokenSecret:(NSString *)tokenSecret
+                          verifier:(NSString *)verifier
+                       consumerKey:(NSString *)consumerKey
+                    consumerSecret:(NSString *)consumerSecret
+                             nonce:(NSString *)nonce
+                         timestamp:(NSString *)timestamp
+                             realm:(NSString *)realm {
     
     // OAuth Spec, Section 9.1.1 "Normalize Request Parameters"
     //
@@ -33,8 +51,8 @@
     NSMutableDictionary *oauth = @{
                                    @"oauth_consumer_key": consumerKey.fhs_URLEncode,
                                    @"oauth_signature_method": @"HMAC-SHA1",
-                                   @"oauth_timestamp": @(time(nil)).stringValue,
-                                   @"oauth_nonce": [NSString fhs_UUID],
+                                   @"oauth_timestamp": timestamp.fhs_URLEncode,
+                                   @"oauth_nonce": nonce.fhs_URLEncode,
                                    @"oauth_version": @"1.0a"
                                    }.mutableCopy;
     
@@ -111,6 +129,7 @@
           consumerKey:(NSString *)consumerKey
        consumerSecret:(NSString *)consumerSecret
                 realm:(NSString *)realm {
+    
     NSString *header = [self OAuthHeaderWithToken:token tokenSecret:tokenSecret verifier:verifier consumerKey:consumerKey consumerSecret:consumerSecret realm:realm];
     [self setValue:header forHTTPHeaderField:@"Authorization"];
 }

@@ -40,6 +40,7 @@
 		F1E360EA18D157EC00CBF03D /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E360E918D157EC00CBF03D /* Social.framework */; };
 		F1E39F9916645C380049DAB1 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */; };
 		F1E5B035198176E9002FC64E /* NSObject+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F1E5B034198176E9002FC64E /* NSObject+FHSTE.m */; };
+		F1FA668219847AD5000F7072 /* OAuth.m in Sources */ = {isa = PBXBuildFile; fileRef = F1FA668119847AD5000F7072 /* OAuth.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,6 +110,7 @@
 		F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		F1E5B033198176E9002FC64E /* NSObject+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+FHSTE.h"; sourceTree = "<group>"; };
 		F1E5B034198176E9002FC64E /* NSObject+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+FHSTE.m"; sourceTree = "<group>"; };
+		F1FA668119847AD5000F7072 /* OAuth.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OAuth.m; path = ../OAuth.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -222,6 +224,7 @@
 			isa = PBXGroup;
 			children = (
 				F11270C9198361AE005F309D /* Streaming.m */,
+				F1FA668119847AD5000F7072 /* OAuth.m */,
 				F11270B319835DF5005F309D /* Supporting Files */,
 			);
 			path = "FHSTwitterEngine Tests";
@@ -396,6 +399,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11270CA198361AE005F309D /* Streaming.m in Sources */,
+				F1FA668219847AD5000F7072 /* OAuth.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -612,6 +616,7 @@
 				F11270BF19835DF5005F309D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

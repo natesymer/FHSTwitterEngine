@@ -1280,8 +1280,8 @@
     NSURL *url = [NSURL URLWithString:url_oauth_request_token];
     
     // Because the params are all strings, it will be x-www-form-urlencoded
-    // It's also presigned
-    NSMutableURLRequest *r = [self requestWithURL:url HTTPMethod:kPOST params:reverseAuth?@{@"x_auth_mode": @"reverse_auth"}:nil];
+    NSMutableURLRequest *r = [NSMutableURLRequest formURLEncodedPOSTRequestWithURL:url params:reverseAuth?@{@"x_auth_mode": @"reverse_auth"}:nil];
+    [r signWithToken:nil tokenSecret:nil verifier:nil consumerKey:_consumerKey consumerSecret:_consumerSecret realm:nil];
 
     id res = [self sendRequest:r];
     
@@ -1327,8 +1327,9 @@
                              };
     
     NSURL *url = [NSURL URLWithString:url_oauth_access_token];
-    NSMutableURLRequest *r = [self requestWithURL:url HTTPMethod:kPOST params:params];
-    
+    NSMutableURLRequest *r = [NSMutableURLRequest formURLEncodedPOSTRequestWithURL:url params:params];
+    [r signWithToken:nil tokenSecret:nil verifier:nil consumerKey:_consumerKey consumerSecret:_consumerSecret realm:nil];
+
     id res = [self sendRequest:r];
     
     if ([res isKindOfClass:[NSError class]]) {
@@ -1338,6 +1339,7 @@
         
         if (httpBody.length > 0) {
             [self storeAccessToken:httpBody];
+            NSLog(@"%@, %@",_accessToken.key, _accessToken.secret);
         } else {
             return [NSError errorWithDomain:FHSErrorDomain code:422 userInfo:@{NSLocalizedDescriptionKey:@"The request was well-formed but was unable to be followed due to semantic errors.", @"request":r}];
         }
