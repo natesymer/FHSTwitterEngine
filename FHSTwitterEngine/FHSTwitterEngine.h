@@ -629,8 +629,10 @@
 
 /**
  Returns a variety of information about the user specified by the required user_id or screen_name parameter. The author's most recent Tweet will be returned inline when possible. GET users/lookup is used to retrieve a bulk collection of user objects. API endpoint: GET users/show.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
  */
-// TODO: GET users/show
+- (id)getUser:(NSString*)user isID:(BOOL)isID;
 
 
 /**
