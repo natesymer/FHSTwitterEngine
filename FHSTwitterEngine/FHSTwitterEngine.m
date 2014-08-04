@@ -492,6 +492,21 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params] ;
 }
 
+- (id)getRetweetersForTweet:(NSString *)identifier count:(int)count {
+    if (count == 0) {
+        return @[].mutableCopy;
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_statuses_retweeters];
+    
+    NSMutableDictionary *params = @{
+                                    @"count": @(count).stringValue,
+                                    @"id":identifier
+                                    }.mutableCopy;
+    
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:params];
+}
+
 - (id)destroyTweet:(NSString *)identifier {
     if (identifier.length == 0) {
         return [NSError badRequestError];

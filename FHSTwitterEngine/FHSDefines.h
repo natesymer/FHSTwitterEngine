@@ -89,6 +89,7 @@ static NSString * const url_statuses_retweets_of_me = @"https://api.twitter.com/
 static NSString * const url_statuses_user_timeline = @"https://api.twitter.com/1.1/statuses/user_timeline.json";
 static NSString * const url_statuses_metions_timeline = @"https://api.twitter.com/1.1/statuses/mentions_timeline.json";
 static NSString * const url_statuses_update_with_media = @"https://api.twitter.com/1.1/statuses/update_with_media.json";
+static NSString * const url_statuses_retweeters = @"https://api.twitter.com/1.1/statuses/retweeters/ids.json";
 static NSString * const url_statuses_destroy = @"https://api.twitter.com/1.1/statuses/destroy.json";
 static NSString * const url_statuses_show = @"https://api.twitter.com/1.1/statuses/show.json";
 

@@ -263,9 +263,11 @@
 
 
 /**
- Returns a collection of up to 100 user IDs belonging to users who have retweeted the tweet specified by the id parameter. This method offers similar data to GET statuses/retweets/:id and replaces API v1's GET statuses/:id/retweeted_by/ids method. API endpoint: GET statuses/retweeters/ids.
+ Returns a collection of up to 100 user IDs belonging to users who have retweeted the tweet specified by the id parameter (this method offers similar data to GET statuses/retweets/:id and replaces API v1's GET statuses/:id/retweeted_by/ids method). API endpoint: GET statuses/retweeters/ids.
+ @param identifier Tweet id.
+ @param count Number of ids to return
  */
-//TODO: GET statuses/retweeters/ids
+- (id)getRetweetersForTweet:(NSString *)identifier count:(int)count;
 
 
 #pragma mark - Search
