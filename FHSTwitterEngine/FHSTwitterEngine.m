@@ -502,6 +502,10 @@
 }
 
 - (id)getRetweetersForTweet:(NSString *)identifier count:(int)count {
+    if (identifier.length == 0) {
+        return [NSError badRequestError];
+    }
+    
     if (count == 0) {
         return @[].mutableCopy;
     }
@@ -1049,12 +1053,15 @@
 }
 
 - (id)getUser:(NSString*)user isID:(BOOL)isID {
+    if (user.length == 0) {
+        return [NSError badRequestError];
+    }
+    
     NSURL *baseURL = [NSURL URLWithString:url_users_show];
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ (isID?@"user_id":@"screen_name"):user,
                                                                       @"include_entities": (_includeEntities?@"true":@"false"),
                                                                       }];
 }
-
 
 - (id)unblock:(NSString *)username {
     if (username.length == 0) {
