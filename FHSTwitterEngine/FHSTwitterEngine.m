@@ -789,6 +789,10 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
 }
 
+- (id)getProfileBanner:(NSString *)user isID:(BOOL)isID {
+    NSURL *baseURL = [NSURL URLWithString:url_users_profile_banner];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{(isID?@"user_id":@"screen_name"): user}];
+}
 
 - (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count {
     return [self getFavoritesForUser:user isID:isID andCount:count sinceID:nil maxID:nil];

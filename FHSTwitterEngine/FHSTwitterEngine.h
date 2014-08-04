@@ -702,7 +702,7 @@
 /**
  Returns a map of the available size variations of the specified user's profile banner. If the user has not uploaded a profile banner, a HTTP 404 will be served instead.  API endpoint: GET users/profile_banner.
  */
-//TODO: GET users/profile_banner
+- (id)getProfileBanner:(NSString *)user isID:(BOOL)isID;
 
 
 #pragma mark - Suggested Users
