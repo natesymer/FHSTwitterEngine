@@ -113,6 +113,7 @@ static NSString * const url_direct_messages = @"https://api.twitter.com/1.1/dire
 
 static NSString * const url_friendships_no_retweets_ids = @"https://api.twitter.com/1.1/friendships/no_retweets/ids.json";
 static NSString * const url_friendships_update = @"https://api.twitter.com/1.1/friendships/update.json";
+static NSString * const url_friendships_show = @"https://api.twitter.com/1.1/friendships/show.json";
 static NSString * const url_friendships_outgoing = @"https://api.twitter.com/1.1/friendships/outgoing.json";
 static NSString * const url_friendships_incoming = @"https://api.twitter.com/1.1/friendships/incoming.json";
 static NSString * const url_friendships_lookup = @"https://api.twitter.com/1.1/friendships/lookup.json";

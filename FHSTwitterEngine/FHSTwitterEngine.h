@@ -443,9 +443,11 @@
 
 /**
  Returns detailed information about the relationship between two arbitrary users. API endpoint: GET friendships/show.
+ @param sourceUser Source user ID or screen name.
+ @param targetUser Target user ID or screen name.
+ @param isID A Boolean that determines if `sourceUser` and `targetUser` are screen names or user IDs.
  */
-//TODO: GET friendships/show
-
+- (id)getFriendshipForSourceUser:(NSString *)sourceUser targetUser:(NSString*)targetUser isID:(BOOL)isID;
 
 /**
  Gets a friends list for an user. API endpoint: GET friends/list.

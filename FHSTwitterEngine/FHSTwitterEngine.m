@@ -697,6 +697,24 @@
                                                                       }];
 }
 
+- (id)getFriendshipForSourceUser:(NSString *)sourceUser targetUser:(NSString*)targetUser isID:(BOOL)isID {
+    
+    if (sourceUser.length == 0) {
+        return [NSError badRequestError];
+    }
+
+    if (targetUser.length == 0) {
+        return [NSError badRequestError];
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_friendships_show];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     (isID?@"source_id":@"source_screen_name"): sourceUser,
+                                                                     (isID?@"target_id":@"target_screen_name"): targetUser,
+                                                                     }];
+    
+}
+
 - (id)getPendingOutgoingFollowers {
     NSURL *baseURL = [NSURL URLWithString:url_friendships_outgoing];
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{@"stringify_ids": @"true"}];
