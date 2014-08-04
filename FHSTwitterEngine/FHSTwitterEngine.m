@@ -807,6 +807,44 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{(isID?@"user_id":@"screen_name"): user}];
 }
 
+- (id)getUserSuggestionsForSlug:(NSString*)slug lang:(NSString*)lang {
+    if (slug.length == 0) {
+        return [NSError badRequestError];
+    }
+    
+    NSString *stringURL = [NSString stringWithFormat:@"%@/%@.json",url_users_suggestions_slug, slug];
+    NSURL *baseURL = [NSURL URLWithString:stringURL];
+    
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:1];
+    if (lang.length>0) {
+        params[@"lang"] = lang;
+    }
+    
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
+}
+
+- (id)getUserSuggestionsForLanguage:(NSString*)lang {
+    NSURL *baseURL = [NSURL URLWithString:url_users_suggestions];
+    
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:1];
+    if (lang.length>0) {
+        params[@"lang"] = lang;
+    }
+    
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
+}
+
+- (id)getUserSuggestionsStatusesForSlug:(NSString*)slug {
+    if (slug.length == 0) {
+        return [NSError badRequestError];
+    }
+
+    NSString *stringURL = [NSString stringWithFormat:@"%@/%@/members.json",url_users_suggestions_slug, slug];
+    NSURL *baseURL = [NSURL URLWithString:stringURL];
+    
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:nil];
+}
+
 - (id)getFavoritesForUser:(NSString *)user isID:(BOOL)isID andCount:(int)count {
     return [self getFavoritesForUser:user isID:isID andCount:count sinceID:nil maxID:nil];
 }

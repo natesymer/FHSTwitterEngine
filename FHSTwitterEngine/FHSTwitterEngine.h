@@ -707,18 +707,22 @@
 
 /**
  Access the users in a given category of the Twitter suggested user list. It is recommended that applications cache this data for no more than one hour. API endpoint: GET users/suggestions/:slug.
+ @param slug Category slug.
+ @param lang Restricts the suggested categories to the requested language.
  */
-// TODO: GET users/suggestions/:slug
+- (id)getUserSuggestionsForSlug:(NSString*)slug lang:(NSString*)lang;
 
 /**
  Access to Twitter's suggested user list. This returns the list of suggested user categories. The category can be used in GET users/suggestions/:slug to get the users in that category. API endpoint: GET users/suggestions.
+ @param lang Restricts the suggested categories to the requested language. The language must be specified by the appropriate two letter ISO 639-1 representation (optional).
  */
-// TODO: GET users/suggestions
+- (id)getUserSuggestionsForLanguage:(NSString*)lang;
  
 /**
  Access the users in a given category of the Twitter suggested user list and return their most recent status if they are not a protected user. API endpoint: GET users/suggestions/:slug/members.
+ @param slug Category slug.
  */
-// TODO: GET users/suggestions/:slug/members
+- (id)getUserSuggestionsStatusesForSlug:(NSString*)slug;
 
 
 #pragma mark - Favorites

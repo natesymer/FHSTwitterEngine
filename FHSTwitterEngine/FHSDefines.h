@@ -74,6 +74,9 @@ static NSString * const url_users_show = @"https://api.twitter.com/1.1/users/sho
 static NSString * const url_users_profile_banner = @"https://api.twitter.com/1.1/users/profile_banner.json";
 static NSString * const url_users_report_spam = @"https://api.twitter.com/1.1/users/report_spam.json";
 static NSString * const url_users_lookup = @"https://api.twitter.com/1.1/users/lookup.json";
+static NSString * const url_users_suggestions_slug = @"https://api.twitter.com/1.1/users/suggestions";
+static NSString * const url_users_suggestions = @"https://api.twitter.com/1.1/users/suggestions.json";
+
 static NSString * const url_lists_create = @"https://api.twitter.com/1.1/lists/create.json";
 static NSString * const url_lists_show = @"https://api.twitter.com/1.1/lists/show.json";
 static NSString * const url_lists_update = @"https://api.twitter.com/1.1/lists/update.json";
