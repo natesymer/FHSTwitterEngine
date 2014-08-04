@@ -1015,6 +1015,11 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
 }
 
+- (id)updateAccountDeliveryDeviceSMS:(BOOL)sms {
+    NSURL *baseURL = [NSURL URLWithString:url_account_update_delivery_device];
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"device":sms?@"sms":@"none"}];
+}
+
 - (id)lookupUsers:(NSArray *)users areIDs:(BOOL)areIDs {
     if (users.count == 0) {
         return nil;

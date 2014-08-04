@@ -508,10 +508,10 @@
 
 
 /**
- Sets which device Twitter delivers updates to for the authenticating user. Sending none as the device parameter will disable SMS updates. API endpoint:POST account/update_delivery_device.
+ Sets which device Twitter delivers updates to for the authenticating user.  . API endpoint:POST account/update_delivery_device.
+ @param sms Boolean that specifies whether to send updates to SMS. If `NO`, the updates will not be sent.
  */
-// TODO: POST account/update_delivery_device
-
+- (id)updateAccountDeliveryDeviceSMS:(BOOL)sms;
 
 /**
  Updates the profile for the authenticated user. API endpoint: POST account/update_profile.

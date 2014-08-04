@@ -126,6 +126,7 @@ static NSString * const url_account_update_profile_background_image = @"https://
 static NSString * const url_account_update_profile_image = @"https://api.twitter.com/1.1/account/update_profile_image.json";
 static NSString * const url_account_settings = @"https://api.twitter.com/1.1/account/settings.json";
 static NSString * const url_account_update_profile = @"https://api.twitter.com/1.1/account/update_profile.json";
+static NSString * const url_account_update_delivery_device = @"https://api.twitter.com/1.1/account/update_delivery_device.json";
 
 static NSString * const url_favorites_list = @"https://api.twitter.com/1.1/favorites/list.json";
 static NSString * const url_favorites_create = @"https://api.twitter.com/1.1/favorites/create.json";
