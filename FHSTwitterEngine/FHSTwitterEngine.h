@@ -241,7 +241,6 @@
  @param images NSArray of UIImages
  @return The response from the Twitter API.
  */
-
 - (id)postTweet:(NSString *)tweetString withImages:(NSArray *)images;
 
 
@@ -252,15 +251,13 @@
  @param inReplyToString Tweet ID to reply to.
  @return The response from the Twitter API.
  */
-
 - (id)postTweet:(NSString *)tweetString withImages:(NSArray *)images inReplyTo:(NSString *)irt;
 
 
 /**
  Returns information allowing the creation of an embedded representation of a Tweet on third party sites. See the oEmbed specification for information about the response format. API endpoint: GET statuses/oembed.
 */
-//TODO: GET statuses/oembed
-
+- (id)getoEmbedStatus:(NSString*)identifier;
 
 /**
  Returns a collection of up to 100 user IDs belonging to users who have retweeted the tweet specified by the id parameter (this method offers similar data to GET statuses/retweets/:id and replaces API v1's GET statuses/:id/retweeted_by/ids method). API endpoint: GET statuses/retweeters/ids.

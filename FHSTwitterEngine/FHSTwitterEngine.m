@@ -492,6 +492,15 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params] ;
 }
 
+- (id)getoEmbedStatus:(NSString*)identifier {
+    if (identifier.length == 0) {
+        return [NSError badRequestError];
+    }
+    
+    NSURL *baseUrl = [NSURL URLWithString:url_statuses_oembed];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseUrl params:nil];
+}
+
 - (id)getRetweetersForTweet:(NSString *)identifier count:(int)count {
     if (count == 0) {
         return @[].mutableCopy;

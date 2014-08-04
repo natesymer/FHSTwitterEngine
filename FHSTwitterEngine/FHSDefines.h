@@ -92,6 +92,7 @@ static NSString * const url_statuses_update_with_media = @"https://api.twitter.c
 static NSString * const url_statuses_retweeters = @"https://api.twitter.com/1.1/statuses/retweeters/ids.json";
 static NSString * const url_statuses_destroy = @"https://api.twitter.com/1.1/statuses/destroy.json";
 static NSString * const url_statuses_show = @"https://api.twitter.com/1.1/statuses/show.json";
+static NSString * const url_statuses_oembed = @"https://api.twitter.com/1.1/statuses/oembed.json";
 
 static NSString * const url_blocks_exists = @"https://api.twitter.com/1.1/blocks/exists.json";
 static NSString * const url_blocks_blocking = @"https://api.twitter.com/1.1/blocks/blocking.json";
