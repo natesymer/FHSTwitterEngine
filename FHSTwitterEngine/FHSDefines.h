@@ -70,6 +70,8 @@ static NSString * const url_oauth_request_token = @"https://api.twitter.com/oaut
 static NSString * const url_search_tweets = @"https://api.twitter.com/1.1/search/tweets.json";
 
 static NSString * const url_users_search = @"https://api.twitter.com/1.1/users/search.json";
+static NSString * const url_users_contributees = @"https://api.twitter.com/1.1/users/contributees.json";
+static NSString * const url_users_contributors = @"https://api.twitter.com/1.1/users/contributors.json";
 static NSString * const url_users_show = @"https://api.twitter.com/1.1/users/show.json";
 static NSString * const url_users_profile_banner = @"https://api.twitter.com/1.1/users/profile_banner.json";
 static NSString * const url_users_report_spam = @"https://api.twitter.com/1.1/users/report_spam.json";

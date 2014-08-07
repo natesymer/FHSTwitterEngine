@@ -642,14 +642,20 @@
 
 /**
  Returns a collection of users that the specified user can "contribute" to. API endpoint: GET users/contributees.
-*/
-// TODO: GET users/contributees
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @param skipStatus A Boolean that determines if statuses are included in the returned user objects.
+ */
+- (id)getContributees:(NSString *)user isID:(BOOL)isID skipStatus:(BOOL)skipStatus;
 
 
 /**
  Returns a collection of users who can contribute to the specified account. API endpoint: GET users/contributors.
+ @param user The user ID or screen name.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @param skipStatus A Boolean that determines if statuses are included in the returned user objects.
  */
-// TODO: GET users/contributors
+- (id)getContributors:(NSString *)user isID:(BOOL)isID skipStatus:(BOOL)skipStatus;
 
 
 /**

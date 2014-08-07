@@ -133,6 +133,32 @@
                                                                      }];
 }
 
+- (id)getContributees:(NSString *)user isID:(BOOL)isID skipStatus:(BOOL)skipStatus {
+    if (user.length == 0) {
+        return [NSError badRequestError];
+    }
+
+    NSURL *baseURL = [NSURL URLWithString:url_users_contributees];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     @"skip_status": (skipStatus?@"true":@"false"),
+                                                                     @"include_entities": (_includeEntities?@"true":@"false"),
+                                                                     (isID?@"user_id":@"screen_name"): user,
+                                                                     }];
+}
+
+- (id)getContributors:(NSString *)user isID:(BOOL)isID skipStatus:(BOOL)skipStatus {
+    if (user.length == 0) {
+        return [NSError badRequestError];
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_users_contributors];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     @"skip_status": (skipStatus?@"true":@"false"),
+                                                                     @"include_entities": (_includeEntities?@"true":@"false"),
+                                                                     (isID?@"user_id":@"screen_name"): user,
+                                                                     }];
+}
+
 - (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
     
     if (count == 0) {
