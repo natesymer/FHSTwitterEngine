@@ -869,9 +869,15 @@
 
 
 /**
- Check if the specified user is a member of the specified list. API endpoint: GET lists/members/show.
+ Check if the specified user is a member of the specified list. Either a list_id or a slug is required. If providing a list_slug, an owner_screen_name or owner_id is also required. API endpoint: GET lists/members/show.
+ @param list List slug or ID.
+ @param isListID A Boolean that determines if `list` is a slug or ID.
+ @param user User screen name or ID.
+ @param isListID A Boolean that determines if `user` is a screen name or ID.
+ @param owner User who owns the list being requested.
+ @param isOwnerID A Boolean that determines if `owner` is a screen name or ID.
  */
-// TODO: GET lists/members/show
+- (id)getMembersShow:(NSString*)list isListID:(BOOL)isListID user:(NSString*)user isUserID:(BOOL)isUserID owner:(NSString*)owner isOwnerID:(BOOL)isOwnerID skipStatus:(BOOL)skipStatus;
 
 
 /**

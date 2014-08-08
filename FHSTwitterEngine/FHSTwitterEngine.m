@@ -324,6 +324,21 @@
     return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:@{@"screen_name": [users componentsJoinedByString:@","]}];
 }
 
+- (id)getMembersShow:(NSString*)list isListID:(BOOL)isListID user:(NSString*)user isUserID:(BOOL)isUserID owner:(NSString*)owner isOwnerID:(BOOL)isOwnerID skipStatus:(BOOL)skipStatus {
+    if (list.length == 0) {
+        return [NSError badRequestError];
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_lists_members_show];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     (isListID?@"list_id":@"slug"): list,
+                                                                     (isUserID?@"user_id":@"screen_name"): user,
+                                                                     (isOwnerID?@"owner_id":@"owner_screen_name"): user,
+                                                                     @"include_entities": (_includeEntities?@"true":@"false"),
+                                                                     @"skip_status": (skipStatus?@"true":@"false"),
+                                                                     }];
+}
+
 - (id)getTimelineForListWithID:(NSString *)listID count:(int)count {
     return [self getTimelineForListWithID:listID count:count sinceID:nil maxID:nil];
 }

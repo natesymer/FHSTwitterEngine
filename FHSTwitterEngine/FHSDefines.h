@@ -85,6 +85,7 @@ static NSString * const url_lists_update = @"https://api.twitter.com/1.1/lists/u
 static NSString * const url_lists_members = @"https://api.twitter.com/1.1/lists/members.json";
 static NSString * const url_lists_members_destroy_all = @"https://api.twitter.com/1.1/lists/members/destroy_all.json";
 static NSString * const url_lists_members_create_all = @"https://api.twitter.com/1.1/lists/members/create_all.json";
+static NSString * const url_lists_members_show = @"https://api.twitter.com/1.1/lists/members/show.json";
 static NSString * const url_lists_statuses = @"https://api.twitter.com/1.1/lists/statuses.json";
 static NSString * const url_lists_list = @"https://api.twitter.com/1.1/lists/list.json";
 
