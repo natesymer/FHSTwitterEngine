@@ -242,6 +242,28 @@
     return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{ @"list_id": listID }];
 }
 
+- (id)getListSubscriptionsForUser:(NSString*)user isID:(BOOL)isID count:(int)count withCursor:(NSString *)cursor {
+
+    if (user.length == 0) {
+        return [NSError badRequestError];
+    }
+
+    if (count == 0) {
+        return [NSError badRequestError];
+    }
+
+    if (count > 1000) {
+        return [NSError badRequestError];
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_lists_subscriptions];
+    return [self sendRequestWithHTTPMethod:kGET URL:baseURL params:@{
+                                                                     (isID?@"user_id":@"screen_name"): user,
+                                                                     @"count":@(count),
+                                                                     @"cursor": cursor
+                                                                     }];
+}
+
 - (id)updateListWithID:(NSString *)listID name:(NSString *)name {
     if (listID.length == 0) {
         return [NSError badRequestError];

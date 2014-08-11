@@ -958,8 +958,12 @@
 
 /**
  Obtain a collection of the lists the specified user is subscribed to, 20 lists per page by default. Does not include the user's own lists. API endpoint: GET lists/subscriptions.
+ @param user User screen name or ID.
+ @param isID A Boolean that determines if `user` is a screen name or a user ID.
+ @param count The amount of results to return per page.
+ @param cursor Cursor position of the list.
  */
-// TODO: GET lists/subscriptions
+- (id)getListSubscriptionsForUser:(NSString*)user isID:(BOOL)isID count:(int)count withCursor:(NSString *)cursor;
 
 
 /**
