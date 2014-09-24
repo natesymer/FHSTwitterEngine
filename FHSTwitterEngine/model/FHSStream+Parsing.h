@@ -12,6 +12,6 @@
 
 + (NSArray *)parseStreamData:(NSData *)data;
 + (NSArray *)parseStreamData:(NSData *)data leftoverData:(NSData **)leftoverData;
-+ (NSArray *)parseStreamData:(char *)chars length:(unsigned long)length leftoverData:(char **)leftoverData leftoverSize:(unsigned long *)leftoverSize;
++ (NSArray *)parseStreamData:(char *)chars length:(size_t)length leftoverData:(char **)leftoverData leftoverSize:(size_t *)leftoverSize;
 
 @end

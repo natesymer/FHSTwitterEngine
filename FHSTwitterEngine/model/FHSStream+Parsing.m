@@ -10,7 +10,7 @@
 
 @implementation FHSStream (Parsing)
 
-static unsigned long const kDelimiterBufferStartingLength = 3;
+static size_t const kDelimiterBufferStartingLength = 3;
 
 + (NSArray *)parseStreamData:(NSData *)data {
     return [self parseStreamData:data leftoverData:NULL];
@@ -18,13 +18,13 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
 
 + (NSArray *)parseStreamData:(NSData *)data leftoverData:(NSData **)leftoverData {
     char *leftovers = NULL;
-    unsigned long leftoverSize = 0;
+    size_t leftoverSize = 0;
     NSArray *res = [self parseStreamData:(char *)data.bytes length:data.length leftoverData:&leftovers leftoverSize:&leftoverSize];
     if (leftoverSize > 0) *leftoverData = [NSData dataWithBytesNoCopy:leftovers length:leftoverSize];
     return res;
 }
 
-+ (NSArray *)parseStreamData:(char *)chars length:(unsigned long)length leftoverData:(char **)leftoverData leftoverSize:(unsigned long *)leftoverSize {
++ (NSArray *)parseStreamData:(char *)chars length:(size_t)length leftoverData:(char **)leftoverData leftoverSize:(size_t *)leftoverSize {
     NSMutableArray *messages = [NSMutableArray array];
     
     // Return the data is nil or has no length
@@ -42,7 +42,7 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
     // Check for data not delimited by length
     // It's impossible to determine if this data is
     // cut off or not, unless you want to track brackets.
-    /*for (unsigned long i = 0; i < length; i++) {
+    /*for (size_t i = 0; i < length; i++) {
      
      }*/
     
@@ -51,9 +51,9 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
     
     int inMessage = 0;
     
-    unsigned long position = 0;
-    unsigned long messageStart = 0;
-    int bufferLength = 0;
+    size_t position = 0;
+    size_t messageStart = 0;
+    size_t bufferLength = 0;
     char *buffer = NULL;
     
     while (position < length) {
@@ -62,8 +62,8 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
             
             // Create a buffer to hold bytes that
             // Represent the length of the message
-            unsigned long delimBufLength = kDelimiterBufferStartingLength;
-            unsigned long delimBufCount = 0;
+            size_t delimBufLength = kDelimiterBufferStartingLength;
+            size_t delimBufCount = 0;
             char *delimBuf = malloc(sizeof(char)*delimBufLength);
             
             // Read characters into the buffer until
@@ -98,7 +98,7 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                 inMessage = 1;
                 
                 // Check if the data includes the whole message
-                unsigned long remainingBytes = length-position;
+                size_t remainingBytes = length-position;
                 
                 // Return the leftover data using a pointer
                 // and return the array of complete messages
@@ -109,7 +109,7 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                             *leftoverData = malloc(sizeof(char)*remainingBytes);
                             *leftoverSize = remainingBytes;
                             
-                            for (unsigned long i = 0; i < remainingBytes; i++) {
+                            for (size_t i = 0; i < remainingBytes; i++) {
                                 *leftoverData[i] = chars[position+i];
                             }
                         }
@@ -161,7 +161,7 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                         // any messages, and therefore it's safe to say that
                         // it contains an error.
                         NSMutableData *errorJson = [[@"{\"error\":\"" dataUsingEncoding:NSUTF8StringEncoding]mutableCopy];
-                        [errorJson appendData:data];
+                        [errorJson appendBytes:chars length:length];
                         [errorJson appendData:[@"\"}" dataUsingEncoding:NSUTF8StringEncoding]];
                         return @[errorJson];
                     } else {
