@@ -9,16 +9,26 @@
 #import "FHSStream.h"
 #import "FHSTwitterEngine+Requests.h"
 #import "NSError+FHSTE.h"
-#import "StreamParser.h"
+#import "FHSStream+Parsing.h"
 
 @interface FHSStream () <NSURLConnectionDelegate,NSURLConnectionDataDelegate>
 
 @property (nonatomic, strong) NSURLConnection *connection;
 @property (nonatomic, strong) NSMutableData *buffer;
+@property char *leftovers;
+@property size_t leftovers_size;
 
 @end
 
 @implementation FHSStream
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _leftovers = NULL;
+    }
+    return self;
+}
 
 + (instancetype)streamWithURL:(NSURL *)url httpMethod:(NSString *)httpMethod parameters:(NSDictionary *)params timeout:(float)timeout block:(StreamBlock)block {
     return [[[self class]alloc]initWithURL:url httpMethod:httpMethod parameters:params timeout:timeout block:block];
@@ -67,46 +77,37 @@
     }
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)received {
     
-#if kFHSTwitterEngineRepairSplitMessages == 1
+#if kFHSTwitterEngineMergeSplitMessages == 1
+    char *buf = (char *)malloc(sizeof(char)*(received.length+_leftovers_size));
+    size_t bufsize = received.length; // shortcut
     
-    NSData *saneData;
+    for (size_t i = 0; i < _leftovers_size; i++) buf[bufsize++] = _leftovers[i]; // Copy the leftover bytes to *buf
+    for (size_t i = 0; i < received.length; i++) buf[i] = ((char *)received.bytes)[i]; // Copy the received bytes to *buf
     
-    if (_buffer.length > 0) {
-        [_buffer appendData:data];
-        saneData = _buffer;
-    } else {
-        saneData = data;
-    }
-#else
-    NSData *saneData = data;
-#endif
-
+    free(_leftovers); _leftovers = NULL;
+ 
+    NSData *data = [NSData dataWithBytesNoCopy:buf length:bufsize freeWhenDone:NO];
+    
     NSData *leftover;
-    NSArray *messages = [StreamParser parseStreamData:saneData leftoverData:&leftover];
-
-#if kFHSTwitterEngineRepairSplitMessages == 1
+    NSArray *messages = [FHSStream parseStreamData:data leftoverData:&leftover];
+    free(buf);
     
-    [_buffer setLength:0];
-    
-    if (leftover.length > 0) {
-        [_buffer appendData:leftover];
-    }
-
+    _leftovers_size = leftover.length;
+    _leftovers = malloc(sizeof(char)*_leftovers_size);
+    for (size_t i = 0; i < _leftovers_size; i++) _leftovers[i] = ((char *)leftover.bytes)[i];
+#else
+    NSArray *messages = [FHSStream parseStreamData:received];
 #endif
     
     [self keepAlive];
     
     for (NSData *message in messages) {
         BOOL stop = NO;
-
         id json = [NSJSONSerialization JSONObjectWithData:message options:NSJSONReadingMutableContainers error:NULL];
         if (_block) _block(json, &stop);
-        
-        if (stop) {
-            [self stop];
-        }
+        if (stop) [self stop];
     }
 }
 
@@ -136,6 +137,10 @@
     }
     
     return [sanitized componentsJoinedByString:@","];
+}
+
+- (void)dealloc {
+    if (_leftovers != NULL) free(_leftovers);
 }
 
 @end

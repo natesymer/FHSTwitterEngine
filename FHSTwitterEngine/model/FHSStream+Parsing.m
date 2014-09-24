@@ -1,16 +1,16 @@
 //
-//  StreamParser.m
+//  FHSStream+Parsing.m
 //  FHSTwitterEngine
 //
-//  Created by Nathaniel Symer on 7/25/14.
+//  Created by Nathaniel Symer on 9/24/14.
 //  Copyright (c) 2014 Nathaniel Symer. All rights reserved.
 //
 
-#import "StreamParser.h"
+#import "FHSStream+Parsing.h"
+
+@implementation FHSStream (Parsing)
 
 static unsigned long const kDelimiterBufferStartingLength = 3;
-
-@implementation StreamParser
 
 + (NSArray *)parseStreamData:(NSData *)data {
     return [self parseStreamData:data leftoverData:NULL];
@@ -38,14 +38,12 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
     // It's impossible to determine if this data is
     // cut off or not, unless you want to track brackets.
     /*for (unsigned long i = 0; i < length; i++) {
-        
-    }*/
+     
+     }*/
     
     // @"Exceeded connection limit for user\r\n"
-    if (chars[0] == 'E' && chars[length-3] == 'r') {
-        return @[[@"{\"error\": \"Exceeded connection limit for user.\" }\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    }
-
+    if (chars[0] == 'E' && chars[length-3] == 'r') return @[[@"{\"error\": \"Exceeded connection limit for user.\" }\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    
     int inMessage = 0;
     
     unsigned long position = 0;
@@ -62,7 +60,7 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
             unsigned long delimBufLength = kDelimiterBufferStartingLength;
             unsigned long delimBufCount = 0;
             char *delimBuf = malloc(sizeof(char)*delimBufLength);
-
+            
             // Read characters into the buffer until
             // the characters are no longer numeric
             while (currChar >= '0' && currChar <= '9') {
@@ -75,8 +73,7 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                     delimBuf = newbuf;
                 }
                 
-                delimBuf[delimBufCount] = currChar;
-                delimBufCount++;
+                delimBuf[delimBufCount++] = currChar;
                 position++; // This will bleed over into the byte after the length delimiter (the CR)
                 currChar = chars[position];
             }
@@ -94,10 +91,10 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                 messageStart = position;
                 currChar = chars[position];
                 inMessage = 1;
-
+                
                 // Check if the data includes the whole message
                 unsigned long remainingBytes = length-position;
-
+                
                 // Return the leftover data using a pointer
                 // and return the array of complete messages
                 if (remainingBytes < bufferLength) {
@@ -121,13 +118,13 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                     return messages;
                 } else {
                     // otherwise, create the message buffer
-
+                    
                     if (buffer) {
                         // Sometimes crashes here
                         //
                         // FHSTwitterEngine(5166,0x102c9d310) malloc: *** error for object 0x10ac4ad28: incorrect checksum for freed object - object was probably modified after being freed.
                         // *** set a breakpoint in malloc_error_break to debug
-                      //  NSLog(@"Buffer: %s",buffer);
+                        //  NSLog(@"Buffer: %s",buffer);
                         free(buffer);
                         buffer = NULL;
                     }
@@ -180,7 +177,7 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                 continue;
             }
             buffer[position-messageStart] = currChar;
-
+            
             // If we've got to the end of a message,
             // let's turn it into an ObjC object and
             // put it in an array.
@@ -205,18 +202,6 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
     }
     
     return messages;
-}
-
-- (NSArray *)parseUndelemitedData:(NSData *)data {
-    NSString *dString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
-    NSArray *parts = [dString componentsSeparatedByString:@"\r\n"];
-    NSMutableArray *messages = [NSMutableArray array];
-    
-    for (NSString *s in parts) {
-        [messages addObject:[s dataUsingEncoding:NSUTF8StringEncoding]];
-    }
-    
-    return parts;
 }
 
 @end

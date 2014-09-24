@@ -19,7 +19,7 @@
 		9B31B96215E56E34003FC89D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96115E56E34003FC89D /* Foundation.framework */; };
 		9B31B96415E56E34003FC89D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96315E56E34003FC89D /* CoreGraphics.framework */; };
 		F106B12318CE6562007F68B5 /* NSURL+FHSTE.m in Sources */ = {isa = PBXBuildFile; fileRef = F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */; };
-		F11270A819832743005F309D /* StreamParser.m in Sources */ = {isa = PBXBuildFile; fileRef = F11270A719832743005F309D /* StreamParser.m */; };
+		F110641A19D3608C0078A844 /* FHSStream+Parsing.m in Sources */ = {isa = PBXBuildFile; fileRef = F110641919D3608C0078A844 /* FHSStream+Parsing.m */; };
 		F11270AF19835DF5005F309D /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F11270AE19835DF5005F309D /* XCTest.framework */; };
 		F11270B019835DF5005F309D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96115E56E34003FC89D /* Foundation.framework */; };
 		F11270B119835DF5005F309D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B95F15E56E34003FC89D /* UIKit.framework */; };
@@ -74,8 +74,8 @@
 		F106B12118CE6562007F68B5 /* NSURL+FHSTE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+FHSTE.h"; sourceTree = "<group>"; };
 		F106B12218CE6562007F68B5 /* NSURL+FHSTE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+FHSTE.m"; sourceTree = "<group>"; };
 		F106B12418CEA3A3007F68B5 /* FHSDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FHSDefines.h; sourceTree = "<group>"; };
-		F11270A619832743005F309D /* StreamParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamParser.h; sourceTree = "<group>"; };
-		F11270A719832743005F309D /* StreamParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StreamParser.m; sourceTree = "<group>"; };
+		F110641819D3608C0078A844 /* FHSStream+Parsing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FHSStream+Parsing.h"; sourceTree = "<group>"; };
+		F110641919D3608C0078A844 /* FHSStream+Parsing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FHSStream+Parsing.m"; sourceTree = "<group>"; };
 		F11270AD19835DF5005F309D /* FHSTwitterEngine Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FHSTwitterEngine Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F11270AE19835DF5005F309D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		F11270B419835DF5005F309D /* FHSTwitterEngine Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FHSTwitterEngine Tests-Info.plist"; sourceTree = "<group>"; };
@@ -267,8 +267,8 @@
 			children = (
 				F1CC819618EF76B6002468D0 /* FHSStream.h */,
 				F1CC819718EF76B6002468D0 /* FHSStream.m */,
-				F11270A619832743005F309D /* StreamParser.h */,
-				F11270A719832743005F309D /* StreamParser.m */,
+				F110641819D3608C0078A844 /* FHSStream+Parsing.h */,
+				F110641919D3608C0078A844 /* FHSStream+Parsing.m */,
 				F1CC819818EF76B6002468D0 /* FHSToken.h */,
 				F1CC819918EF76B6002468D0 /* FHSToken.m */,
 			);
@@ -319,7 +319,7 @@
 		9B31B95215E56E34003FC89D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = "Nathaniel Symer";
 				TargetAttributes = {
 					F11270AC19835DF5005F309D = {
@@ -372,7 +372,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F11270A819832743005F309D /* StreamParser.m in Sources */,
 				9B2A1BC415E805D1007E66E0 /* AppDelegate.m in Sources */,
 				9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */,
 				F17DCD1018CDF9A2005382F4 /* FHSTwitterEngine+Requests.m in Sources */,
@@ -382,6 +381,7 @@
 				F106B12318CE6562007F68B5 /* NSURL+FHSTE.m in Sources */,
 				F16ADB6E1985AC2C003925A6 /* FHSTwitterEngine+Streaming.m in Sources */,
 				F17DCD1B18CE0196005382F4 /* NSString+FHSTE.m in Sources */,
+				F110641A19D3608C0078A844 /* FHSStream+Parsing.m in Sources */,
 				F1127D3E1982A79600BE6469 /* NSMutableURLRequest+FHSTE.m in Sources */,
 				F1127D3B1982A44200BE6469 /* NSMutableURLRequest+OAuth.m in Sources */,
 				F12A456B18CE384100D6AEFA /* NSError+FHSTE.m in Sources */,
@@ -443,9 +443,11 @@
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -478,9 +480,11 @@
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -522,10 +526,7 @@
 				GCC_PREFIX_HEADER = "Demo/Supporting Files/FHSTwitterEngine-Prefix.pch";
 				INFOPLIST_FILE = "Demo/Supporting Files/FHSTwitterEngine-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/FHSTwitterEngineDemo\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;

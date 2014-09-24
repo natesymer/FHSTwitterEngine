@@ -149,34 +149,36 @@ static NSString * const TwitPicAPIKey = @"dc85de02fa89e78ecc41804617a5b171";
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if ([alertView.title isEqualToString:@"Tweet"]) {
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            @autoreleasepool {
-                NSString *tweet = [alertView textFieldAtIndex:0].text;
-                id returned = [[FHSTwitterEngine shared]postTweet:tweet];
-                [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-                
-                NSString *title = nil;
-                NSString *message = nil;
-                
-                if ([returned isKindOfClass:[NSError class]]) {
-                    NSError *error = (NSError *)returned;
-                    title = [NSString stringWithFormat:@"Error %ld",(long)error.code];
-                    message = error.localizedDescription;
-                } else {
-                    NSLog(@"%@",returned);
-                    title = @"Tweet Posted";
-                    message = tweet;
-                }
-                
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    @autoreleasepool {
-                        UIAlertView *av = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-                        [av show];
+        if (buttonIndex == alertView.firstOtherButtonIndex) {
+            [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                @autoreleasepool {
+                    NSString *tweet = [alertView textFieldAtIndex:0].text;
+                    id returned = [[FHSTwitterEngine shared]postTweet:tweet];
+                    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                    
+                    NSString *title = nil;
+                    NSString *message = nil;
+                    
+                    if ([returned isKindOfClass:[NSError class]]) {
+                        NSError *error = (NSError *)returned;
+                        title = [NSString stringWithFormat:@"Error %ld",(long)error.code];
+                        message = error.localizedDescription;
+                    } else {
+                        NSLog(@"%@",returned);
+                        title = @"Tweet Posted";
+                        message = tweet;
                     }
-                });
-            }
-        });
+                    
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        @autoreleasepool {
+                            [[[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]show];
+                        }
+                    });
+                }
+            });
+        } else [alertView dismissWithClickedButtonIndex:buttonIndex animated:YES];
+        
     } else {
         if (buttonIndex == 1) {
             NSString *username = [alertView textFieldAtIndex:0].text;

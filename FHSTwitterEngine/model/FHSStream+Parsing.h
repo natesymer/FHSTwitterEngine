@@ -1,18 +1,16 @@
 //
-//  StreamParser.h
+//  FHSStream+Parsing.h
 //  FHSTwitterEngine
 //
-//  Created by Nathaniel Symer on 7/25/14.
+//  Created by Nathaniel Symer on 9/24/14.
 //  Copyright (c) 2014 Nathaniel Symer. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import "FHSStream.h"
 
-@interface StreamParser : NSObject
+@interface FHSStream (Parsing)
 
 + (NSArray *)parseStreamData:(NSData *)data;
 + (NSArray *)parseStreamData:(NSData *)data leftoverData:(NSData **)leftoverData;
-
-- (NSArray *)parseUndelemitedData:(NSData *)data;
 
 @end
