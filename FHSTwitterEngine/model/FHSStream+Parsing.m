@@ -17,10 +17,15 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
 }
 
 + (NSArray *)parseStreamData:(NSData *)data leftoverData:(NSData **)leftoverData {
+    char *leftovers = NULL;
+    unsigned long leftoverSize = 0;
+    NSArray *res = [self parseStreamData:(char *)data.bytes length:data.length leftoverData:&leftovers leftoverSize:&leftoverSize];
+    if (leftoverSize > 0) *leftoverData = [NSData dataWithBytesNoCopy:leftovers length:leftoverSize];
+    return res;
+}
+
++ (NSArray *)parseStreamData:(char *)chars length:(unsigned long)length leftoverData:(char **)leftoverData leftoverSize:(unsigned long *)leftoverSize {
     NSMutableArray *messages = [NSMutableArray array];
-    
-    char *chars = (char *)data.bytes;
-    unsigned long length = data.length;
     
     // Return the data is nil or has no length
     if (length == 0) return @[];
@@ -101,18 +106,12 @@ static unsigned long const kDelimiterBufferStartingLength = 3;
                     if (leftoverData) {
                         // Read leftover bytes into a buffer
                         if (remainingBytes > 0) {
-                            char *leftoverBytes = malloc(sizeof(char)*remainingBytes);
+                            *leftoverData = malloc(sizeof(char)*remainingBytes);
+                            *leftoverSize = remainingBytes;
                             
                             for (unsigned long i = 0; i < remainingBytes; i++) {
-                                leftoverBytes[i] = chars[position+i];
+                                *leftoverData[i] = chars[position+i];
                             }
-                            
-                            // Use the pointer to return the leftover data.
-                            *leftoverData = [NSData dataWithBytes:leftoverBytes length:remainingBytes];
-                            
-                            // Free that buffer
-                            free(leftoverBytes);
-                            leftoverBytes = NULL;
                         }
                     }
                     return messages;

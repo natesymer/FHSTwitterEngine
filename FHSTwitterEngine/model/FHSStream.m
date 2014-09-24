@@ -88,15 +88,10 @@
     
     free(_leftovers); _leftovers = NULL;
  
-    NSData *data = [NSData dataWithBytesNoCopy:buf length:bufsize freeWhenDone:NO];
-    
-    NSData *leftover;
-    NSArray *messages = [FHSStream parseStreamData:data leftoverData:&leftover];
+    _leftovers_size = 0;
+
+    NSArray *messages = [FHSStream parseStreamData:buf length:bufsize leftoverData:&_leftovers leftoverSize:&_leftovers_size];
     free(buf);
-    
-    _leftovers_size = leftover.length;
-    _leftovers = malloc(sizeof(char)*_leftovers_size);
-    for (size_t i = 0; i < _leftovers_size; i++) _leftovers[i] = ((char *)leftover.bytes)[i];
 #else
     NSArray *messages = [FHSStream parseStreamData:received];
 #endif
