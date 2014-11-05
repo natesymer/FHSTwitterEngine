@@ -325,8 +325,15 @@
 
 /**
  Streams messages for a set of users, as described in Site streams. See https://dev.twitter.com/docs/streaming-apis/streams/site for more information. API endpoint: GET site.
+ @param follow List of user IDs, indicating the users to return statuses for in the stream.
+ @param delimited Boolean that specifies whether to delimit the stream.
+ @param stall_warnings Boolean that specifies whether periodic messages are to be delivered if the client is in danger of being disconnected.
+ @param withFollowing Boolean that specifies whether the stream adds messages from accounts the user follows.
+ @param replies Boolean that specifies whether the stream includes replies
+ @param stringify_friend_ids Boolean that specifies whether the friends list preamble is returned as an array of strings (instead of integers).
+ @param block Stream block: it contains a return stream and a *stop Boolean.
  */
-// TODO: GET site
+- (void)streamSiteMessagesFollow:(NSArray*)follow delimited:(BOOL)delimited stall_warnings:(BOOL)stall_warnings withFollowing:(BOOL)withFollowing replies:(BOOL)replies stringify_friend_ids:(BOOL)stringify_friend_ids block:(StreamBlock)block;
 
 
 #pragma mark - Direct Messages

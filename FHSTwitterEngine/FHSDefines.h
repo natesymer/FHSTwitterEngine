@@ -59,6 +59,8 @@ static NSString * const kDELETE = @"DELETE";
 
 static NSString * const url_twitpic_upload = @"http://api.twitpic.com/2/upload.json";
 
+static NSString * const url_stream_site = @"https://sitestream.twitter.com/1.1/site.json";
+
 static NSString * const url_stream_user = @"https://userstream.twitter.com/1.1/user.json";
 static NSString * const url_stream_statuses_filter = @"https://stream.twitter.com/1.1/statuses/filter.json";
 static NSString * const url_stream_statuses_sample = @"https://stream.twitter.com/1.1/statuses/sample.json";

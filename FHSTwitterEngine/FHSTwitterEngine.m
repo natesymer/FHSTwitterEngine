@@ -1352,6 +1352,42 @@
     [self streamURL:[NSURL URLWithString:url_stream_statuses_firehose] httpMethod:kGET params:nil block:block];
 }
 
+
+- (void)streamSiteMessagesFollow:(NSArray*)follow delimited:(BOOL)delimited stall_warnings:(BOOL)stall_warnings withFollowing:(BOOL)withFollowing replies:(BOOL)replies stringify_friend_ids:(BOOL)stringify_friend_ids block:(StreamBlock)block {
+    BOOL usersValid = follow.count > 0 && follow.count < 5000;
+    if (!usersValid) {
+        NSError *error = [NSError errorWithDomain:FHSErrorDomain code:400 userInfo:@{NSLocalizedDescriptionKey: @"Bad Request: invalid parameters: GET site requires at least one user (follow)."}];
+        block(error, NULL);
+        return;
+    }
+    
+    NSMutableDictionary *params = [[NSMutableDictionary alloc] init]; //TODO: max capacity
+    
+    params[@"follow"] = [follow componentsJoinedByString:@","];
+    
+    if (delimited) {
+        params[@"delimited"] = @"length";
+    }
+    
+    if (stall_warnings) {
+        params[@"stall_warnings"] = @"true";
+    }
+    
+    params[@"with"] = withFollowing ? @"followings" : @"user";
+
+    if (replies) {
+        params[@"replies"] = @"all";
+    }
+    
+    if (stringify_friend_ids) {
+        params[@"stringify_friend_ids"] = @"true";
+    }
+    
+    [self streamURL:[NSURL URLWithString:url_stream_site] httpMethod:kGET params:params block:block];
+    
+}
+
+
 #pragma mark - Access Tokens
 
 - (void)loadAccessToken {
