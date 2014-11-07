@@ -159,6 +159,43 @@
                                                                      }];
 }
 
+- (id)accountRemoveProfileBanner {
+    NSURL *baseURL = [NSURL URLWithString:url_account_remove_profile_banner];
+    
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:nil];
+}
+
+- (id)accountUpdateProfileBanner:(UIImage*)banner width:(NSInteger)width height:(NSInteger)height offset_left:(NSInteger)offset_left offset_top:(NSInteger)offset_top {
+    
+    if (!banner) {
+        return [NSError badRequestError];
+    }
+    
+    if (width>0) {
+        if ((height==0)||
+            (offset_left==0)||
+            (offset_top==0)
+            )
+            return [NSError badRequestError];
+    }
+    
+
+    NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_banner];
+    
+    NSMutableDictionary *params = [[NSMutableDictionary alloc] init];    
+    params[@"banner"] = UIImagePNGRepresentation(banner);
+    params[@"width"] = @(width).stringValue;
+    params[@"height"] = @(width).stringValue;
+    params[@"offset_left"] = @(width).stringValue;
+    params[@"offset_top"] = @(width).stringValue;
+    
+    return [self sendRequestWithHTTPMethod:kPOST URL:baseURL params:params];
+}
+
+- (id)accountUpdateProfileBanner:(UIImage *)banner {
+    return [self accountUpdateProfileBanner:banner width:0 height:0 offset_left:0 offset_top:0];
+}
+
 - (id)searchTweetsWithQuery:(NSString *)q count:(int)count resultType:(FHSTwitterEngineResultType)resultType unil:(NSDate *)untilDate sinceID:(NSString *)sinceID maxID:(NSString *)maxID {
     
     if (count == 0) {

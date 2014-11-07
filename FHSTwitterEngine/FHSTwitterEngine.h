@@ -668,13 +668,25 @@
 /**
  Removes the uploaded profile banner for the authenticating user. Returns HTTP 200 upon success. API endpoint: POST account/remove_profile_banner.
  */
-//TODO: POST account/remove_profile_banner
+- (id)accountRemoveProfileBanner;
+
+
+/**
+ Uploads a profile banner on behalf of the authenticating user.  API endpoint: POST account/update_profile_banner. If providing any one of the height, width, offset_left, or offset_top parameters, you must provide all of the sizing parameters.
+ @param banner Banner image.
+ @param width The width of the preferred section of the image being uploaded in pixels. Use with height, offset_left, and offset_top to select the desired region of the image to use.
+ @param height The height of the preferred section of the image being uploaded in pixels. Use with width, offset_left, and offset_top to select the desired region of the image to use.
+ @param offset_left The number of pixels by which to offset the uploaded image from the left. Use with height, width, and offset_top to select the desired region of the image to use.
+ @param offset_top The number of pixels by which to offset the uploaded image from the top. Use with height, width, and offset_left to select the desired region of the image to use.
+ */
+- (id)accountUpdateProfileBanner:(UIImage*)banner width:(NSInteger)width height:(NSInteger)height offset_left:(NSInteger)offset_left offset_top:(NSInteger)offset_top;
 
 
 /**
  Uploads a profile banner on behalf of the authenticating user.  API endpoint: POST account/update_profile_banner.
+ @param banner Banner image.
  */
-//TODO: POST account/update_profile_banner
+- (id)accountUpdateProfileBanner:(UIImage*)banner;
 
 
 /**

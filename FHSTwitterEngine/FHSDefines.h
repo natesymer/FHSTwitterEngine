@@ -130,6 +130,8 @@ static NSString * const url_friendships_lookup = @"https://api.twitter.com/1.1/f
 static NSString * const url_friendships_destroy = @"https://api.twitter.com/1.1/friendships/destroy.json";
 static NSString * const url_friendships_create = @"https://api.twitter.com/1.1/friendships/create.json";
 
+static NSString * const url_account_remove_profile_banner = @"https://api.twitter.com/1.1/account/remove_profile_banner.json";
+static NSString * const url_account_update_profile_banner = @"https://api.twitter.com/1.1/account/update_profile_banner.json";
 static NSString * const url_account_verify_credentials = @"https://api.twitter.com/1.1/account/verify_credentials.json";
 static NSString * const url_account_update_profile_colors = @"https://api.twitter.com/1.1/account/update_profile_colors.json";
 static NSString * const url_account_update_profile_background_image = @"https://api.twitter.com/1.1/account/update_profile_background_image.json";
