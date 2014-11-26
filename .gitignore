@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # OS X
 .DS_Store
 
@@ -30,3 +31,10 @@ DerivedData
 # `pod install` in .travis.yml
 #
 # Pods/
+=======
+
+*.xcuserstate
+FHSTwitterEngine.xcodeproj/xcuserdata/
+FHSTwitterEngine.xcodeproj/project.xcworkspace/
+.DS_Store
+>>>>>>> aa8eb1a74dcecdc38775e3eebef098ee2d58e4a1
