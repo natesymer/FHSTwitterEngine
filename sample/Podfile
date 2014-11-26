@@ -1,0 +1,7 @@
+source 'https://github.com/CocoaPods/Specs.git'
+
+target 'FHSTwitterEngine', :exclusive => true do
+  pod "FHSTwitterEngine", :path => "../"
+
+  
+end

@@ -1,0 +1,14 @@
+PODS:
+  - FHSTwitterEngine (0.1.8)
+
+DEPENDENCIES:
+  - FHSTwitterEngine (from `../`)
+
+EXTERNAL SOURCES:
+  FHSTwitterEngine:
+    :path: ../
+
+SPEC CHECKSUMS:
+  FHSTwitterEngine: bdc759be7ae407287f254d4a5a0b59a25e5be4be
+
+COCOAPODS: 0.35.0
