@@ -120,16 +120,9 @@ Most methods return `id`. The returned object can be a(n):
 
 **For the future/To Do**
 
-You can [email](mailto:nate@natesymer.com) me with suggestions or open an [issue](https://github.com/fhsjaagshs/FHSTwitterEngine/issues).
+We are working on a [new version](https://github.com/fhsjaagshs/FHSTwitterEngine/tree/development) :-)
 
-- OS X OAuth login window
-- Custom objects for profile settings
-- Tag releases
-- Tests
-- Add license
-- Create a CocoaPod
-- Make demo universal
-- Improve demo for XAuth
+You can [email](mailto:nate@natesymer.com) suggestions or open an [issue](https://github.com/fhsjaagshs/FHSTwitterEngine/issues).
 
 **Debugging 101 for outsource developers**
 
