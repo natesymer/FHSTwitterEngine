@@ -92,6 +92,7 @@ extern NSString * const FHSErrorDomain;
 // statuses/update
 - (NSError *)postTweet:(NSString *)tweetString;
 - (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
+- (NSError *)postTweet:(NSString *)tweetString withMediaIDs:(NSArray *)mediaIDs ;
 
 // media/upload
 - (id) uploadMediaWithData:(NSData *) imageData;
