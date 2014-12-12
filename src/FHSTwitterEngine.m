@@ -706,7 +706,7 @@ id removeNull(id rootObject) {
         return [NSError badRequestError];
     }
     NSURL *baseURL = [NSURL URLWithString:url_media_upload];
-    NSDictionary* params = @{@"media": theData};
+    NSDictionary* params = @{@"media": imageData};
     return [self sendPOSTRequestForURL:baseURL andParams:params];
 }
 
@@ -714,7 +714,7 @@ id removeNull(id rootObject) {
     
     if (tweetString.length == 0) {
         return [NSError badRequestError];
-    } else if (mediaIDs.length == 0) {
+    } else if (mediaIDs.count == 0) {
        [self postTweet:tweetString];
     }
     
