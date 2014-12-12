@@ -63,6 +63,7 @@ static NSString * const authBlockKey = @"FHSTwitterEngineOAuthCompletion";
 //
 // URL constants
 //
+static NSString * const url_media_upload = @"https://upload.twitter.com/1.1/media/upload.json";
 
 static NSString * const url_search_tweets = @"https://api.twitter.com/1.1/search/tweets.json";
 
@@ -697,6 +698,33 @@ id removeNull(id rootObject) {
 
 - (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData {
     return [self postTweet:tweetString withImageData:theData inReplyTo:nil];
+}
+
+- (id) uploadMediaWithData:(NSData *) imageData
+{
+    if (imageData == nil){
+        return [NSError badRequestError];
+    }
+    NSURL *baseURL = [NSURL URLWithString:url_media_upload];
+    NSDictionary* params = @{@"media": theData};
+    return [self sendPOSTRequestForURL:baseURL andParams:params];
+}
+
+- (NSError *)postTweet:(NSString *)tweetString withMediaIDs:(NSArray *)mediaIDs  {
+    
+    if (tweetString.length == 0) {
+        return [NSError badRequestError];
+    } else if (mediaIDs.length == 0) {
+       [self postTweet:tweetString];
+    }
+    
+    NSURL *baseURL = [NSURL URLWithString:url_statuses_update];
+    
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    params[@"status"] = tweetString;
+    params[@"media_ids"] = mediaIDs;
+    
+    return [self sendPOSTRequestForURL:baseURL andParams:params];
 }
 
 - (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt {
