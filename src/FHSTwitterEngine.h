@@ -95,7 +95,8 @@ extern NSString * const FHSErrorDomain;
 - (NSError *)postTweet:(NSString *)tweetString withMediaIDs:(NSArray *)mediaIDs ;
 
 // media/upload
-- (id) uploadMediaWithData:(NSData *) imageData;
+- (void) uploadMediaWithData:(NSData *) imageData withCompletionBlock:(void (^)(NSError *error, id response)) completionBlock
+;
 
 // statuses/home_timeline
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;

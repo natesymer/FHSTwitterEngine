@@ -700,14 +700,18 @@ id removeNull(id rootObject) {
     return [self postTweet:tweetString withImageData:theData inReplyTo:nil];
 }
 
-- (id) uploadMediaWithData:(NSData *) imageData
+- (void) uploadMediaWithData:(NSData *) imageData withCompletionBlock:(void (^)(NSError *, id))completionBlock
 {
     if (imageData == nil){
-        return [NSError badRequestError];
+        NSError* error=  [NSError badRequestError];
+        if (completionBlock){
+            completionBlock(error, nil);
+        }
+    } else {
+        NSURL *baseURL = [NSURL URLWithString:url_media_upload];
+        NSDictionary* params = @{@"media": imageData};
+        [self sendPOSTRequestForURL:baseURL andParams:params WithCompletionBlock:completionBlock];
     }
-    NSURL *baseURL = [NSURL URLWithString:url_media_upload];
-    NSDictionary* params = @{@"media": imageData};
-    return [self sendPOSTRequestForURL:baseURL andParams:params];
 }
 
 - (NSError *)postTweet:(NSString *)tweetString withMediaIDs:(NSArray *)mediaIDs  {
@@ -1815,6 +1819,51 @@ id removeNull(id rootObject) {
     }
     
     return nil; // eventually return the parsed response
+}
+
+- (void) sendPOSTRequestForURL:(NSURL *)url andParams:(NSDictionary *)params WithCompletionBlock:(void (^)(NSError *error, id response)) completionBlock
+{
+    
+    NSError* error;
+    id response;
+    NSError *authError = [self checkAuth];
+    
+    if (authError) {
+        error = authError;
+        
+    } else {
+    
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
+        [request setHTTPMethod:@"POST"];
+        [request setHTTPShouldHandleCookies:NO];
+    
+        NSString *boundary = [NSString fhs_UUID];
+    
+        NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
+        [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
+    
+        [self signRequest:request];
+    
+        NSData *body = [self POSTBodyWithParams:params boundary:boundary];
+        [request setValue:@(body.length).stringValue forHTTPHeaderField:@"Content-Length"];
+        request.HTTPBody = body;
+        id retobj = [self sendRequest:request];
+        if (!retobj){
+            error = [NSError noDataError];
+        }  else if ([retobj isKindOfClass:[NSError class]]) {
+            error =  retobj;
+        } else {
+            id parsed = removeNull([NSJSONSerialization JSONObjectWithData:(NSData *)retobj options:NSJSONReadingMutableContainers error:nil]);
+            
+            error = [self checkError:parsed];
+            if (!error){
+                response = parsed;
+            }
+            if (completionBlock){
+                completionBlock(error, response);
+            }
+        }
+    }
 }
 
 - (id)sendGETRequestForURL:(NSURL *)url andParams:(NSDictionary *)params {
