@@ -185,7 +185,6 @@ id removeNull(id rootObject) {
 @property (nonatomic, strong) NSString *secret;
 
 + (FHSConsumer *)consumerWithKey:(NSString *)key secret:(NSString *)secret;
-
 @end
 
 @implementation FHSConsumer
@@ -262,6 +261,8 @@ id removeNull(id rootObject) {
 // These are here to obfuscate them from prying eyes
 @property (strong, nonatomic) FHSConsumer *consumer;
 @property (assign, nonatomic) BOOL shouldClearConsumer;
+
+- (NSString *) URLEncodedString:(NSString *) string;
 
 @end
 
@@ -1676,7 +1677,12 @@ id removeNull(id rootObject) {
     for (NSString *key in mutableParams.allKeys) {
         [paramPairs addObject:[NSString stringWithFormat:@"%@=%@",[key fhs_URLEncode],[mutableParams[key] fhs_URLEncode]]];
     }
-    
+    // this is for parameters embedded in the request body, doesn't apply for multipart forms with binary data
+    if (request.HTTPBody){
+        NSString* bodyStr = [[NSString alloc] initWithUTF8String:request.HTTPBody.bytes];
+        NSArray* bodyParams = [bodyStr componentsSeparatedByString:@"&"];
+        [paramPairs addObjectsFromArray:bodyParams];
+    }
     if ([request.HTTPMethod isEqualToString:@"GET"]) {
         
         NSArray *halves = [request.URL.absoluteString componentsSeparatedByString:@"?"];
@@ -1751,6 +1757,36 @@ id removeNull(id rootObject) {
     return nil;
 }
 
+- (NSData *) POSTBodyWithParams:(NSDictionary *) params
+{
+    __block NSString* urlParamsStr = nil;
+    [params enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        NSString* paramStr = nil;
+        NSString* valueStr = nil;
+        if ([obj isKindOfClass:[NSString class]]){
+            valueStr = obj;
+        } else if ([obj isKindOfClass:[NSArray class]]){
+            
+            for (NSString* value in obj) {
+                if (valueStr == nil){
+                    valueStr = value;
+                } else {
+                    valueStr = [valueStr stringByAppendingString:[NSString stringWithFormat:@",%@", value]];
+                }
+            }
+        }
+        paramStr = [NSString stringWithFormat:@"%@=%@", key, valueStr];
+        if (urlParamsStr == nil){
+            urlParamsStr = paramStr;
+        } else {
+            urlParamsStr = [urlParamsStr stringByAppendingString:[NSString stringWithFormat:@"&%@", paramStr]];
+        }
+    }];
+    NSLog(@"params: %@", urlParamsStr);
+    urlParamsStr = [self URLEncodedString:urlParamsStr];
+    return [urlParamsStr dataUsingEncoding:NSUTF8StringEncoding];
+}
+
 - (NSData *)POSTBodyWithParams:(NSDictionary *)params boundary:(NSString *)boundary {
     NSMutableData *body = [NSMutableData dataWithLength:0];
     
@@ -1790,18 +1826,32 @@ id removeNull(id rootObject) {
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
+    // chose between multipart form and url encoded data formatting for request params
+    BOOL needsMultipart = NO;
+    if (params){
+        for (id obj in params.allValues){
+            if ([obj isKindOfClass:[NSData class]]){
+                needsMultipart = YES;
+                break;
+            }
+        }
+    }
+    if (needsMultipart){
+        NSString *boundary = [NSString fhs_UUID];
     
-    NSString *boundary = [NSString fhs_UUID];
+        NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
+        [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
     
-    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
-    [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
+        [self signRequest:request];
     
-    [self signRequest:request];
-    
-    NSData *body = [self POSTBodyWithParams:params boundary:boundary];
-    [request setValue:@(body.length).stringValue forHTTPHeaderField:@"Content-Length"];
-    request.HTTPBody = body;
-    
+        NSData *body = [self POSTBodyWithParams:params boundary:boundary];
+        [request setValue:@(body.length).stringValue forHTTPHeaderField:@"Content-Length"];
+        request.HTTPBody = body;
+    } else {
+        NSData *body = [self POSTBodyWithParams:params];
+        request.HTTPBody = body;
+        [self signRequest:request];
+    }
     id retobj = [self sendRequest:request];
     
     if (!retobj) {
@@ -2198,6 +2248,26 @@ id removeNull(id rootObject) {
 - (void)dealloc {
     [self setDelegate:nil];
     [[NSNotificationCenter defaultCenter]removeObserver:self];
+}
+
+- (NSString *) URLEncodedString:(NSString *) string {
+    NSMutableString * output = [NSMutableString string];
+    const unsigned char * source = (const unsigned char *)[string UTF8String];
+    int sourceLen = strlen((const char *)source);
+    for (int i = 0; i < sourceLen; ++i) {
+        const unsigned char thisChar = source[i];
+        if (thisChar == ' '){
+            [output appendString:@"+"];
+        } else if (thisChar == '.' || thisChar == '-' || thisChar == '_' || thisChar == '~' ||
+                   (thisChar >= 'a' && thisChar <= 'z') ||
+                   (thisChar >= 'A' && thisChar <= 'Z') ||
+                   (thisChar >= '0' && thisChar <= '9')) {
+            [output appendFormat:@"%c", thisChar];
+        } else {
+            [output appendFormat:@"%%%02X", thisChar];
+        }
+    }
+    return output;
 }
 
 @end
