@@ -171,7 +171,7 @@ id removeNull(id rootObject) {
         }];
         return [NSMutableArray arrayWithArray:sanitizedArray];
     }
-
+    
     if ([rootObject isKindOfClass:[NSNull class]]) {
         return (id)nil;
     } else {
@@ -212,7 +212,7 @@ id removeNull(id rootObject) {
 
 - (id)initWithHTTPResponseBody:(NSString *)body {
     self = [super init];
-	if (self) {
+    if (self) {
         
         if (body.length > 0) {
             NSArray *pairs = [body componentsSeparatedByString:@"&"];
@@ -233,14 +233,14 @@ id removeNull(id rootObject) {
                 }
             }
         }
-	}
+    }
     
     return self;
 }
 
 @end
 
-@interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate> 
+@interface FHSTwitterEngineController : UIViewController <UIWebViewDelegate>
 
 @property (nonatomic, strong) UINavigationBar *navBar;
 @property (nonatomic, strong) UIWebView *theWebView;
@@ -261,8 +261,6 @@ id removeNull(id rootObject) {
 // These are here to obfuscate them from prying eyes
 @property (strong, nonatomic) FHSConsumer *consumer;
 @property (assign, nonatomic) BOOL shouldClearConsumer;
-
-- (NSString *) URLEncodedString:(NSString *) string;
 
 @end
 
@@ -286,7 +284,7 @@ id removeNull(id rootObject) {
 
 - (NSString *)fhs_URLEncode {
     CFStringRef url = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)self, NULL, CFSTR("!*'();:@&=+$,/?%#[]"), kCFStringEncodingUTF8);
-	return (__bridge NSString *)url;
+    return (__bridge NSString *)url;
 }
 
 - (NSString *)fhs_truncatedToLength:(int)length {
@@ -315,14 +313,14 @@ id removeNull(id rootObject) {
 }
 
 - (BOOL)fhs_isNumeric {
-	const char *raw = (const char *)[self UTF8String];
+    const char *raw = (const char *)[self UTF8String];
     
-	for (int i = 0; i < strlen(raw); i++) {
-		if (raw[i] < '0' || raw[i] > '9') {
+    for (int i = 0; i < strlen(raw); i++) {
+        if (raw[i] < '0' || raw[i] > '9') {
             return NO;
         }
-	}
-	return YES;
+    }
+    return YES;
 }
 
 @end
@@ -459,7 +457,7 @@ id removeNull(id rootObject) {
     [_dateFormatter setDateFormat:@"YYYY-MM-DD"];
     params[@"until"] = [_dateFormatter stringFromDate:untilDate];
     [_dateFormatter setDateFormat:@"EEE MMM dd HH:mm:ss ZZZZ yyyy"];
-
+    
     if (resultType == FHSTwitterEngineResultTypeMixed) {
         params[@"result_type"] = @"mixed";
     } else if (resultType == FHSTwitterEngineResultTypeRecent) {
@@ -488,7 +486,7 @@ id removeNull(id rootObject) {
     NSURL *baseURL = [NSURL URLWithString:url_lists_create];
     
     NSMutableDictionary *params = [@{@"name": name, @"mode":isPrivate?@"private":@"public"} mutableCopy];
-
+    
     if (description.length > 0) {
         params[@"description"] = description;
     }
@@ -534,7 +532,7 @@ id removeNull(id rootObject) {
     if (listID.length == 0) {
         return [NSError badRequestError];
     }
-
+    
     NSURL *baseURL = [NSURL URLWithString:url_lists_update];
     return [self sendPOSTRequestForURL:baseURL andParams:@{@"list_id": listID, @"mode": isPrivate?@"private":@"public"}];
 }
@@ -612,7 +610,7 @@ id removeNull(id rootObject) {
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_statuses];
     NSMutableDictionary *params = [@{ @"count":@(count).stringValue, @"exclude_replies":(excludeReplies?@"true":@"false"), @"include_rts":(excludeRetweets?@"false":@"true"),@"list_id":listID } mutableCopy];
-
+    
     if (sinceID.length > 0) {
         params[@"since_id"] = sinceID;
     }
@@ -681,7 +679,7 @@ id removeNull(id rootObject) {
     if (count == 0) {
         return nil;
     }
-
+    
     NSURL *baseURL = [NSURL URLWithString:url_statuses_metions_timeline];
     
     NSMutableDictionary *params = [@{ @"count":@(count).stringValue, @"exclude_replies":@"false", @"include_rts":@"true" } mutableCopy];
@@ -720,7 +718,7 @@ id removeNull(id rootObject) {
     if (tweetString.length == 0) {
         return [NSError badRequestError];
     } else if (mediaIDs.count == 0) {
-       [self postTweet:tweetString];
+        [self postTweet:tweetString];
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_statuses_update];
@@ -743,7 +741,7 @@ id removeNull(id rootObject) {
             return [self postTweet:tweetString inReplyTo:irt];
         }
     }
-
+    
     NSURL *baseURL = [NSURL URLWithString:url_statuses_update_with_media];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -842,7 +840,7 @@ id removeNull(id rootObject) {
         if ([ret isKindOfClass:[NSData class]]) {
             return [UIImage imageWithData:(NSData *)ret];
         }
-
+        
         return ret;
     }
     
@@ -1112,7 +1110,7 @@ id removeNull(id rootObject) {
     NSURL *baseURL = [NSURL URLWithString:url_account_update_profile_colors];
     NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:6];
     params[@"skip_status"] = @"true";
-
+    
     if (profile_background_color.length > 0) {
         params[@"profile_background_color"] = profile_background_color;
     }
@@ -1338,7 +1336,7 @@ id removeNull(id rootObject) {
     if (inReplyToString.length > 0) {
         params[@"in_reply_to_status_id"] = inReplyToString;
     }
-
+    
     return [self sendPOSTRequestForURL:baseURL andParams:params];
 }
 
@@ -1387,7 +1385,7 @@ id removeNull(id rootObject) {
     NSData *secretData = [secretForSigning dataUsingEncoding:NSUTF8StringEncoding];
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
     unsigned char result[20];
-	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
+    CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
     NSString *signature = [[NSData dataWithBytes:result length:20]base64Encode];
     
     NSString *oauthToken = [NSString stringWithFormat:@"oauth_token=\"%@\", ", _accessToken.key.fhs_URLEncode];
@@ -1518,7 +1516,7 @@ id removeNull(id rootObject) {
     }
     
     NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:5];
-
+    
     if (usersValid) {
         params[@"follow"] = [users componentsJoinedByString:@","];
     }
@@ -1711,14 +1709,14 @@ id removeNull(id rootObject) {
     NSData *secretData = [secret dataUsingEncoding:NSUTF8StringEncoding];
     NSData *clearTextData = [signatureBaseString dataUsingEncoding:NSUTF8StringEncoding];
     unsigned char result[20];
-	CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
+    CCHmac(kCCHmacAlgSHA1, secretData.bytes, secretData.length, clearTextData.bytes, clearTextData.length, result);
     NSData *theData = [[[NSData dataWithBytes:result length:20]base64Encode]dataUsingEncoding:NSUTF8StringEncoding];
-
+    
     NSString *signature = [[[NSString alloc]initWithData:theData encoding:NSUTF8StringEncoding]fhs_URLEncode];
     
-	NSString *oauthToken = (tokenString.length > 0)?[NSString stringWithFormat:@"oauth_token=\"%@\", ",[tokenString fhs_URLEncode]]:@"oauth_callback=\"oob\", ";
+    NSString *oauthToken = (tokenString.length > 0)?[NSString stringWithFormat:@"oauth_token=\"%@\", ",[tokenString fhs_URLEncode]]:@"oauth_callback=\"oob\", ";
     NSString *oauthVerifier = (verifierString.length > 0)?[NSString stringWithFormat:@"oauth_verifier=\"%@\", ",verifierString]:@"";
-
+    
     NSString *oauthHeader = [NSString stringWithFormat:@"OAuth oauth_consumer_key=\"%@\", %@%@oauth_signature_method=\"HMAC-SHA1\", oauth_signature=\"%@\", oauth_timestamp=\"%@\", oauth_nonce=\"%@\", oauth_version=\"1.0\"",consumerKey,oauthToken,oauthVerifier,signature,timestamp,nonce];
     
     [request setValue:oauthHeader forHTTPHeaderField:@"Authorization"];
@@ -1726,7 +1724,7 @@ id removeNull(id rootObject) {
 
 - (int)parameterLengthForURL:(NSString *)url params:(NSMutableDictionary *)params {
     int length = url.length;
-
+    
     for (NSString *key in params) {
         length += [key fhs_URLEncode].length;
         length += [params[key] fhs_URLEncode].length;
@@ -1775,15 +1773,13 @@ id removeNull(id rootObject) {
                 }
             }
         }
-        paramStr = [NSString stringWithFormat:@"%@=%@", key, valueStr];
+        paramStr = [NSString stringWithFormat:@"%@=%@", [key fhs_URLEncode], [valueStr fhs_URLEncode]];
         if (urlParamsStr == nil){
             urlParamsStr = paramStr;
         } else {
             urlParamsStr = [urlParamsStr stringByAppendingString:[NSString stringWithFormat:@"&%@", paramStr]];
         }
     }];
-    NSLog(@"params: %@", urlParamsStr);
-    urlParamsStr = [self URLEncodedString:urlParamsStr];
     return [urlParamsStr dataUsingEncoding:NSUTF8StringEncoding];
 }
 
@@ -1838,12 +1834,12 @@ id removeNull(id rootObject) {
     }
     if (needsMultipart){
         NSString *boundary = [NSString fhs_UUID];
-    
+        
         NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
         [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
-    
+        
         [self signRequest:request];
-    
+        
         NSData *body = [self POSTBodyWithParams:params boundary:boundary];
         [request setValue:@(body.length).stringValue forHTTPHeaderField:@"Content-Length"];
         request.HTTPBody = body;
@@ -1882,18 +1878,18 @@ id removeNull(id rootObject) {
         error = authError;
         
     } else {
-    
+        
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
         [request setHTTPMethod:@"POST"];
         [request setHTTPShouldHandleCookies:NO];
-    
+        
         NSString *boundary = [NSString fhs_UUID];
-    
+        
         NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
         [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
-    
+        
         [self signRequest:request];
-    
+        
         NSData *body = [self POSTBodyWithParams:params boundary:boundary];
         [request setValue:@(body.length).stringValue forHTTPHeaderField:@"Content-Length"];
         request.HTTPBody = body;
@@ -1939,7 +1935,7 @@ id removeNull(id rootObject) {
     [request setHTTPMethod:@"GET"];
     [request setHTTPShouldHandleCookies:NO];
     [self signRequest:request];
-
+    
     id retobj = [self sendRequest:request];
     
     if (!retobj) {
@@ -2010,7 +2006,7 @@ id removeNull(id rootObject) {
     [request setHTTPMethod:@"POST"];
     [request setHTTPShouldHandleCookies:NO];
     [self signRequest:request withToken:nil tokenSecret:nil verifier:nil];
-
+    
     id retobj = [self sendRequest:request];
     
     if ([retobj isKindOfClass:[NSData class]]) {
@@ -2021,7 +2017,7 @@ id removeNull(id rootObject) {
 }
 
 - (BOOL)finishAuthWithRequestToken:(FHSToken *)reqToken {
-
+    
     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30.0f];
     [request setHTTPMethod:@"POST"];
@@ -2135,26 +2131,26 @@ id removeNull(id rootObject) {
     if (target.length == 0) {
         return nil;
     }
-	
-	NSArray *tuples = [body componentsSeparatedByString:@"&"];
-	if (tuples.count < 1) {
+    
+    NSArray *tuples = [body componentsSeparatedByString:@"&"];
+    if (tuples.count < 1) {
         return nil;
     }
-	
-	for (NSString *tuple in tuples) {
-		NSArray *keyValueArray = [tuple componentsSeparatedByString:@"="];
-		
-		if (keyValueArray.count >= 2) {
-			NSString *key = [keyValueArray objectAtIndex:0];
-			NSString *value = [keyValueArray objectAtIndex:1];
-			
-			if ([key isEqualToString:target]) {
+    
+    for (NSString *tuple in tuples) {
+        NSArray *keyValueArray = [tuple componentsSeparatedByString:@"="];
+        
+        if (keyValueArray.count >= 2) {
+            NSString *key = [keyValueArray objectAtIndex:0];
+            NSString *value = [keyValueArray objectAtIndex:1];
+            
+            if ([key isEqualToString:target]) {
                 return value;
             }
-		}
-	}
-	
-	return nil;
+        }
+    }
+    
+    return nil;
 }
 
 - (BOOL)isAuthorized {
@@ -2162,18 +2158,18 @@ id removeNull(id rootObject) {
         return NO;
     }
     
-	if (self.accessToken.key && self.accessToken.secret) {
+    if (self.accessToken.key && self.accessToken.secret) {
         if (self.accessToken.key.length > 0 && self.accessToken.secret.length > 0) {
             return YES;
         }
     }
     
-	return NO;
+    return NO;
 }
 
 - (void)clearAccessToken {
     [self storeAccessToken:@""];
-	self.accessToken = nil;
+    self.accessToken = nil;
     self.authenticatedID = nil;
 }
 
@@ -2250,26 +2246,6 @@ id removeNull(id rootObject) {
     [[NSNotificationCenter defaultCenter]removeObserver:self];
 }
 
-- (NSString *) URLEncodedString:(NSString *) string {
-    NSMutableString * output = [NSMutableString string];
-    const unsigned char * source = (const unsigned char *)[string UTF8String];
-    int sourceLen = strlen((const char *)source);
-    for (int i = 0; i < sourceLen; ++i) {
-        const unsigned char thisChar = source[i];
-        if (thisChar == ' '){
-            [output appendString:@"+"];
-        } else if (thisChar == '.' || thisChar == '-' || thisChar == '_' || thisChar == '~' ||
-                   (thisChar >= 'a' && thisChar <= 'z') ||
-                   (thisChar >= 'A' && thisChar <= 'Z') ||
-                   (thisChar >= '0' && thisChar <= '9')) {
-            [output appendFormat:@"%c", thisChar];
-        } else {
-            [output appendFormat:@"%%%02X", thisChar];
-        }
-    }
-    return output;
-}
-
 @end
 
 @implementation FHSTwitterEngineController
@@ -2285,8 +2261,8 @@ id removeNull(id rootObject) {
     self.navBar = [[UINavigationBar alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, (UIDevice.currentDevice.systemVersion.floatValue >= 7.0f)?64:44)];
     _navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     UINavigationItem *navItem = [[UINavigationItem alloc]initWithTitle:@"Twitter Login"];
-	navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
-	[_navBar pushNavigationItem:navItem animated:NO];
+    navItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(close)];
+    [_navBar pushNavigationItem:navItem animated:NO];
     
     self.theWebView = [[UIWebView alloc]initWithFrame:CGRectMake(0, _navBar.bounds.size.height, self.view.bounds.size.width, self.view.bounds.size.height-_navBar.bounds.size.height)];
     _theWebView.hidden = YES;
@@ -2299,24 +2275,24 @@ id removeNull(id rootObject) {
     [self.view addSubview:_navBar];
     
     self.loadingText = [[UILabel alloc]initWithFrame:CGRectMake((self.view.bounds.size.width/2)-40, (self.view.bounds.size.height/2)-10-7.5, 100, 15)];
-	_loadingText.text = @"Please Wait...";
-	_loadingText.backgroundColor = [UIColor clearColor];
-	_loadingText.textColor = [UIColor blackColor];
-	_loadingText.textAlignment = NSTextAlignmentLeft;
-	_loadingText.font = [UIFont boldSystemFontOfSize:15];
-	[self.view addSubview:_loadingText];
-	
-	self.spinner = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-	_spinner.center = CGPointMake((self.view.bounds.size.width/2)-60, (self.view.bounds.size.height/2)-10);
-	[self.view addSubview:_spinner];
-	[_spinner startAnimating];
+    _loadingText.text = @"Please Wait...";
+    _loadingText.backgroundColor = [UIColor clearColor];
+    _loadingText.textColor = [UIColor blackColor];
+    _loadingText.textAlignment = NSTextAlignmentLeft;
+    _loadingText.font = [UIFont boldSystemFontOfSize:15];
+    [self.view addSubview:_loadingText];
+    
+    self.spinner = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    _spinner.center = CGPointMake((self.view.bounds.size.width/2)-60, (self.view.bounds.size.height/2)-10);
+    [self.view addSubview:_spinner];
+    [_spinner startAnimating];
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @autoreleasepool {
             NSString *reqString = [[FHSTwitterEngine sharedEngine]getRequestTokenString];
-
+            
             if (reqString.length == 0) {
                 double delayInSeconds = 0.5;
                 dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
@@ -2355,33 +2331,33 @@ id removeNull(id rootObject) {
 }
 
 - (void)pasteboardChanged:(NSNotification *)note {
-	
-	if (![note.userInfo objectForKey:UIPasteboardChangedTypesAddedKey]) {
+    
+    if (![note.userInfo objectForKey:UIPasteboardChangedTypesAddedKey]) {
         return;
     }
     
     NSString *string = [[UIPasteboard generalPasteboard]string];
-	
-	if (string.length != 7 || !string.fhs_isNumeric) {
+    
+    if (string.length != 7 || !string.fhs_isNumeric) {
         return;
     }
-	
-	[self gotPin:string];
+    
+    [self gotPin:string];
 }
 
 - (NSString *)locatePin {
-	NSString *pin = [[_theWebView stringByEvaluatingJavaScriptFromString:newPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-	
-	if (pin.length == 7) {
-		return pin;
-	} else {
-		pin = [[_theWebView stringByEvaluatingJavaScriptFromString:oldPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-		
-		if (pin.length == 7) {
-			return pin;
-		}
-	}
-	return nil;
+    NSString *pin = [[_theWebView stringByEvaluatingJavaScriptFromString:newPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    if (pin.length == 7) {
+        return pin;
+    } else {
+        pin = [[_theWebView stringByEvaluatingJavaScriptFromString:oldPinJS]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        
+        if (pin.length == 7) {
+            return pin;
+        }
+    }
+    return nil;
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
@@ -2398,12 +2374,12 @@ id removeNull(id rootObject) {
     if ([formCount isEqualToString:@"0"]) {
         _navBar.topItem.title = @"Select and Copy the PIN";
     }
-	
-	[UIView beginAnimations:nil context:nil];
+    
+    [UIView beginAnimations:nil context:nil];
     _spinner.hidden = YES;
     _loadingText.hidden = YES;
-	[UIView commitAnimations];
-	
+    [UIView commitAnimations];
+    
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     
     _theWebView.hidden = NO;
@@ -2420,19 +2396,19 @@ id removeNull(id rootObject) {
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
     
     if (strstr([request.URL.absoluteString UTF8String], "denied=")) {
-		[self dismissViewControllerAnimated:YES completion:nil];
+        [self dismissViewControllerAnimated:YES completion:nil];
         return NO;
     }
     
     NSData *data = request.HTTPBody;
-	char *raw = data?(char *)[data bytes]:"";
-	
-	if (raw && (strstr(raw, "cancel=") || strstr(raw, "deny="))) {
-        [self close];
-		return NO;
-	}
+    char *raw = data?(char *)[data bytes]:"";
     
-	return YES;
+    if (raw && (strstr(raw, "cancel=") || strstr(raw, "deny="))) {
+        [self close];
+        return NO;
+    }
+    
+    return YES;
 }
 
 - (void)close {
