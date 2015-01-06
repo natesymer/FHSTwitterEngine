@@ -699,15 +699,15 @@ id removeNull(id rootObject) {
     return [self postTweet:tweetString withImageData:theData inReplyTo:nil];
 }
 
-- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt {
+- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)tweetID {
     
     if (tweetString.length == 0) {
         return [NSError badRequestError];
     } else if (theData.length == 0) {
-        if (irt.length == 0) {
+        if (tweetID.length == 0) {
             return [self postTweet:tweetString];
         } else {
-            return [self postTweet:tweetString inReplyTo:irt];
+            return [self postTweet:tweetString inReplyTo:tweetID];
         }
     }
 
@@ -717,8 +717,8 @@ id removeNull(id rootObject) {
     params[@"status"] = tweetString;
     params[@"media[]"] = theData;
     
-    if (irt.length > 0) {
-        params[@"in_reply_to_status_id"] = irt;
+    if (tweetID.length > 0) {
+        params[@"in_reply_to_status_id"] = tweetID;
     }
     
     return [self sendPOSTRequestForURL:baseURL andParams:params];
@@ -1292,7 +1292,7 @@ id removeNull(id rootObject) {
     return [self sendGETRequestForURL:baseURL andParams:params];
 }
 
-- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString {
+- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)tweetID {
     if (tweetString.length == 0) {
         return [NSError badRequestError];
     }
@@ -1302,8 +1302,8 @@ id removeNull(id rootObject) {
     NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:2];
     params[@"status"] = tweetString;
     
-    if (inReplyToString.length > 0) {
-        params[@"in_reply_to_status_id"] = inReplyToString;
+    if (tweetID.length > 0) {
+        params[@"in_reply_to_status_id"] = tweetID;
     }
 
     return [self sendPOSTRequestForURL:baseURL andParams:params];
