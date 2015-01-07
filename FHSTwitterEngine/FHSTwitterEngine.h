@@ -91,7 +91,7 @@ extern NSString * const FHSErrorDomain;
 
 // statuses/update
 - (NSError *)postTweet:(NSString *)tweetString;
-- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
+- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)tweetID;
 
 // statuses/home_timeline
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
@@ -226,7 +226,7 @@ extern NSString * const FHSErrorDomain;
 
 // statuses/update_with_media
 - (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData;
-- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)irt;
+- (NSError *)postTweet:(NSString *)tweetString withImageData:(NSData *)theData inReplyTo:(NSString *)tweetID;
 
 // statuses/mentions_timeline
 - (id)getMentionsTimelineWithCount:(int)count;
