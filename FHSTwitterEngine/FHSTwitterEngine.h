@@ -28,7 +28,7 @@
 // The synchronous Twitter engine that doesn’t suck!!
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 // Image sizes
 typedef enum {

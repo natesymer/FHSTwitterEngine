@@ -1,5 +1,9 @@
-
-*.xcuserstate
 FHSTwitterEngine.xcodeproj/xcuserdata/
 FHSTwitterEngine.xcodeproj/project.xcworkspace/
+
 .DS_Store
+
+*.xcuserstate
+*.xcworkspacedata
+*.xccheckout
+*.xcscheme
