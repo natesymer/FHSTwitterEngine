@@ -11,12 +11,12 @@
 		9B2A1BC515E805D1007E66E0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9B2A1B9A15E805D1007E66E0 /* InfoPlist.strings */; };
 		9B2A1BC915E805D1007E66E0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BA215E805D1007E66E0 /* main.m */; };
 		9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1BC315E805D1007E66E0 /* ViewController.m */; };
-		9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */; settings = {COMPILER_FLAGS = ""; }; };
 		9B2A59E41628F053003B4E2E /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B2A59E31628F053003B4E2E /* Default-568h@2x.png */; };
 		9B31B96015E56E34003FC89D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B95F15E56E34003FC89D /* UIKit.framework */; };
 		9B31B96215E56E34003FC89D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96115E56E34003FC89D /* Foundation.framework */; };
 		9B31B96415E56E34003FC89D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B31B96315E56E34003FC89D /* CoreGraphics.framework */; };
-		F1BF9D4E18CCD06200075337 /* FHSStream.m in Sources */ = {isa = PBXBuildFile; fileRef = F1BF9D4D18CCD06200075337 /* FHSStream.m */; };
+		CE49C7501A6DAB3E00F9DB93 /* FHSStream.m in Sources */ = {isa = PBXBuildFile; fileRef = CE49C74D1A6DAB3E00F9DB93 /* FHSStream.m */; };
+		CE49C7511A6DAB3E00F9DB93 /* FHSTwitterEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = CE49C74F1A6DAB3E00F9DB93 /* FHSTwitterEngine.m */; };
 		F1E39F9916645C380049DAB1 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */; };
 /* End PBXBuildFile section */
 
@@ -29,15 +29,15 @@
 		9B2A1BA215E805D1007E66E0 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9B2A1BC215E805D1007E66E0 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		9B2A1BC315E805D1007E66E0 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		9B2A1C0815E807D9007E66E0 /* FHSTwitterEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FHSTwitterEngine.h; sourceTree = "<group>"; };
-		9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FHSTwitterEngine.m; sourceTree = "<group>"; };
 		9B2A59E31628F053003B4E2E /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		9B31B95B15E56E34003FC89D /* FHSTwitterEngine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FHSTwitterEngine.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B31B95F15E56E34003FC89D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		9B31B96115E56E34003FC89D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		9B31B96315E56E34003FC89D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		F1BF9D4C18CCD06200075337 /* FHSStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FHSStream.h; sourceTree = "<group>"; };
-		F1BF9D4D18CCD06200075337 /* FHSStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FHSStream.m; sourceTree = "<group>"; };
+		CE49C74C1A6DAB3E00F9DB93 /* FHSStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FHSStream.h; sourceTree = "<group>"; };
+		CE49C74D1A6DAB3E00F9DB93 /* FHSStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FHSStream.m; sourceTree = "<group>"; };
+		CE49C74E1A6DAB3E00F9DB93 /* FHSTwitterEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FHSTwitterEngine.h; sourceTree = "<group>"; };
+		CE49C74F1A6DAB3E00F9DB93 /* FHSTwitterEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FHSTwitterEngine.m; sourceTree = "<group>"; };
 		F1E39F9816645C380049DAB1 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -63,7 +63,6 @@
 				9B2A1B9915E805D1007E66E0 /* AppDelegate.m */,
 				9B2A1BC215E805D1007E66E0 /* ViewController.h */,
 				9B2A1BC315E805D1007E66E0 /* ViewController.m */,
-				9B2A1C0715E807D9007E66E0 /* FHSTwitterEngine */,
 				9B2A1BD815E80601007E66E0 /* Supporting Files */,
 			);
 			path = FHSTwitterEngineDemo;
@@ -81,20 +80,10 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		9B2A1C0715E807D9007E66E0 /* FHSTwitterEngine */ = {
-			isa = PBXGroup;
-			children = (
-				9B2A1C0815E807D9007E66E0 /* FHSTwitterEngine.h */,
-				9B2A1C0915E807D9007E66E0 /* FHSTwitterEngine.m */,
-				F1BF9D4C18CCD06200075337 /* FHSStream.h */,
-				F1BF9D4D18CCD06200075337 /* FHSStream.m */,
-			);
-			path = FHSTwitterEngine;
-			sourceTree = SOURCE_ROOT;
-		};
 		9B31B95015E56E34003FC89D = {
 			isa = PBXGroup;
 			children = (
+				CE49C74B1A6DAB3E00F9DB93 /* FHSTwitterEngine */,
 				9B2A1B9715E805D1007E66E0 /* FHSTwitterEngineDemo */,
 				9B31B95E15E56E34003FC89D /* Frameworks */,
 				9B31B95C15E56E34003FC89D /* Products */,
@@ -118,6 +107,18 @@
 				9B31B96315E56E34003FC89D /* CoreGraphics.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CE49C74B1A6DAB3E00F9DB93 /* FHSTwitterEngine */ = {
+			isa = PBXGroup;
+			children = (
+				CE49C74C1A6DAB3E00F9DB93 /* FHSStream.h */,
+				CE49C74D1A6DAB3E00F9DB93 /* FHSStream.m */,
+				CE49C74E1A6DAB3E00F9DB93 /* FHSTwitterEngine.h */,
+				CE49C74F1A6DAB3E00F9DB93 /* FHSTwitterEngine.m */,
+			);
+			name = FHSTwitterEngine;
+			path = ../FHSTwitterEngine;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -183,11 +184,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE49C7511A6DAB3E00F9DB93 /* FHSTwitterEngine.m in Sources */,
 				9B2A1BC415E805D1007E66E0 /* AppDelegate.m in Sources */,
 				9B2A1BC915E805D1007E66E0 /* main.m in Sources */,
-				F1BF9D4E18CCD06200075337 /* FHSStream.m in Sources */,
 				9B2A1BD715E805D1007E66E0 /* ViewController.m in Sources */,
-				9B2A1C2915E807D9007E66E0 /* FHSTwitterEngine.m in Sources */,
+				CE49C7501A6DAB3E00F9DB93 /* FHSStream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
