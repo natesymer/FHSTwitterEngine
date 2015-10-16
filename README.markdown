@@ -118,9 +118,7 @@ Most methods return `id`. The returned object can be a(n):
 - `NSError`
 - `nil`
 
-**For the future/To Do**
-
-We are working on a [new version](https://github.com/fhsjaagshs/FHSTwitterEngine/tree/development) :-)
+**Contact**
 
 You can [email](mailto:nate@natesymer.com) suggestions or open an [issue](https://github.com/fhsjaagshs/FHSTwitterEngine/issues).
 
