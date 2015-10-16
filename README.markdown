@@ -3,7 +3,7 @@ FHSTwitterEngine
 
 ***Twitter API for Cocoa developers***
 
-Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](http://twitter.com/natesymer) 
+Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](https://twitter.com/natesymer) 
 
 `FHSTwitterEngine` can:
 
