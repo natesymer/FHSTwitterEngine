@@ -30,9 +30,7 @@ class ViewController: UITableViewController, FHSTwitterEngineAccessTokenDelegate
         
         FHSTwitterEngine.sharedEngine().permanentlySetConsumerKey("Xg3ACDprWAH8loEPjMzRg", andSecret: "9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0")
         FHSTwitterEngine.sharedEngine().delegate = self
-        if loadAccessToken() != nil {
-            FHSTwitterEngine.sharedEngine().loadAccessToken()
-        }
+        FHSTwitterEngine.sharedEngine().loadAccessToken()
     }
     
     // MARK: - Private
