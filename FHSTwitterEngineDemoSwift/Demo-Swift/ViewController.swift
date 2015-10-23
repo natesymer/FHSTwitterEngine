@@ -30,7 +30,7 @@ class ViewController: UITableViewController, FHSTwitterEngineAccessTokenDelegate
         
         FHSTwitterEngine.sharedEngine().permanentlySetConsumerKey("Xg3ACDprWAH8loEPjMzRg", andSecret: "9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0")
         FHSTwitterEngine.sharedEngine().delegate = self
-        FHSTwitterEngine.sharedEngine().loadAccessToken()        
+        FHSTwitterEngine.sharedEngine().loadAccessToken()
     }
     
     // MARK: - Private
@@ -51,7 +51,7 @@ class ViewController: UITableViewController, FHSTwitterEngineAccessTokenDelegate
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell:UITableViewCell = tableView.dequeueReusableCellWithIdentifier(cellId, forIndexPath: indexPath) as UITableViewCell
+        let cell:UITableViewCell = tableView.dequeueReusableCellWithIdentifier(cellId, forIndexPath: indexPath) as UITableViewCell
         
         let action = self.dataSource[indexPath.row] as String
         
@@ -101,8 +101,11 @@ class ViewController: UITableViewController, FHSTwitterEngineAccessTokenDelegate
         NSUserDefaults.standardUserDefaults().setObject(accessToken, forKey: "SavedAccessHTTPBody")
     }
     
-    func loadAccessToken() -> String! {
-        return NSUserDefaults.standardUserDefaults().objectForKey("SavedAccessHTTPBody") as String
+    func loadAccessToken() -> String? {
+        if let outputStr = NSUserDefaults.standardUserDefaults().objectForKey("SavedAccessHTTPBody") as? String{
+            return outputStr
+        }
+        return nil
     }
 }
 
