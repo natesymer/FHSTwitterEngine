@@ -38,6 +38,7 @@ class ViewController: UITableViewController, FHSTwitterEngineAccessTokenDelegate
     func oauthAction() {
         
         let loginController = FHSTwitterEngine.sharedEngine().loginControllerWithCompletionHandler { (Bool success) -> Void in
+            self.tableView.reloadData()
             print("success: \(success) \n")
         }
         
