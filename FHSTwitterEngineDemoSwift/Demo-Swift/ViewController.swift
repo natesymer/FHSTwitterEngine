@@ -39,7 +39,7 @@ class ViewController: UITableViewController, FHSTwitterEngineAccessTokenDelegate
         
         let loginController = FHSTwitterEngine.sharedEngine().loginControllerWithCompletionHandler { (Bool success) -> Void in
             self.tableView.reloadData()
-            print("success: \(success) \n")
+            print("success: \(success) \n", terminator: "")
         }
         
         self.presentViewController(loginController, animated: true, completion: nil)
@@ -64,14 +64,14 @@ class ViewController: UITableViewController, FHSTwitterEngineAccessTokenDelegate
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         switch indexPath.row {
         case 0:
-            print("post tweet")
+            print("post tweet", terminator: "")
             let alertView = UIAlertView(title: "Tweet", message: "Write a tweet below", delegate: self, cancelButtonTitle: "Cancel", otherButtonTitles: "Tweet")
             alertView.alertViewStyle = UIAlertViewStyle.PlainTextInput
             alertView.show()
             
         case 1:
-            print("time line")
-            print("\(FHSTwitterEngine.sharedEngine().getTimelineForUser(FHSTwitterEngine.sharedEngine().authenticatedID, isID: true, count: 10))")
+            print("time line", terminator: "")
+            print("\(FHSTwitterEngine.sharedEngine().getTimelineForUser(FHSTwitterEngine.sharedEngine().authenticatedID, isID: true, count: 10))", terminator: "")
 
         case 2:
             FHSTwitterEngine.sharedEngine().clearAccessToken()
@@ -79,7 +79,7 @@ class ViewController: UITableViewController, FHSTwitterEngineAccessTokenDelegate
             
         default:
             let row = indexPath.row
-            print("tapped on \(row) \n")
+            print("tapped on \(row) \n", terminator: "")
             
         }
         
