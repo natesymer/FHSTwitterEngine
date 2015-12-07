@@ -3,7 +3,7 @@ FHSTwitterEngine
 
 ***Twitter API for Cocoa developers***
 
-Created by [Nathaniel Symer](mailto:nate@natesymer.com), aka [@natesymer](https://twitter.com/natesymer) 
+Created by [Nathaniel Symer](mailto:nate@natesymer.com)
 
 `FHSTwitterEngine` can:
 
@@ -120,12 +120,6 @@ Most methods return `id`. The returned object can be a(n):
 
 **Contact**
 
-You can [email](mailto:nate@natesymer.com) suggestions or open an [issue](https://github.com/fhsjaagshs/FHSTwitterEngine/issues).
-
-**Debugging 101 for outsource developers**
-
-Before emailing me, spend an hour trying to fix the problem yourself. Don't go wild and try to change everything, just trace back your steps, and look closely at details. Don't program by permutation.
-
-One common issue appears to be an `#import` loop. This happens when class *a* imports class *b* which, in turn, imports class *a*. Usually, the compiler will give you a warning that should look like: *"multiple declarations of class x"*. However, this warning/error can appear from multiple declarations of class x, so be careful.
-
-If after an hour, you have no solution and your problem is in your code, I don't want to hear it. I'm not getting paid to do your job (that you should be capable of doing yourself). 
+- Open an [issue](https://github.com/fhsjaagshs/FHSTwitterEngine/issues)
+- [Daniel Khamsing](https://twitter.com/dkhamsing)
+- [Nathaniel Symer](mailto:nate@natesymer.com)
