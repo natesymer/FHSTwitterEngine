@@ -91,7 +91,11 @@ extern NSString * const FHSErrorDomain;
 
 // statuses/update
 - (NSError *)postTweet:(NSString *)tweetString;
-- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)tweetID;
+- (NSError *)postTweet:(NSString *)tweetString inReplyTo:(NSString *)inReplyToString;
+- (NSError *)postTweet:(NSString *)tweetString withMediaIDs:(NSArray *)mediaIDs ;
+
+// media/upload
+- (void) uploadMediaWithData:(NSData *) imageData withCompletionBlock:(void (^)(NSError *error, id response)) completionBlock;
 
 // statuses/home_timeline
 - (id)getHomeTimelineSinceID:(NSString *)sinceID count:(int)count;
