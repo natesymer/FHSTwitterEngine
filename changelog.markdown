@@ -112,6 +112,14 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 
 - Added streaming
 
+**Version 1.8.1**
+
+- Add support for media/upload API by [SalahAldin Ghanim](https://github.com/salah-ghanim)
+- Swift demo by [Daniel Khamsing](https://github.com/dkhamsing)
+- Fix (standardize) parameter names by [Cam Clendenin](https://github.com/camclendenin)
+- Fix bug with body request body parameters by [SalahAldin Ghanim](https://github.com/salah-ghanim)
+- Fix demo crash by [Alex Ling](https://github.com/hkalexling)
+
 OAuthConsumer
 ===
 *Version numbers below are for **\_my\_** version of OAuthConsumer. I modified OAuthConsumer almost beyond recognition...*
