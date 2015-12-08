@@ -115,10 +115,16 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 **Version 1.8.1**
 
 - Add support for media/upload API by [SalahAldin Ghanim](https://github.com/salah-ghanim)
+- Add preliminary support for CocoaPods by [SalahAldin Ghanim](https://github.com/salah-ghanim)
 - Swift demo by [Daniel Khamsing](https://github.com/dkhamsing)
 - Fix (standardize) parameter names by [Cam Clendenin](https://github.com/camclendenin)
 - Fix bug with body request body parameters by [SalahAldin Ghanim](https://github.com/salah-ghanim)
 - Fix demo crash by [Alex Ling](https://github.com/hkalexling)
+
+**Version 1.8.2**
+
+- Add support for Cocoapods by [Daniel Khamsing](https://github.com/dkhamsing)
+- Add documentation by [Daniel Khamsing](https://github.com/dkhamsing)
 
 OAuthConsumer
 ===
