@@ -4,5 +4,5 @@
 # use_frameworks!
 
 target 'FHSTwitterEngineDemoCocoaPods' do
-pod 'FHSTwitterEngine', '~> 1.8'
+pod 'FHSTwitterEngine', '~> 2.0'
 end
