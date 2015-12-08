@@ -40,7 +40,9 @@ pod 'FHSTwitterEngine', '~> 2.0'
 
 ## Usage
 
-Add `#import "FHSTwitterEngine.h"` where necessary
+> Add import where necessary
+
+	#import "FHSTwitterEngine.h"
 
 > Set up `FHSTwitterEngine`
 
