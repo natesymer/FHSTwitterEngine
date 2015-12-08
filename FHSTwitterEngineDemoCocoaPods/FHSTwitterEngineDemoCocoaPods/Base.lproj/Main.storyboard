@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9059" systemVersion="15B42" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9049"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Mbi-2n-nnw">
+                                <rect key="frame" x="250" y="120" width="100" height="50"/>
+                                <animations/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="58z-pm-aVC"/>
+                                    <constraint firstAttribute="height" constant="50" id="n8N-s0-uTZ"/>
+                                </constraints>
+                                <state key="normal" title="OAuth Login"/>
+                                <connections>
+                                    <action selector="loginAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="jWA-fz-vKA"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cKo-r9-nxR">
+                                <rect key="frame" x="250" y="180" width="100" height="84"/>
+                                <animations/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="eBS-e3-9Rr"/>
+                                    <constraint firstAttribute="height" constant="84" id="vtL-oG-gPR"/>
+                                </constraints>
+                                <state key="normal" title="Get Tweets"/>
+                                <connections>
+                                    <action selector="getTweetsAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="fX2-cQ-pVI"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <animations/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="cKo-r9-nxR" firstAttribute="top" secondItem="Mbi-2n-nnw" secondAttribute="bottom" constant="10" id="BMl-Aq-uTJ"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Mbi-2n-nnw" secondAttribute="trailing" constant="237" id="NuM-SV-aWg"/>
+                            <constraint firstItem="Mbi-2n-nnw" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="238" id="ggx-JI-hvF"/>
+                            <constraint firstItem="Mbi-2n-nnw" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="100" id="ufs-OM-upw"/>
+                            <constraint firstItem="cKo-r9-nxR" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="w2p-sy-9vS"/>
+                            <constraint firstItem="Mbi-2n-nnw" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="w72-xa-TKD"/>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="NuM-SV-aWg"/>
+                                <exclude reference="ggx-JI-hvF"/>
+                            </mask>
+                        </variation>
+                    </view>
+                    <connections>
+                        <outlet property="getTweetsButton" destination="cKo-r9-nxR" id="lBU-jb-MDe"/>
+                        <outlet property="loginButton" destination="Mbi-2n-nnw" id="ahK-Iw-i0m"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="133" y="433"/>
+        </scene>
+    </scenes>
+</document>
