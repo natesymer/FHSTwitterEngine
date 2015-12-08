@@ -112,7 +112,7 @@ The singleton pattern allows the programmer to use the library across scopes wit
 
 ## Threading
 
-While you can use any threading technology for threading, I recommend Grand Central Dispatch (GCD).
+While you can use any threading technology for threading, I recommend [Grand Central Dispatch (GCD)](https://developer.apple.com/library/ios/documentation/Performance/Reference/GCD_libdispatch_Ref/).
 
 ## General Comments
 
