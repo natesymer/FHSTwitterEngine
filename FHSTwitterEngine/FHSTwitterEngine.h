@@ -43,7 +43,6 @@ typedef enum {
     FHSTwitterEngineImageSizeOriginal // original size of image
 } FHSTwitterEngineImageSize;
 
-
 /**
  Result types.
  */
@@ -53,19 +52,18 @@ typedef enum {
     FHSTwitterEngineResultTypePopular
 } FHSTwitterEngineResultType;
 
-
 /**
  Stream block.
  */
 typedef void(^StreamBlock)(id result, BOOL *stop);
 
-
 /**
- Remove NSNulls from NSDictionary and NSArray
+ Remove NSNulls from NSDictionary and NSArray.
  Credit: Conrad Kramer https://github.com/conradev
  */
 id removeNull(id rootObject);
 
+// Profile
 extern NSString * const FHSProfileBackgroundColorKey;
 extern NSString * const FHSProfileLinkColorKey;
 extern NSString * const FHSProfileSidebarBorderColorKey;
@@ -77,6 +75,7 @@ extern NSString * const FHSProfileURLKey;
 extern NSString * const FHSProfileLocationKey;
 extern NSString * const FHSProfileDescriptionKey;
 
+// Error
 extern NSString * const FHSErrorDomain;
 
 /** FHSTwitterEngine token object. */
@@ -132,9 +131,9 @@ extern NSString * const FHSErrorDomain;
 
 @interface FHSTwitterEngine : NSObject
 
-//
-// REST API
-//
+#pragma mark - REST API
+
+/// @name REST API
 
 /**
  Post tweet.
@@ -169,7 +168,7 @@ extern NSString * const FHSErrorDomain;
 - (void)uploadMediaWithData:(NSData *)imageData withCompletionBlock:(void (^)(NSError *error, id response))completionBlock;
 
 /**
- Get timeline of tweets
+ Get timeline of tweets.
  @param sinceID Start tweet id.
  @param count Number of tweets.
  @return List of tweets.
@@ -228,7 +227,7 @@ extern NSString * const FHSErrorDomain;
 - (NSError *)setProfileImageWithImageData:(NSData *)data;
 
 /**
- Get user settings
+ Get user settings.
  @return User settings.
  */
 - (id)getUserSettings;
@@ -389,7 +388,7 @@ extern NSString * const FHSErrorDomain;
 - (id)getDirectMessages:(int)count;
 
 /**
- Delete direct message
+ Delete a direct message.
  @param messageID Message id.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
@@ -739,6 +738,10 @@ extern NSString * const FHSErrorDomain;
  */
 - (id)uploadImageToTwitPic:(NSData *)imageData withMessage:(NSString *)message twitPicAPIKey:(NSString *)twitPicAPIKey;
 
+#pragma mark - Streaming
+
+/// @name Streaming
+
 /**
  Stream user messages.
  @param with List of users to stream.
@@ -779,9 +782,9 @@ extern NSString * const FHSErrorDomain;
  */
 - (id)streamingRequestForURL:(NSURL *)url HTTPMethod:(NSString *)method parameters:(NSDictionary *)params;
 
-//
-// Login and Auth
-//
+#pragma mark - XAuth
+
+/// @name XAuth
 
 /**
  Get XAuth access token.
@@ -791,7 +794,9 @@ extern NSString * const FHSErrorDomain;
  */
 - (NSError *)getXAuthAccessTokenForUsername:(NSString *)username password:(NSString *)password;
 
-// OAuth login
+#pragma mark - OAuth
+
+/// @name OAuth
 
 /**
  Login view controller.
@@ -806,9 +811,9 @@ extern NSString * const FHSErrorDomain;
  */
 - (UIViewController *)loginControllerWithCompletionHandler:(void(^)(BOOL success))block;
 
-//
-// Access Token Mangement
-//
+#pragma mark - Access Token
+
+/// @name Access Token
 
 /**
  Clear access token.
@@ -826,9 +831,9 @@ extern NSString * const FHSErrorDomain;
  */
 - (BOOL)isAuthorized;
 
-//
-// API Key management
-//
+#pragma mark - API Key
+
+/// @name API Key
 
 /**
  Clear consumer.
