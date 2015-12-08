@@ -46,8 +46,11 @@ typedef enum {
 
 typedef void(^StreamBlock)(id result, BOOL *stop);
 
-// Remove NSNulls from NSDictionary and NSArray
-// Credit for this function goes to Conrad Kramer
+
+/**
+ Remove NSNulls from NSDictionary and NSArray
+ Credit: Conrad Kramer https://github.com/conradev
+ */
 id removeNull(id rootObject);
 
 extern NSString * const FHSProfileBackgroundColorKey;
