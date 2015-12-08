@@ -124,6 +124,7 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 **Version 1.8.2**
 
 - Add support for Cocoapods by [Daniel Khamsing](https://github.com/dkhamsing)
+- Add documentation by [Daniel Khamsing](https://github.com/dkhamsing)
 
 OAuthConsumer
 ===
