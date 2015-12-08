@@ -129,6 +129,7 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 **Version 2.0.1**
 
 - Version change to accomodate Cocoapods
+- Update documentation by [Daniel Khamsing](https://github.com/dkhamsing)
 
 OAuthConsumer
 ===
