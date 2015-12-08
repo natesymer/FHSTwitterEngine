@@ -126,6 +126,11 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Add support for Cocoapods by [Daniel Khamsing](https://github.com/dkhamsing)
 - Add documentation by [Daniel Khamsing](https://github.com/dkhamsing)
 
+**Version 2.0.1**
+
+- Version change to accomodate Cocoapods
+- Update documentation by [Daniel Khamsing](https://github.com/dkhamsing)
+
 OAuthConsumer
 ===
 *Version numbers below are for **\_my\_** version of OAuthConsumer. I modified OAuthConsumer almost beyond recognition...*
