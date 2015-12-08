@@ -82,8 +82,19 @@ extern NSString * const FHSErrorDomain;
 /** FHSTwitterEngine token object. */
 @interface FHSToken : NSObject
 
+/**
+ Token key.
+ */
 @property (nonatomic, strong) NSString *key;
+
+/**
+ Token secret.
+ */
 @property (nonatomic, strong) NSString *secret;
+
+/**
+ Token verifier.
+ */
 @property (nonatomic, strong) NSString *verifier;
 
 /**
