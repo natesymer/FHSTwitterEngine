@@ -29,7 +29,7 @@ Where did OAuthConsumer go? It's gone :) because there were a number of issues w
 ### [CocoaPods](https://cocoapods.org/)
 
 ```ruby
-pod 'FHSTwitterEngine', '~> 1.8'
+pod 'FHSTwitterEngine', '~> 2.0'
 ```
 
 ### Manual
