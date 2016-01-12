@@ -133,8 +133,9 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 
 **Version 2.0.2**
 
-- Update podspec platform to `7.0`
+- Update podspec `platform`, `social_media_url`
 - Update Cocoapods demo
+- Update Twitter demo app keys
 
 OAuthConsumer
 ===
