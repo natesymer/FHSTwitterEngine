@@ -24,14 +24,25 @@ Where did OAuthConsumer go? It's gone :) because there were a number of issues w
 3. It could not take raw data as post params by design (see #2)
 4. It duplicated functionality I already implemented.
 
-**Setup**
+## Setup
+
+### [CocoaPods](https://cocoapods.org/)
+
+```ruby
+pod 'FHSTwitterEngine', '~> 2.0'
+```
+
+### Manual
 
 1. Add `FHSTwitterEngine.h` and `FHSTwitterEngine.m` to your project
-2. `#import "FHSTwitterEngine.h"` where necessary
-3. Link against `SystemConfiguration.framework`
-4. Enable ARC for both files if applicable
+- Link against `SystemConfiguration.framework`
+- Enable ARC for both files if applicable
 
-**Usage:**
+## Usage
+
+> Add import where necessary
+
+	#import "FHSTwitterEngine.h"
 
 > Set up `FHSTwitterEngine`
 
@@ -95,19 +106,19 @@ Where did OAuthConsumer go? It's gone :) because there were a number of issues w
     	}
     });
 
-**The "Singleton" Pattern**
+## The "Singleton" Pattern
 
 The singleton pattern allows the programmer to use the library across scopes without having to manually keep a reference to the FHSTwitterEngine object. When the app is killed, any memory used by FHSTwitterEngine is freed.
 
-**Threading**
+## Threading
 
 While you can use any threading technology for threading, I recommend Grand Central Dispatch (GCD).
 
-**General Comments**
+## General Comments
 
 `FHSTwitterEngine` will attempt to preemptively detect errors in your requests, before they are actually sent. This includes missing parameters, and a lack of authorization. If FHSTwitterEngine detects that a user is not logged in, it will attempt to load an access token using its delegate. This process is designed to prevent bad requests from being needlessly sent.
 
-**About requests**
+## About requests
 
 Most methods return `id`. The returned object can be a(n):
 
@@ -118,7 +129,7 @@ Most methods return `id`. The returned object can be a(n):
 - `NSError`
 - `nil`
 
-**Contact**
+## Contact
 
 - Open an [issue](https://github.com/fhsjaagshs/FHSTwitterEngine/issues)
 - [Daniel Khamsing](https://twitter.com/dkhamsing)

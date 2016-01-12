@@ -131,6 +131,12 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Version change to accomodate Cocoapods
 - Update documentation by [Daniel Khamsing](https://github.com/dkhamsing)
 
+**Version 2.0.2**
+
+- Update podspec `platform`, `social_media_url`
+- Update Cocoapods demo
+- Update Twitter demo app keys
+
 OAuthConsumer
 ===
 *Version numbers below are for **\_my\_** version of OAuthConsumer. I modified OAuthConsumer almost beyond recognition...*

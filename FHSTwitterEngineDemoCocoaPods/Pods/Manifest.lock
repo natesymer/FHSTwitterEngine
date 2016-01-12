@@ -1,10 +1,10 @@
 PODS:
-  - FHSTwitterEngine (1.8.1)
+  - FHSTwitterEngine (2.0.1)
 
 DEPENDENCIES:
-  - FHSTwitterEngine (~> 1.8)
+  - FHSTwitterEngine (~> 2.0)
 
 SPEC CHECKSUMS:
-  FHSTwitterEngine: 540360ee2ae71577cccb69a709fc4556bd63571b
+  FHSTwitterEngine: 871c89f61ade58aa7fd03b2b271393db1bcb7dd3
 
 COCOAPODS: 0.39.0
