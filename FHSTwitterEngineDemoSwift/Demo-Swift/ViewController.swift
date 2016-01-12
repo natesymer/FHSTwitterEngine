@@ -28,7 +28,7 @@ class ViewController: UITableViewController, FHSTwitterEngineAccessTokenDelegate
         let oauthButton = UIBarButtonItem(title: "OAuth", style: UIBarButtonItemStyle.Plain, target: self, action: "oauthAction")
         self.navigationItem.rightBarButtonItem = oauthButton
         
-        FHSTwitterEngine.sharedEngine().permanentlySetConsumerKey("Xg3ACDprWAH8loEPjMzRg", andSecret: "9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0")
+        FHSTwitterEngine.sharedEngine().permanentlySetConsumerKey("8EfOoU20N2kmrdKH3JXNw", andSecret: "k5yXQiJghM1bdlLhgKlfDVarAiyX8hsQREyQhLpsMw8")
         FHSTwitterEngine.sharedEngine().delegate = self
         FHSTwitterEngine.sharedEngine().loadAccessToken()
     }

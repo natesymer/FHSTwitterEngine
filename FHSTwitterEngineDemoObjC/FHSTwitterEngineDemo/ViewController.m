@@ -38,7 +38,7 @@
 	[bar pushNavigationItem:navItem animated:NO];
     [self.view addSubview:bar];
     
-    [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"Xg3ACDprWAH8loEPjMzRg" andSecret:@"9LwYDxw1iTc6D9ebHdrYCZrJP4lJhQv5uf4ueiPHvJ0"];
+    [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"8EfOoU20N2kmrdKH3JXNw" andSecret:@"k5yXQiJghM1bdlLhgKlfDVarAiyX8hsQREyQhLpsMw8"];
     [[FHSTwitterEngine sharedEngine]setDelegate:self];
     [[FHSTwitterEngine sharedEngine]loadAccessToken];
 }
