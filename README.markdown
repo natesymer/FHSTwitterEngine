@@ -7,7 +7,7 @@ Created by [Nathaniel Symer](mailto:nate@natesymer.com)
 
 `FHSTwitterEngine` can:
 
-- Authenicate using OAuth and/or xAuth.
+- Authenticate using OAuth and/or xAuth.
 - Make a request to just about every API endpoint.
 
 Why you should use `FHSTwitterEngine`:
@@ -17,12 +17,7 @@ Why you should use `FHSTwitterEngine`:
 - Shared instance
 - Scientific
 
-Where did OAuthConsumer go? It's gone :) because there were a number of issues with it:
-
-1. It had too much compatibility code
-2. It concatenated and signed POST params
-3. It could not take raw data as post params by design (see #2)
-4. It duplicated functionality I already implemented.
+This project started with [OAuthConsumer](.github/oauthconsumer.md).
 
 ## Setup
 
@@ -48,22 +43,22 @@ pod 'FHSTwitterEngine', '~> 2.0'
 
     [[FHSTwitterEngine sharedEngine]permanentlySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
 > Or with a temporary consumer that gets cleared after each request
- 
+
     [[FHSTwitterEngine sharedEngine]temporarilySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
-         
+
 > Set access token delegate (see header)
 
-    [[FHSTwitterEngine sharedEngine]setDelegate:myDelegate]; 
-    
+    [[FHSTwitterEngine sharedEngine]setDelegate:myDelegate];
+
 > Login via OAuth:
-    
+
     UIViewController *loginController = [[FHSTwitterEngine sharedEngine]loginControllerWithCompletionHandler:^(BOOL success) {
         NSLog(success?@"L0L success":@"O noes!!! Loggen faylur!!!");
     }];
     [self presentViewController:loginController animated:YES completion:nil];
-    
+
 > Login via XAuth:
-    
+
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     	@autoreleasepool {
     		NSError *error = [[FHSTwitterEngine sharedEngine]getXAuthAccessTokenForUsername:@"<username>" password:@"<password>"];
@@ -75,11 +70,11 @@ pod 'FHSTwitterEngine', '~> 2.0'
        		});
     	}
     });
-    
+
 > Clear the current consumer key
 
 	[[FHSTwitterEngine sharedEngine]clearConsumer];
-	
+
 > Load a saved access_token (called when API calls are made):
 
     [[FHSTwitterEngine sharedEngine]loadAccessToken];
@@ -91,7 +86,7 @@ pod 'FHSTwitterEngine', '~> 2.0'
 > Check if a session is valid:
 
     [[FHSTwitterEngine sharedEngine]isAuthorized];
-    
+
 > Do an API call (POST and GET):
 
     dispatch_async((dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
