@@ -1,54 +1,82 @@
-**Changelog**
-===
+# **FHSTwitterEngine Changelog**
 
-FHSTwitterEngine
-===
+Changes are by **Nate Symer** unless otherwise noted (you can also see the changelog archive for [OAuthConsumer](.github/oauthconsumer.md)).
 
-Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngine used to be 100% undocumented.
+**Version 2.0.2** by [Daniel Khamsing](https://github.com/dkhamsing)
 
-**Initial Commits**
+- Update Podspec `platform`, `social_media_url`
+- Update CocoaPods demo
+- Update Twitter demo app keys
 
-- Added more endpoints
-- Fixed a variety of bugs
+**Version 2.0.1** by [Daniel Khamsing](https://github.com/dkhamsing)
 
-**Version 1.0**
+- Version change to accommodate CocoaPods
+- Update documentation
 
-- Finished endpoints
-- FHSTwitterEngine now uses Twitter API v1.1
-- Changed the return of errors (now returns NSError, see readme.markdown for more)
+**Version 1.8.2** by [Daniel Khamsing](https://github.com/dkhamsing)
 
-**Version 1.1**
+- Add support for CocoaPods
+- Add documentation
 
-- Fixed a TON of bugs
-- Cut dependency on TouchJSON
+**Version 1.8.1**
 
-**Version 1.2**
+- Add support for media/upload API by [SalahAldin Ghanim](https://github.com/salah-ghanim)
+- Add preliminary support for CocoaPods by [SalahAldin Ghanim](https://github.com/salah-ghanim)
+- Swift demo by [Daniel Khamsing](https://github.com/dkhamsing)
+- Fix (standardize) parameter names by [Cam Clendenin](https://github.com/camclendenin)
+- Fix bug with body request body parameters by [SalahAldin Ghanim](https://github.com/salah-ghanim)
+- Fix demo crash by [Alex Ling](https://github.com/hkalexling)
 
-- Fixed the postTweet:withImageData:inReplyTo: method.
-- Added Search API stuffs
+**Version 1.8**
 
-**Version 1.3**
+- Added streaming
 
-- Added self.includeEntities to turn on or off the inclusion of entities. Defaults to NO.
+**Version 1.7**
 
-**Version 1.3.1**
+- `FHSTwitterEngine` now uses the singleton pattern
+- Cleaned up the -isAuthorized check in `-sendGETRequest:` and `-sendPOSTRequest:` to attempt to load saved access tokens if unauthorized.
+- Cleaned up login controller
+- Updated Demo app
 
-- Fixed some potential problems in base64EncodingWithLineLength:
+**Version 1.6.5**
 
-**Version 1.3.2**
+- Fixed issue in `-generateRequestStringsFromArray` method where some ids were ignored (the remainder of a modulo division operation)
 
-- Fixed an issue with the date format from twitter, thanks to Jason Hsu.
-- Added the ability to set your consumer key and secret on a per-request basis.
+**Version 1.6.4**
 
-**Version 1.3.3**
+- Moved all batch lookup methods to use `100` instead of `99`
 
-- since_id is now optional for - [FHSTwitterEngine getHomeTimelineSinceID:count:]
+**Version 1.6.3.1**
 
-**Version 1.4**
+- Found an issue with the mass listing method - cursors
+- Adapted code for cursors, no more `-getFriends` and `-getFollowers`. You'll just have to pass your logged in username… Boo hoo.
 
-- Fixed misspelling of "Destroy" (was destory) in a method name (I think it was destoryTweet:). Thanks to Conrad Kramer ([@conradev](http://twitter.com/conradev)) for pointing this out.
-- Added completion block to OAuth login method
-- Fixed lag with the date parsing method by not lazily allocating the NSDateFormatter. A 200ms delay is now gone. *And there was much rejoycing*.
+**Version 1.6.3**
+
+- Added `followers/list` and `friends/list`
+- Replaced `-getFriends` and `-getFollowers` with the methods for the above
+- Exposed `-generateRequestStringsFromArray:`
+
+**Version 1.6.1**
+
+- Sorry I forgot about the changelog!
+- Fixed a bunch of bugs... You should be good to go.
+- More optimization and reengineering
+
+**Version 1.6**
+
+- MOVE AWAY FROM ARC
+- Fix bug with parsing nil JSON data
+
+**Version 1.5.2**
+
+- Cleaned up the OAuth login controller and the base64 encoding methods.
+
+**Version 1.5.1**
+
+- Cleaned up error messages
+- Streamlined the sending of requests
+- Fixed handling of users string with the methods that take an `NSArray` of users as a param
 
 **Version 1.5**
 
@@ -61,83 +89,46 @@ Bear in mind that I didn't exactly start this until recently, and FHSTwitterEngi
 - Fixed incorrect key in `updateProfileColorsWithDictionary:`
 - Added keys for profile settings
 
-**Version 1.5.1**
+**Version 1.4**
 
-- Cleaned up error messages
-- Streamlined the sending of requests
-- Fixed handling of users string with the methods that take an NSArray of users as a param
+- Fixed misspelling of "Destroy" in a method name (I think it was `destoryTweet:`). Thanks to [Conrad Kramer](http://twitter.com/conradev) for pointing this out.
+- Added completion block to OAuth login method
+- Fixed lag with the date parsing method by not lazily allocating the `NSDateFormatter`. A 200ms delay is now gone. *And there was much rejoicing*.
 
-**Version 1.5.2**
+**Version 1.3.3**
 
-- Cleaned up the OAuth login controller and the base64 encoding methods.
+- `since_id` is now optional for `getHomeTimelineSinceID:count:`
 
-**Version 1.6**
+**Version 1.3.2**
 
-- MOVE AWAY FROM ARC
-- Fix bug with parsing nil JSON data
+- Fixed an issue with the date format from Twitter, thanks to Jason Hsu.
+- Added the ability to set your consumer key and secret on a per-request basis.
 
-**Version 1.6.1**
+**Version 1.3.1**
 
-- Sorry I forgot about the changelog!
-- Fixed a bunch of bugs... You should be good to go.
-- More optimization and reengineering
+- Fixed some potential problems in `base64EncodingWithLineLength:`
 
-**Version 1.6.3**
+**Version 1.3**
 
-- Added followers/list and friends/list
-- Replaced -getFriends and -getFollowers with the methods for the above
-- Exposed -generateRequestStringsFromArray:
+- Added `self.includeEntities` to turn on or off the inclusion of entities. Defaults to NO.
 
-**Version 1.6.3.1**
+**Version 1.2**
 
-- Found an issue with the mass listing method - cursors
-- Adapted code for cursors, no more -getFriends and -getFollowers. You'll just have to pass your logged in username… Boo hoo.
+- Fixed the `postTweet:withImageData:inReplyTo:` method.
+- Added Search API stuffs
 
-**Version 1.6.4**
+**Version 1.1**
 
-- Moved all batch lookup methods to use 100 instead of 99
+- Fixed a TON of bugs
+- Cut dependency on `TouchJSON`
 
-**Version 1.6.5**
+**Version 1.0**
 
-- Fixed issue in -generateRequestStringsFromArray method where some ids were ignored (the remainder of a modulo division operation)
+- Finished endpoints
+- `FHSTwitterEngine` now uses Twitter API v1.1
+- Changed the return of errors (now returns `NSError`, see README for more)
 
-**Version 1.7**
+**Initial Commits**
 
-- FHSTwitterEngine now uses the singleton pattern
-- Cleaned up the -isAuthorized check in `-sendGETRequest:` and `-sendPOSTRequest:` to attempt to load saved access tokens if unauthorized.
-- Cleaned up login controller
-- Updated Demo app
-
-**Version 1.8**
-
-- Added streaming
-
-**Version 1.8.1**
-
-- Add support for media/upload API by [SalahAldin Ghanim](https://github.com/salah-ghanim)
-- Add preliminary support for CocoaPods by [SalahAldin Ghanim](https://github.com/salah-ghanim)
-- Swift demo by [Daniel Khamsing](https://github.com/dkhamsing)
-- Fix (standardize) parameter names by [Cam Clendenin](https://github.com/camclendenin)
-- Fix bug with body request body parameters by [SalahAldin Ghanim](https://github.com/salah-ghanim)
-- Fix demo crash by [Alex Ling](https://github.com/hkalexling)
-
-**Version 1.8.2**
-
-- Add support for Cocoapods by [Daniel Khamsing](https://github.com/dkhamsing)
-- Add documentation by [Daniel Khamsing](https://github.com/dkhamsing)
-
-**Version 2.0.1**
-
-- Version change to accomodate Cocoapods
-- Update documentation by [Daniel Khamsing](https://github.com/dkhamsing)
-
-**Version 2.0.2**
-
-- Update podspec `platform`, `social_media_url`
-- Update Cocoapods demo
-- Update Twitter demo app keys
-
-OAuthConsumer
-===
-
-Changelog archive for [OAuthConsumer](.github/oauthconsumer.md).
+- Added more endpoints
+- Fixed a variety of bugs
