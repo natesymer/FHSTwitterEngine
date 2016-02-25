@@ -46,7 +46,7 @@ pod 'FHSTwitterEngine', '~> 2.0'
 
     [[FHSTwitterEngine sharedEngine]temporarilySetConsumerKey:@"<consumer_key>" andSecret:@"<consumer_secret>"];
 
-> Set access token delegate (see header)
+> Set access token delegate (see [header](FHSTwitterEngine/FHSTwitterEngine.h))
 
     [[FHSTwitterEngine sharedEngine]setDelegate:myDelegate];
 
@@ -103,7 +103,7 @@ pod 'FHSTwitterEngine', '~> 2.0'
 
 ## The "Singleton" Pattern
 
-The singleton pattern allows the programmer to use the library across scopes without having to manually keep a reference to the FHSTwitterEngine object. When the app is killed, any memory used by FHSTwitterEngine is freed.
+The singleton pattern allows the programmer to use the library across scopes without having to manually keep a reference to the `FHSTwitterEngine` object. When the app is killed, any memory used by `FHSTwitterEngine` is freed.
 
 ## Threading
 
@@ -111,7 +111,7 @@ While you can use any threading technology for threading, I recommend [Grand Cen
 
 ## General Comments
 
-`FHSTwitterEngine` will attempt to preemptively detect errors in your requests, before they are actually sent. This includes missing parameters, and a lack of authorization. If FHSTwitterEngine detects that a user is not logged in, it will attempt to load an access token using its delegate. This process is designed to prevent bad requests from being needlessly sent.
+`FHSTwitterEngine` will attempt to preemptively detect errors in your requests, before they are actually sent. This includes missing parameters, and a lack of authorization. If `FHSTwitterEngine` detects that a user is not logged in, it will attempt to load an access token using its delegate. This process is designed to prevent bad requests from being needlessly sent.
 
 ## About requests
 
