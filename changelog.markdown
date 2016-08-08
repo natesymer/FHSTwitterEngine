@@ -2,6 +2,10 @@
 
 Changes are by **Nate Symer** unless otherwise noted (you can also see the changelog archive for [OAuthConsumer](.github/oauthconsumer.md)).
 
+**Version 2.0.4** by [Daniel Khamsing](https://github.com/dkhamsing)
+
+- Fix missing `list_id` in `- removeUsersFromListWithID:users`
+
 **Version 2.0.3** by [Daniel Khamsing](https://github.com/dkhamsing)
 
 - Fix missing `list_id` in `- addUsersToListWithID:users`
