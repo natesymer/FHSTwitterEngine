@@ -583,7 +583,10 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_members_create_all];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"screen_name": [users componentsJoinedByString:@","]}];
+    NSDictionary *params = @{
+                             @"list_id": listID,
+                             @"screen_name": [users componentsJoinedByString:@","]};
+    return [self sendPOSTRequestForURL:baseURL andParams:params];
 }
 
 - (id)getTimelineForListWithID:(NSString *)listID count:(int)count {
