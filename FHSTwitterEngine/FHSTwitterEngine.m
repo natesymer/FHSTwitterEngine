@@ -571,7 +571,11 @@ id removeNull(id rootObject) {
     }
     
     NSURL *baseURL = [NSURL URLWithString:url_lists_members_destroy_all];
-    return [self sendPOSTRequestForURL:baseURL andParams:@{@"screen_name": [users componentsJoinedByString:@","]}];
+    NSDictionary *params = @{
+                             @"list_id": listID,
+                             @"screen_name": [users componentsJoinedByString:@","]
+                             };
+    return [self sendPOSTRequestForURL:baseURL andParams:params];
 }
 
 - (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users {
@@ -585,7 +589,8 @@ id removeNull(id rootObject) {
     NSURL *baseURL = [NSURL URLWithString:url_lists_members_create_all];
     NSDictionary *params = @{
                              @"list_id": listID,
-                             @"screen_name": [users componentsJoinedByString:@","]};
+                             @"screen_name": [users componentsJoinedByString:@","]
+                             };
     return [self sendPOSTRequestForURL:baseURL andParams:params];
 }
 
