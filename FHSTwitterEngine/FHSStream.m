@@ -52,14 +52,14 @@
     NSMutableString *message = nil;
     
     NSString *response = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
-
     for (NSString *part in [response componentsSeparatedByString:@"\r\n"]) {
-        int length = [part intValue];
+        int length = [part length];
         
         if (length > 0) {
             message = [NSMutableString string];
             bytesExpected = length;
-        } else if (bytesExpected > 0 && message) {
+        }
+        if (bytesExpected > 0 && message) {
             if (message.length < bytesExpected) {
                 [message appendString:part];
                 
