@@ -53,7 +53,7 @@
     
     NSString *response = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
     for (NSString *part in [response componentsSeparatedByString:@"\r\n"]) {
-        int length = [part length];
+        NSInteger length = [part length];
         
         if (length > 0) {
             message = [NSMutableString string];
