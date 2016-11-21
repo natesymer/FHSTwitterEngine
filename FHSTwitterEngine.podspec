@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "FHSTwitterEngine"
-  s.version	         = "2.0.4"
+  s.version	         = "2.0.5"
   s.summary          = "Twitter API for Cocoa developers"
 
   s.homepage         = "https://github.com/fhsjaagshs/FHSTwitterEngine"
