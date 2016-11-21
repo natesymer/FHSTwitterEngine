@@ -47,19 +47,23 @@
     }
 }
 
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    NSLog(@"finish");
+}
+
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    int bytesExpected = 0;
+    NSInteger bytesExpected = 0;
     NSMutableString *message = nil;
     
     NSString *response = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
-
     for (NSString *part in [response componentsSeparatedByString:@"\r\n"]) {
-        int length = [part intValue];
+        NSInteger length = [part length];
         
         if (length > 0) {
             message = [NSMutableString string];
             bytesExpected = length;
-        } else if (bytesExpected > 0 && message) {
+        }
+        if (bytesExpected > 0 && message) {
             if (message.length < bytesExpected) {
                 [message appendString:part];
                 
@@ -77,7 +81,7 @@
                         _block(json, &stop);
                         [self keepAlive];
                     } else {
-                        NSError *error = [NSError errorWithDomain:FHSErrorDomain code:406 userInfo:@{ NSUnderlyingErrorKey: jsonError, NSLocalizedDescriptionKey: @"Invalid JSON was returned from Twitter", @"json": json }];
+                        NSError *error = [NSError errorWithDomain:FHSErrorDomain code:406 userInfo:@{ NSUnderlyingErrorKey: jsonError, NSLocalizedDescriptionKey: @"Invalid JSON was returned from Twitter", @"response": response }];
                         _block(error, &stop);
                     }
                     
