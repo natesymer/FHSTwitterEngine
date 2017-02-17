@@ -249,7 +249,7 @@ extern NSString * const FHSErrorDomain;
 /**
  Set profile background with image.
  @param data Image data.
- @param tiled Boolean whether the image is tiled.
+ @param isTiled Boolean whether the image is tiled.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)setProfileBackgroundImageWithImageData:(NSData *)data tiled:(BOOL)isTiled;
@@ -257,7 +257,7 @@ extern NSString * const FHSErrorDomain;
 /**
  Set profile background with file path.
  @param file Image path.
- @param tiled Boolean whether the image is tiled.
+ @param isTiled Boolean whether the image is tiled.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)setProfileBackgroundImageWithImageAtPath:(NSString *)file tiled:(BOOL)isTiled;
@@ -271,7 +271,7 @@ extern NSString * const FHSErrorDomain;
 
 /**
  Update profile colors. See FHSTwitterEngine.m for details.
- @param settings Dictionary of settings. If the dictionary is nil, FHSTwitterEngine resets the values.
+ @param dictionary Dictionary of settings. If the dictionary is nil, FHSTwitterEngine resets the values.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)updateProfileColorsWithDictionary:(NSDictionary *)dictionary;
@@ -284,7 +284,7 @@ extern NSString * const FHSErrorDomain;
 
 /**
  Like a tweet.
- @param tweetId Tweet id.
+ @param tweetID Tweet id.
  @param flag Boolean whether the tweet is liked.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
@@ -348,7 +348,6 @@ extern NSString * const FHSErrorDomain;
 
 /**
  Get ids of protected users for whom the authenticated user has a pending follow request.
- @param Ids of protected users.
  */
 - (id)getPendingOutgoingFollowers;
 
@@ -619,7 +618,7 @@ extern NSString * const FHSErrorDomain;
 /**
  Add users to a list.
  @param listID List id.
- @param List of users.
+ @param users of users.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;
@@ -627,7 +626,7 @@ extern NSString * const FHSErrorDomain;
 /**
  Remove users from a list.
  @param listID List id.
- @param List of users.
+ @param users of users.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
@@ -690,7 +689,6 @@ extern NSString * const FHSErrorDomain;
 
 /**
  Seach tweets.
- @param Search query.
  @param resultType FHSTwitterEngineResultType type.
  @param untilDate Until date.
  @param sinceID First tweet to retrieve.
@@ -747,7 +745,7 @@ extern NSString * const FHSErrorDomain;
  @param with List of users to stream.
  @param replies Boolean whether to include replies.
  @param keywords Keywords.
- @param locationBox Location
+ @param locBox Location
  @param block Stream block.
  */
 - (void)streamUserMessagesWith:(NSArray *)with replies:(BOOL)replies keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block;
@@ -756,7 +754,7 @@ extern NSString * const FHSErrorDomain;
  Stream public tweets.
  @param users Users
  @param keywords Keywords.
- @param locationBox Location
+ @param locBox Location
  @param block Stream block.
  */
 - (void)streamPublicStatusesForUsers:(NSArray *)users keywords:(NSArray *)keywords locationBox:(NSArray *)locBox block:(StreamBlock)block;
