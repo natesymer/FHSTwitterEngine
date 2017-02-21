@@ -618,7 +618,7 @@ extern NSString * const FHSErrorDomain;
 /**
  Add users to a list.
  @param listID List id.
- @param users of users.
+ @param users List of users.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)addUsersToListWithID:(NSString *)listID users:(NSArray *)users;
@@ -626,7 +626,7 @@ extern NSString * const FHSErrorDomain;
 /**
  Remove users from a list.
  @param listID List id.
- @param users of users.
+ @param users List of users.
  @return If an error occurs, returns an NSError object that describes the problem.
  */
 - (NSError *)removeUsersFromListWithID:(NSString *)listID users:(NSArray *)users;
