@@ -346,7 +346,7 @@ id removeNull(id rootObject) {
 }
 
 - (NSString *)base64Encode {
-    int outLength = ((((self.length*4)/3)/4)*4)+(((self.length*4)/3)%4?4:0);
+    int outLength = (int)(((((self.length*4)/3)/4)*4)+(((self.length*4)/3)%4?4:0));
     const char *inputBuffer = self.bytes;
     char *outputBuffer = malloc(outLength+1);
     outputBuffer[outLength] = 0;
@@ -354,7 +354,7 @@ id removeNull(id rootObject) {
     int cycle = 0;
     int inpos = 0;
     int outpos = 0;
-    char temp;
+    char temp = '\0';
     
     outputBuffer[outLength-1] = '=';
     outputBuffer[outLength-2] = '=';
@@ -1441,7 +1441,7 @@ id removeNull(id rootObject) {
     
     [req setHTTPBody:body];
     
-    [req setValue:[NSString stringWithFormat:@"%d",body.length] forHTTPHeaderField:@"Content-Length"];
+    [req setValue:[NSString stringWithFormat:@"%lu", (unsigned long)body.length] forHTTPHeaderField:@"Content-Length"];
     
     NSError *error = nil;
     NSHTTPURLResponse *response = nil;
@@ -1585,14 +1585,14 @@ id removeNull(id rootObject) {
     
     int offset = 0;
     int remainder = fmod(array.count, 100);
-    int numberOfStrings = (array.count-remainder)/100;
+    int numberOfStrings = (int)(array.count-remainder)/100;
     
     NSMutableArray *reqStrs = [NSMutableArray array];
     
     for (int i = 1; i <= numberOfStrings; ++i) {
         NSString *ninetyNinththItem = (NSString *)[array objectAtIndex:(i*100)-1];
         NSRange range = [initialString rangeOfString:ninetyNinththItem];
-        int endOffset = range.location+range.length;
+        int endOffset = (int)(range.location+range.length);
         NSRange rangeOfAString = NSMakeRange(offset, endOffset-offset);
         offset = endOffset;
         NSString *endResult = [initialString fhs_stringWithRange:rangeOfAString];
@@ -1733,7 +1733,7 @@ id removeNull(id rootObject) {
 }
 
 - (int)parameterLengthForURL:(NSString *)url params:(NSMutableDictionary *)params {
-    int length = url.length;
+    int length = (int) url.length;
     
     for (NSString *key in params) {
         length += [key fhs_URLEncode].length;
