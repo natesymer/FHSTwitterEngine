@@ -2,6 +2,10 @@
 
 Changes are by **Nate Symer** unless otherwise noted (you can also see the changelog archive for [OAuthConsumer](.github/oauthconsumer.md)).
 
+**Version 2.0.6** by [@OneSecure](https://github.com/OneSecure)
+
+- [Fix code formatting, warnings](https://github.com/fhsjaagshs/FHSTwitterEngine/pull/129)
+
 **Version 2.0.5** by [@brightsider](https://github.com/brightsider)
 
 - [Fix streaming](https://github.com/fhsjaagshs/FHSTwitterEngine/pull/124)
